@@ -8,7 +8,7 @@ name: friendly-eats
 
 services:
   postgres:
-    image: postgis/postgis:17-3.5
+    image: postgis/postgis:18-3.6
     container_name: fe-postgres
     environment:
       POSTGRES_DB: friendly_eats
