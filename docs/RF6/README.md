@@ -22,6 +22,7 @@ paths:
   - frontend/apps/web/app/lugares/*/page.tsx
   - frontend/apps/web/components/place/PlaceView.tsx
   - frontend/apps/web/components/PriceTag.tsx
+  - frontend/apps/web/components/place/PlacePosts.tsx
 ---
 
 # RF6 · Cadastrar estabelecimento: tipo, local e preço declarado
@@ -113,4 +114,4 @@ paths:
 | Configuração | `friendly-eats.price.reference-brl` (58), `multipliers` (0.7,1.4,2.8), `round-brl` (5), `min-reports` (5) | ✅ |
 | Testes | `TaxonomyRulesTest.vocabulariesHaveTheResearchedSizeAndEveryCuisineDescendsFromItsMacroGeneric`, `TaxonomyRulesTest.typesFollowTheAccountKindAndPolosAreNeverSecondary`, `TaxonomyRulesTest.locationUsesTheIbgeCodeKeepsPinsInBrazilAndHidesTheHomeKitchenStreet`, `TaxonomyRulesTest.priceScaleDoublesFromTheReferenceMealAndRoundsToFiveReais`; `EstablishmentApiIT.establishmentPageIsPublicOnlyWithTheOwnerSealAndHidesTheHomeKitchenStreet` (inclui 6 cadastros simultâneos com CPF e a conta que vira cozinha caseira depois), `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice` (preço pelas avaliações), `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults` (18+), `EstablishmentApiIT.accountEliminationRemovesReviewsAndOwnedEstablishments` | ✅ |
 | Pendências | verificação automática de CNPJ e CNAE (BrasilAPI, matriz R8); moderação: `REMOVED` e revisão do selo (RF13); auditoria de troca de tipo principal (R10); facetas operacionais (seção 8 da taxonomia); preço pelo cardápio (`PRICE_SRC_MENU`) e cardápio por item (RF9); CEP pelo ViaCEP e geocodificação; contêiner `dentro_de → POLO` (R5) | ⏳ |
-| Tela | app web: página `/lugares/[id]` (tipo, grupo, preço com origem, local com "Localização aproximada", selo do dono, aviso 18+); e2e `lugar.spec.ts` com axe. Formulário de cadastro do lugar com pino no mapa | ✅ página · ⏳ formulário |
+| Tela | app web: página `/lugares/[id]` (tipo, grupo, preço com origem, local com "Localização aproximada", selo do dono, aviso 18+ e a seção "Posts deste lugar", `PlacePosts`, com o feed `GET /establishments/{id}/posts` do [RF14](../RF14/README.md)); e2e `lugar.spec.ts` com axe. Formulário de cadastro do lugar com pino no mapa | ✅ página · ⏳ formulário |
