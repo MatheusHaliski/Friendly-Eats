@@ -46,7 +46,8 @@ paths:
    | `page`, `size` | página a partir de 0; tamanho padrão 20, até 50 |
 
    Código desconhecido, raio fora de 0–50 km, ponto fora do Brasil ou `DISTANCE` sem localização dão `422` com todos os
-   erros juntos.
+   erros juntos. **Nenhum texto do pedido entra no SQL**: os códigos são conferidos contra a taxonomia, os valores vão
+   como parâmetros nomeados (`:c0`, `:chipC0`…, com índice, nunca com o texto recebido) e o SQL só junta constantes.
 2. **Só páginas públicas**: lugar `ACTIVE` (fechado sai), conta dona `ACTIVE` e selo **`VERIFIED`**. Lugar com foco em
    bebida alcoólica só para adulto logado.
 3. **Raio**: o pré-filtro usa o índice GiST (`ST_DWithin` com folga de 600 m) e a distância final é medida até o

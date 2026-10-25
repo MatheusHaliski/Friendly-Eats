@@ -321,8 +321,12 @@ public class EstablishmentSearch {
         String vegetal = "(COALESCE(e.dietary_offers->>'VEGANO', '') = 'EXCLUSIVO'"
                 + " OR COALESCE(e.dietary_offers->>'VEGETARIANO', '') = 'EXCLUSIVO')";
         List<String> any = new ArrayList<>();
-        for (String code : chips) {
-            CuisineChip chip = CuisineChip.valueOf(code);
+        int i = 0;
+        // percorre as constantes do enum (não o texto do pedido): nada vindo do usuário entra no SQL
+        for (CuisineChip chip : CuisineChip.values()) {
+            if (!chips.contains(chip.name())) {
+                continue;
+            }
             if (chip == CuisineChip.VEGETAL) {
                 any.add(vegetal);
                 continue;
@@ -331,10 +335,11 @@ public class EstablishmentSearch {
                     .filter(c -> CuisineChip.of(c, null, Map.of()) == chip).map(Enum::name).toList();
             List<String> formats = Arrays.stream(FoodFormat.values())
                     .filter(f -> CuisineChip.of(null, f, Map.of()) == chip).map(Enum::name).toList();
-            String byCuisine = cuisines.isEmpty() ? "FALSE" : "e.primary_cuisine IN (:chipC_" + code + ")";
+            String byCuisine = cuisines.isEmpty() ? "FALSE" : "e.primary_cuisine IN (:chipC" + i + ")";
             String byFormat = formats.isEmpty() ? "FALSE"
-                    : "(e.primary_cuisine IS NULL AND e.primary_format IN (:chipF_" + code + "))";
-            p.addValue("chipC_" + code, cuisines).addValue("chipF_" + code, formats);
+                    : "(e.primary_cuisine IS NULL AND e.primary_format IN (:chipF" + i + "))";
+            p.addValue("chipC" + i, cuisines).addValue("chipF" + i, formats);
+            i++;
             any.add("(NOT " + vegetal + " AND (" + byCuisine + " OR " + byFormat + "))");
         }
         where.append(" AND (").append(String.join(" OR ", any)).append(")");
