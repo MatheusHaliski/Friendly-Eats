@@ -48,3 +48,6 @@ seguir perfis e a resposta identificada do dono.
   estabelecimento, preço, estrelas e local, com os códigos estáveis usados do RF6 ao RF8
 - [Design System](DESIGN_SYSTEM.md): cores, glifos, chips e contraste das telas (a cor nunca é o único sinal)
 - [Termos de Uso](legal/TERMOS_DE_USO.md) (rascunho com marcadores `{{…}}`, para revisão jurídica)
+- [Pesquisa de requisitos](PESQUISA_REQUISITOS.md): 71 requisitos candidatos em quatro eixos (comunidade,
+  estabelecimento, confiança e leis, receitas e IA), as obrigações legais ainda não cumpridas e a proposta do RF17 ao
+  RF36, com os arquivos completos em [`pesquisa/requisitos/`](pesquisa/requisitos/)

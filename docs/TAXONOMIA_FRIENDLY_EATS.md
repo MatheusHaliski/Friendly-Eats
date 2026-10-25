@@ -656,7 +656,7 @@ comunidade, como o Google.
 | `LGBTQIA_ACOLHEDOR` | Espaço LGBTQIA+ acolhedor | dono, com moderação |
 
 "Não aceita pets" nunca pode parecer "não aceita cão-guia": o cão de assistência é sempre permitido (Lei 11.126/2005,
-*não verificado*).
+confirmada na [pesquisa de requisitos](PESQUISA_REQUISITOS.md)).
 
 ### 8.4 Acessibilidade ⏳
 
