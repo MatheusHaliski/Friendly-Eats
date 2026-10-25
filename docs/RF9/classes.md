@@ -105,7 +105,7 @@ classDiagram
     }
     class PostRepository {
         <<repository>>
-        +findAuthorFeed(...) List
+        +findProfileFeed(...) List
         +insertReaction(...) int
         +removeAllPostsOf(Long) int
     }

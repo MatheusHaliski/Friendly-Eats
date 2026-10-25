@@ -65,7 +65,7 @@ paths:
 | Camada | Artefato | Situação |
 |---|---|---|
 | Regras | `PublicProfileService` (conta ativa, perfil privado, cidade de atuação, 18+ nos posts, cursor do feed de perfis), `AccountBadge` (cor, glifo e ícone dos 7 tipos), `ProfileViews` | ✅ |
-| Persistência | `ProfileDirectoryQueries` (conta ativa, perfil público pelos padrões do cadastro, organizações com selo, `f_unaccent` na cidade e no nome); `PostRepository.findAuthorFeed` ([RF9](../RF9/README.md)) | ✅ |
+| Persistência | `ProfileDirectoryQueries` (conta ativa, perfil público pelos padrões do cadastro, organizações com selo, `f_unaccent` na cidade e no nome); `PostRepository.findProfileFeed` ([RF9](../RF9/README.md)) | ✅ |
 | API | `UserProfileController`: `GET /api/v1/users`, `/api/v1/users/{id}/profile`, `/api/v1/users/{id}/posts`; GET públicos no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Testes | `UserProfileApiIT.profileShowsOnlyPublicDataAndTheAuthorsPostsPageByCursor`, `UserProfileApiIT.privateProfileShowsTheMinimumAndClosesThePostsExceptForTheHolder`, `UserProfileApiIT.profileFeedListsActivePublicAccountsWithBadgeAndSealAndFilters` | ✅ |
 | Pendências | seguir e deixar de seguir, com contadores; perfil privado liberado para seguidores; feed de perfis por relevância e perto de mim; perfil do estabelecimento com os lugares dele; denúncia de perfil (RF13) | ⏳ |

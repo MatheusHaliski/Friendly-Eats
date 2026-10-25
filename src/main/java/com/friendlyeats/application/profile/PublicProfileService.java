@@ -79,10 +79,11 @@ public class PublicProfileService {
         PostReader.Viewer v = reader.viewer(viewerId);
         boolean adult = self || v.adult();
         int limit = size(size);
-        List<Post> fetched = cursor == null || cursor.isBlank()
-                ? posts.findAuthorFeed(userId, adult, limit + 1)
-                : posts.findAuthorFeedBefore(userId, adult, FeedCursor.decode(cursor).createdAt(),
-                FeedCursor.decode(cursor).id(), limit + 1);
+        // o cursor só escolhe a página: o acesso (conta ativa, perfil privado) já foi conferido acima
+        FeedCursor after = cursor == null || cursor.isBlank() ? null : FeedCursor.decode(cursor);
+        List<Post> fetched = after == null
+                ? posts.findProfileFeed(userId, adult, limit + 1)
+                : posts.findProfileFeedBefore(userId, adult, after.createdAt(), after.id(), limit + 1);
         return reader.page(fetched, limit, v);
     }
 

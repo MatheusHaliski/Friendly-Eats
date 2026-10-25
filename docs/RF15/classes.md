@@ -40,7 +40,7 @@ classDiagram
     }
     class PostRepository {
         <<RF9>>
-        +findAuthorFeed(authorId, adult, limit) List
+        +findProfileFeed(authorId, adult, limit) List
         +countByAuthorIdAndStatusIn(...) long
     }
     PublicProfileService --> ProfileDirectoryQueries

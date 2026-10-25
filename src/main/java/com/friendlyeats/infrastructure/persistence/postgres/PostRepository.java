@@ -28,7 +28,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
             ORDER BY created_at DESC, id DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<Post> findAuthorFeed(Long authorId, boolean adult, int limit);
+    List<Post> findProfileFeed(Long authorId, boolean adult, int limit);
 
     /** Página seguinte por cursor (created_at, id): estável mesmo com posts novos chegando. */
     @Query(value = """
@@ -39,7 +39,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
             ORDER BY created_at DESC, id DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<Post> findAuthorFeedBefore(Long authorId, boolean adult, Instant beforeCreatedAt, UUID beforeId, int limit);
+    List<Post> findProfileFeedBefore(Long authorId, boolean adult, Instant beforeCreatedAt, UUID beforeId, int limit);
 
     long countByAuthorIdAndStatusIn(Long authorId, Collection<PostStatus> statuses);
 
