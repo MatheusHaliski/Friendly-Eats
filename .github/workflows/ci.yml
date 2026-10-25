@@ -206,7 +206,9 @@ jobs:
 
   web:
     name: "Web: lint, tipos, testes e build"
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 (fixado: é o Chromium do ambiente de desenvolvimento) não instala dependências no
+    # ubuntu-latest atual (26.04); o 24.04 é suportado. Trocar junto com a versão do Playwright.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
       run:
