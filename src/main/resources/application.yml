@@ -74,6 +74,20 @@ friendly-eats:
     terms-version: "2026-10-25.1"
     terms-url: ${TERMS_URL:http://localhost:3000/termos}
     privacy-version: "2026-10-25"
+  # escala nacional de preço por pessoa (RF6): limites = referência × multiplicadores, arredondados para R$ 5
+  # (R$ 58 → até 40, 40–80, 80–160, acima de 160). Reajuste anual pelo IPCA de alimentação fora do domicílio.
+  price:
+    reference-brl: 58
+    multipliers: 0.7,1.4,2.8
+    round-brl: 5
+    min-reports: 5             # relatos de gasto em 12 meses para a faixa vir das avaliações
+  # nota agregada (RF8): média exibida a partir de 5 avaliações; ranking bayesiano com m = 10 e C = prior-mean
+  rating:
+    min-display: 5
+    prior-weight: 10
+    prior-mean: 4.2
+    half-life-days: 365
+    recency-floor: 0.25
   registration:
     minimum-age: 13
     protected-until-age: 16      # ECA Digital: padrões protetivos travados abaixo desta idade

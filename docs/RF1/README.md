@@ -2,7 +2,7 @@
 rf: RF1
 titulo: Cadastro com tipo de conta e aceite dos Termos de Uso
 status: parcial
-cards: [FE-01, FE-02, FE-03, FE-07]
+cards: [FE-01, FE-07]
 paths:
   - src/main/java/com/friendlyeats/domain/model/UserAccount.java
   - src/main/java/com/friendlyeats/domain/model/UserCategoryEnum.java
@@ -23,6 +23,18 @@ paths:
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/TermsAcceptanceRepository.java
   - src/main/resources/db/migration/V1__baseline.sql
   - docs/legal/TERMOS_DE_USO.md
+  - frontend/apps/web/app/cadastro/page.tsx
+  - frontend/apps/web/app/confirmar-email/page.tsx
+  - frontend/apps/web/app/termos/page.tsx
+  - frontend/apps/web/components/auth/RegisterView.tsx
+  - frontend/apps/web/components/auth/VerifyEmailView.tsx
+  - frontend/apps/web/components/AccountBadge.tsx
+  - frontend/apps/web/lib/account-types.ts
+  - frontend/apps/web/lib/register-fields.ts
+  - frontend/apps/web/lib/field-errors.ts
+  - frontend/apps/web/lib/markdown.tsx
+  - frontend/apps/web/lib/uf.ts
+  - frontend/apps/web/components/Form.tsx
 ---
 
 # RF1 · Cadastro com tipo de conta
@@ -56,7 +68,8 @@ paths:
    - **Oficial:** órgão (`ANVISA`, `VIGILANCIA_ESTADUAL`, `VIGILANCIA_MUNICIPAL`, `PROCON`, `MINISTERIO_AGRICULTURA`, `OUTRO_ORGAO`), CNPJ, site e representante.
    - CNPJ aceita o formato **alfanumérico** (IN RFB 2.229/2024).
 3. Estabelecimento (com CNPJ ou com CPF), varejo e oficial nascem com selo `PENDING`: leem e interagem, mas só publicam
-   como organização depois da moderação. Os demais nascem `NOT_REQUIRED`. No negócio com CPF, a moderação confere a
+   como organização depois da moderação. A página de um estabelecimento só fica pública com o selo `VERIFIED` da conta
+   dona ([RF6](../RF6/README.md)). Os demais nascem `NOT_REQUIRED`. No negócio com CPF, a moderação confere a
    identidade do titular e, quando houver, o alvará ou a licença sanitária.
 4. Idade: menos de 13 é recusado; menos de 16 exige `guardianEmail` e preferências protetivas; tipo diferente de
    comensal exige 18+.
@@ -99,4 +112,5 @@ O preto da conta Oficial dá 1,06:1 sobre o fundo escuro; o anel de 2 px `#D6D0C
 | Testes | `AccountRulesTest` (campos por tipo, CNAE, selo, CPF, `informalPlaceRegistersWithAPrivateCpfInsteadOfCnpj`), `DomainModelTest`, `AuthApiIT.registerWithChosenTypeAndTermsStartsASessionThatAnIncognitoWindowDoesNotSee`, `AuthApiIT.registrationRulesTermsTypeFieldsAgeAndUniqueness`, `AuthApiIT.minorsKeepProtectiveDefaults` | ✅ |
 | Termos | preencher os `{{…}}` e passar por revisão jurídica | 🟡 |
 | Pendências | e-mail transacional real; eliminar cadastro não confirmado em 7 dias; consulta de CNPJ e CNAE (BrasilAPI/Receita) | ⏳ |
-| Tela | protótipo e app | ⏳ |
+| Tela | app web: `/cadastro` (7 tipos com cor + glifo + rótulo, campos do tipo, "Não tenho CNPJ" com CPF, Termos desmarcados), `/confirmar-email` e `/termos` (gerada de `docs/legal/TERMOS_DE_USO.md`); e2e `cadastro.spec.ts` com axe | ✅ |
+| Foco nos erros | `/cadastro` e `/confirmar-email`: o resumo de erros e os avisos recebem o foco **depois** de montados (`useDeferredFocus`, em `components/Form.tsx`); antes, o foco pedido por `requestAnimationFrame` se perdia com a máquina ocupada; e2e `cadastro.spec.ts` | ✅ |

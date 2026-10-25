@@ -1,0 +1,54 @@
+{
+  "items": [
+    {
+      "purpose": "LOCATION_TRACKING",
+      "label": "Salvar minha localização",
+      "description": "Guarda a última localização para “perto de mim” e para os alertas de comida da região. Buscar por raio, uma vez, não precisa disso.",
+      "legalBasis": "Art. 7º, I (consentimento)",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "PERSONALIZED_FEED",
+      "label": "Feed e busca personalizados",
+      "description": "Ordena o feed e a busca pelo seu gosto (culinárias favoritas e histórico).",
+      "legalBasis": "Art. 7º, I (consentimento)",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "SENSITIVE_PROFILE_DATA",
+      "label": "Dados sensíveis do perfil",
+      "description": "Guarda os seus estilos alimentares, que podem revelar saúde (alergia, doença celíaca) ou religião (halal, kosher).",
+      "legalBasis": "Art. 11, I (consentimento específico)",
+      "sensitive": true,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "MARKETING",
+      "label": "Ofertas e novidades",
+      "description": "Ofertas de estabelecimentos e marcas por e-mail e no app.",
+      "legalBasis": "Art. 7º, I (consentimento)",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "THIRD_PARTY_SHARING",
+      "label": "Compartilhar com parceiros",
+      "description": "Envia os dados necessários a parceiros de reserva e delivery quando você usa esses serviços.",
+      "legalBasis": "Art. 7º, I (consentimento)",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    }
+  ]
+}

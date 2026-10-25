@@ -46,6 +46,17 @@ classDiagram
         +setPhoto(long, String) ProfileView
         +removePhoto(long) ProfileView
     }
+    class ProfilePatch {
+        <<record>>
+        +String name
+        +String handle
+        +List favoriteCuisines
+        +List dietaryStyles
+        +Map typeDetails
+    }
+    class ConsentService {
+        +granted(long, ConsentPurpose) boolean
+    }
     class PreferencesService {
         +get(long) PreferencesView
         +update(long, PreferencesPatch) PreferencesView
@@ -76,6 +87,8 @@ classDiagram
     UserPreference --> AppBackground
     ProfileService --> MediaUploads
     ProfileService ..> UserAccount
+    ProfileService ..> ProfilePatch
+    ProfileService ..> ConsentService : estilos alimentares
     PreferencesService ..> UserPreference
     MediaUploads --> ImageSanitizer
     MediaUploads --> MediaStorage

@@ -38,7 +38,13 @@ mvn verify                                 # + integração com Testcontainers (
 python3 scripts/check_rf_docs.py           # estrutura das pastas docs/RFn
 python3 scripts/wcag_contrast.py           # contraste das cores dos tipos de conta
 docker compose up -d                       # PostGIS, Valkey, Garage (+ --profile full para Cassandra)
+mvn spring-boot:run                        # perfil dev, com dados de exemplo (DevSeed)
+cd frontend && npm run dev                 # app web (Next.js) em :3000, repassando /api para :8080
+cd frontend && npm run lint && npm run typecheck && npm test && npm run build && npm run e2e
 ```
+
+O app web (`frontend/`) também implementa RFs: telas e componentes entram nos `paths` do RF (ex.: `/cadastro` no RF1,
+`/entrar` no RF4, Explorar no RF10). Cores e tokens só pelo `frontend/packages/tokens`, nunca valores soltos.
 
 ## Convenções
 

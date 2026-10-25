@@ -40,10 +40,15 @@ sequenceDiagram
     participant S3 as Bucket S3
 
     JOB->>AC: contas PENDING_DELETION com prazo vencido (uma transação cada)
+    AC->>DB: DELETE review WHERE author_id = conta (review_revision por ON DELETE CASCADE)
+    AC->>DB: PostContentEraser: curtidas e salvos apagados, contadores corrigidos, comentários sem texto
+    AC->>DB: compartilhamentos sem a conta, posts REMOVED sem conteúdo (título Conteúdo removido)
+    AC->>DB: DELETE establishment WHERE owner_id = conta (review dos lugares por ON DELETE CASCADE)
     AC->>DB: apaga 2FA, códigos de recuperação e preferências
     AC->>DB: anonymizeForLgpdDeletion · ANONYMOUS_LGPD_DELETED
     AC->>VK: revoga as sessões
     AC->>DB: COMMIT
-    AC->>S3: DELETE avatars/… (MediaJanitor, depois do commit)
-    Note over AC,S3: ⏳ avaliações e fotos dos posts, Cassandra, destruição da DEK
+    AC->>S3: DELETE avatars/… e posts/… (MediaJanitor, depois do commit)
+    AC->>VK: ZREM dos posts no ranking em alta (depois do commit)
+    Note over AC,S3: ⏳ Cassandra, destruição da DEK
 ```

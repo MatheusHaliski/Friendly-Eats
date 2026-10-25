@@ -1,0 +1,374 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Sabor Mineiro",
+      "primaryType": {
+        "code": "RESTAURANTE_A_LA_CARTE",
+        "label": "Restaurante (à la carte)",
+        "group": "RESTAURANTE"
+      },
+      "group": {
+        "code": "RESTAURANTE",
+        "label": "Restaurantes",
+        "group": null
+      },
+      "chip": {
+        "code": "BRASILEIRA",
+        "label": "Brasileira",
+        "lucideIcon": "cooking-pot",
+        "darkHex": "#DDAE14",
+        "lightHex": "#6B5300"
+      },
+      "primaryCuisine": {
+        "code": "MINEIRA",
+        "label": "Mineira",
+        "group": "BRASIL"
+      },
+      "primaryFormat": {
+        "code": "PRATO_FEITO",
+        "label": "Prato feito / marmita / executivo",
+        "group": "REFEICOES"
+      },
+      "price": {
+        "level": "PRICE_2",
+        "glyph": "$$",
+        "label": "Moderado",
+        "rangeLabel": "R$ 40 a R$ 80 por pessoa",
+        "source": "PRICE_SRC_DECLARED",
+        "reportCount": 0,
+        "declaredMinCents": 4500,
+        "declaredMaxCents": 6500,
+        "accessibleLabel": "Faixa de preço: moderado, R$ 40 a R$ 80 por pessoa, informado pelo estabelecimento"
+      },
+      "rating": {
+        "state": "RATED",
+        "average": 4.3,
+        "averageLabel": "4,3",
+        "count": 6,
+        "histogram": {
+          "5": 3,
+          "4": 2,
+          "3": 1,
+          "2": 0,
+          "1": 0
+        },
+        "dimensions": {},
+        "accessibleLabel": "Nota 4,3 de 5, com base em 6 avaliações"
+      },
+      "location": {
+        "uf": "MG",
+        "city": "Belo Horizonte",
+        "neighborhood": "Savassi",
+        "approximate": false
+      },
+      "distanceKm": null,
+      "adultsOnly": false,
+      "status": "ACTIVE"
+    },
+    {
+      "id": 2,
+      "name": "Cantina Nonna Rosa",
+      "primaryType": {
+        "code": "RESTAURANTE_A_LA_CARTE",
+        "label": "Restaurante (à la carte)",
+        "group": "RESTAURANTE"
+      },
+      "group": {
+        "code": "RESTAURANTE",
+        "label": "Restaurantes",
+        "group": null
+      },
+      "chip": {
+        "code": "EUROPEIA",
+        "label": "Europeia",
+        "lucideIcon": "wine",
+        "darkHex": "#8DBAFF",
+        "lightHex": "#0B57B8"
+      },
+      "primaryCuisine": {
+        "code": "ITALIANA",
+        "label": "Italiana",
+        "group": "EUROPA"
+      },
+      "primaryFormat": {
+        "code": "MASSAS",
+        "label": "Massas",
+        "group": "REFEICOES"
+      },
+      "price": {
+        "level": "PRICE_3",
+        "glyph": "$$$",
+        "label": "Caro",
+        "rangeLabel": "R$ 80 a R$ 160 por pessoa",
+        "source": "PRICE_SRC_REVIEWS",
+        "reportCount": 5,
+        "declaredMinCents": null,
+        "declaredMaxCents": null,
+        "accessibleLabel": "Faixa de preço: caro, R$ 80 a R$ 160 por pessoa, segundo 5 avaliações"
+      },
+      "rating": {
+        "state": "RATING_FEW",
+        "average": null,
+        "averageLabel": null,
+        "count": 3,
+        "histogram": {},
+        "dimensions": {},
+        "accessibleLabel": "3 avaliações, ainda sem nota média"
+      },
+      "location": {
+        "uf": "SP",
+        "city": "São Paulo",
+        "neighborhood": "Bixiga",
+        "approximate": false
+      },
+      "distanceKm": null,
+      "adultsOnly": false,
+      "status": "ACTIVE"
+    },
+    {
+      "id": 3,
+      "name": "Doce Sonho Confeitaria",
+      "primaryType": {
+        "code": "CONFEITARIA",
+        "label": "Confeitaria / doceria",
+        "group": "CAFE_DOCE"
+      },
+      "group": {
+        "code": "CAFE_DOCE",
+        "label": "Cafés, padarias e doces",
+        "group": null
+      },
+      "chip": {
+        "code": "DOCES_CAFE",
+        "label": "Doces & café",
+        "lucideIcon": "coffee",
+        "darkHex": "#FFC1DB",
+        "lightHex": "#8E1A5D"
+      },
+      "primaryCuisine": null,
+      "primaryFormat": {
+        "code": "DOCES_CONFEITARIA",
+        "label": "Doces, bolos e confeitaria",
+        "group": "DOCES_E_GELADOS"
+      },
+      "price": {
+        "level": "PRICE_UNKNOWN",
+        "glyph": null,
+        "label": "Preço não informado",
+        "rangeLabel": null,
+        "source": null,
+        "reportCount": 0,
+        "declaredMinCents": null,
+        "declaredMaxCents": null,
+        "accessibleLabel": "Faixa de preço: preço não informado"
+      },
+      "rating": {
+        "state": "RATING_NONE",
+        "average": null,
+        "averageLabel": null,
+        "count": 0,
+        "histogram": {},
+        "dimensions": {},
+        "accessibleLabel": "Sem avaliações ainda"
+      },
+      "location": {
+        "uf": "PR",
+        "city": "Curitiba",
+        "neighborhood": "Batel",
+        "approximate": false
+      },
+      "distanceKm": null,
+      "adultsOnly": false,
+      "status": "ACTIVE"
+    },
+    {
+      "id": 4,
+      "name": "Acarajé da Dinha",
+      "primaryType": {
+        "code": "AMBULANTE",
+        "label": "Comida de rua (barraca, carrinho, tabuleiro)",
+        "group": "RAPIDO"
+      },
+      "group": {
+        "code": "RAPIDO",
+        "label": "Lanche e comida rápida",
+        "group": null
+      },
+      "chip": {
+        "code": "BRASILEIRA",
+        "label": "Brasileira",
+        "lucideIcon": "cooking-pot",
+        "darkHex": "#DDAE14",
+        "lightHex": "#6B5300"
+      },
+      "primaryCuisine": {
+        "code": "BAIANA",
+        "label": "Baiana",
+        "group": "BRASIL"
+      },
+      "primaryFormat": {
+        "code": "SALGADOS",
+        "label": "Salgados",
+        "group": "SALGADOS_E_PETISCOS"
+      },
+      "price": {
+        "level": "PRICE_1",
+        "glyph": "$",
+        "label": "Econômico",
+        "rangeLabel": "até R$ 40 por pessoa",
+        "source": "PRICE_SRC_DECLARED",
+        "reportCount": 0,
+        "declaredMinCents": 1500,
+        "declaredMaxCents": 2500,
+        "accessibleLabel": "Faixa de preço: econômico, até R$ 40 por pessoa, informado pelo estabelecimento"
+      },
+      "rating": {
+        "state": "RATED",
+        "average": 4.8,
+        "averageLabel": "4,8",
+        "count": 12,
+        "histogram": {
+          "5": 10,
+          "4": 2,
+          "3": 0,
+          "2": 0,
+          "1": 0
+        },
+        "dimensions": {},
+        "accessibleLabel": "Nota 4,8 de 5, com base em 12 avaliações"
+      },
+      "location": {
+        "uf": "BA",
+        "city": "Salvador",
+        "neighborhood": "Rio Vermelho",
+        "approximate": true
+      },
+      "distanceKm": null,
+      "adultsOnly": false,
+      "status": "ACTIVE"
+    },
+    {
+      "id": 5,
+      "name": "Raiz Vegana",
+      "primaryType": {
+        "code": "BISTRO",
+        "label": "Bistrô / casual",
+        "group": "RESTAURANTE"
+      },
+      "group": {
+        "code": "RESTAURANTE",
+        "label": "Restaurantes",
+        "group": null
+      },
+      "chip": {
+        "code": "VEGETAL",
+        "label": "Vegetal",
+        "lucideIcon": "vegan",
+        "darkHex": "#6FE699",
+        "lightHex": "#08693A"
+      },
+      "primaryCuisine": {
+        "code": "BRASILEIRA",
+        "label": "Brasileira",
+        "group": "BRASIL"
+      },
+      "primaryFormat": null,
+      "price": {
+        "level": "PRICE_4",
+        "glyph": "$$$$",
+        "label": "Muito caro",
+        "rangeLabel": "acima de R$ 160 por pessoa",
+        "source": "PRICE_SRC_DECLARED",
+        "reportCount": 0,
+        "declaredMinCents": 18000,
+        "declaredMaxCents": null,
+        "accessibleLabel": "Faixa de preço: muito caro, acima de R$ 160 por pessoa, informado pelo estabelecimento"
+      },
+      "rating": {
+        "state": "RATED",
+        "average": 3.9,
+        "averageLabel": "3,9",
+        "count": 8,
+        "histogram": {
+          "5": 2,
+          "4": 3,
+          "3": 2,
+          "2": 1,
+          "1": 0
+        },
+        "dimensions": {},
+        "accessibleLabel": "Nota 3,9 de 5, com base em 8 avaliações"
+      },
+      "location": {
+        "uf": "RJ",
+        "city": "Rio de Janeiro",
+        "neighborhood": "Botafogo",
+        "approximate": false
+      },
+      "distanceKm": null,
+      "adultsOnly": false,
+      "status": "CLOSED"
+    },
+    {
+      "id": 18,
+      "name": "Boteco do Zé",
+      "primaryType": {
+        "code": "BOTECO",
+        "label": "Boteco / bar de petiscos",
+        "group": "BAR"
+      },
+      "group": {
+        "code": "BAR",
+        "label": "Bares e bebidas",
+        "group": null
+      },
+      "chip": {
+        "code": "LANCHES_PIZZA",
+        "label": "Lanches & pizza",
+        "lucideIcon": "pizza",
+        "darkHex": "#E07C0A",
+        "lightHex": "#A65A06"
+      },
+      "primaryCuisine": null,
+      "primaryFormat": {
+        "code": "PETISCOS_BOTECO",
+        "label": "Petiscos e porções de boteco",
+        "group": "SALGADOS_E_PETISCOS"
+      },
+      "price": {
+        "level": "PRICE_2",
+        "glyph": "$$",
+        "label": "Moderado",
+        "rangeLabel": "R$ 40 a R$ 80 por pessoa",
+        "source": "PRICE_SRC_DECLARED",
+        "reportCount": 0,
+        "declaredMinCents": 5000,
+        "declaredMaxCents": 7000,
+        "accessibleLabel": "Faixa de preço: moderado, R$ 40 a R$ 80 por pessoa, informado pelo estabelecimento"
+      },
+      "rating": {
+        "state": "RATING_FEW",
+        "average": null,
+        "averageLabel": null,
+        "count": 2,
+        "histogram": {},
+        "dimensions": {},
+        "accessibleLabel": "2 avaliações, ainda sem nota média"
+      },
+      "location": {
+        "uf": "SP",
+        "city": "São Paulo",
+        "neighborhood": "Vila Madalena",
+        "approximate": false
+      },
+      "distanceKm": null,
+      "adultsOnly": true,
+      "status": "ACTIVE"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "total": 37,
+  "radiusKm": null
+}

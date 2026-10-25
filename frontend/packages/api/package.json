@@ -1,0 +1,13 @@
+{
+  "name": "@friendly-eats/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cliente tipado da API do Friendly Eats (tipos escritos a partir dos records Java)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  }
+}

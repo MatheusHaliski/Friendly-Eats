@@ -3,7 +3,7 @@ package com.friendlyeats.application.common;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/** Monta as URLs públicas: caminhos da API e mídia no S3/CDN. */
+/** Monta as URLs públicas: links compartilháveis do perfil e do post e mídia no S3/CDN. */
 @Component
 public class PublicLinks {
 
@@ -17,8 +17,13 @@ public class PublicLinks {
     }
 
     /** Link do perfil que vai para fora do app (WhatsApp, e-mail...): sem rastreamento de quem compartilhou. */
-    public String profileShareUrl(String handle) {
-        return handle == null ? null : publicBaseUrl + "/@" + handle;
+    public String profileShareUrl(long userId) {
+        return publicBaseUrl + "/u/" + userId;
+    }
+
+    /** Link do post que vai para fora do app (RF12): também sem dizer quem compartilhou. */
+    public String postShareUrl(java.util.UUID postId) {
+        return publicBaseUrl + "/p/" + postId;
     }
 
     public String mediaUrl(String objectKey) {

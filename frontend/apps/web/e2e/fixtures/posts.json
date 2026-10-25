@@ -1,0 +1,1150 @@
+[
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000001",
+    "kind": {
+      "code": "FOTO_PRATO",
+      "label": "Foto de prato",
+      "lucideIcon": "clapperboard",
+      "border": "SEM_MOLDURA"
+    },
+    "feed": "POST",
+    "mediaType": "IMAGE",
+    "title": "PF caprichado no Sabor Mineiro",
+    "body": "Arroz soltinho, feijão de caldo grosso, couve na manteiga e ovo com a gema mole. O tutu acabou cedo, então chega antes do meio-dia. Atendimento rápido mesmo lotado e preço justo para o tamanho do prato.",
+    "mediaUrl": "/media-teste/posts/1.png",
+    "altText": "Prato feito visto de cima: arroz, feijão, couve refogada e um ovo frito com a gema amarela, sobre uma mesa de madeira.",
+    "establishment": {
+      "id": 1,
+      "name": "Sabor Mineiro",
+      "city": "Belo Horizonte",
+      "uf": "MG",
+      "adultsOnly": false,
+      "pagePath": "/api/v1/establishments/1"
+    },
+    "cuisine": {
+      "code": "MINEIRA",
+      "label": "Mineira",
+      "group": "BRASIL"
+    },
+    "foodFormat": {
+      "code": "PRATO_FEITO",
+      "label": "Prato feito / marmita / executivo",
+      "group": "REFEICOES"
+    },
+    "dietaryStyles": [],
+    "allergens": [
+      {
+        "code": "LEITE",
+        "label": "Leite (de todos os mamíferos)",
+        "level": "PODE_CONTER",
+        "levelLabel": "Pode conter"
+      },
+      {
+        "code": "OVOS",
+        "label": "Ovos",
+        "level": "CONTEM",
+        "levelLabel": "Contém"
+      }
+    ],
+    "warnings": [],
+    "allergenNotice": "Informação declarada por quem publicou, sem conferência da Anvisa nem do Friendly Eats. Confirme com o estabelecimento, inclusive sobre contaminação cruzada.",
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "advertising": false,
+    "advertisingLabel": null,
+    "startsAt": null,
+    "endsAt": null,
+    "price": {
+      "priceCents": 3290,
+      "priceFromCents": null,
+      "priceToCents": null,
+      "discountPercent": null,
+      "free": false,
+      "label": "R$ 32,90"
+    },
+    "recipe": null,
+    "alert": null,
+    "city": null,
+    "expiresAt": null,
+    "expired": false,
+    "status": "PUBLISHED",
+    "publishedAt": "2026-10-25T14:20:00Z",
+    "updatedAt": "2026-10-25T14:20:00Z",
+    "author": {
+      "id": 42,
+      "name": "Júlia Andrade",
+      "handle": "juliandrade",
+      "category": {
+        "code": "COMENSAL",
+        "label": "Comensal",
+        "color": "#48A8FF",
+        "lightColor": "#05558F",
+        "glyph": "◇",
+        "glyphName": "losango",
+        "lucideIcon": "user-round"
+      },
+      "verified": false,
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/42/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 12,
+      "comments": 3,
+      "shares": 2
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactions": {
+      "open": true,
+      "likes": true,
+      "comments": true,
+      "shares": true,
+      "saves": true,
+      "commentAudience": "EVERYONE",
+      "viewerCanComment": false,
+      "commentNotice": "Entre na sua conta para comentar."
+    },
+    "shareUrl": "https://friendlyeats.app/p/0199a1b2-c3d4-7e5f-8a9b-000000000001",
+    "background": {
+      "config": {
+        "v": 1,
+        "color": null,
+        "gradientId": null,
+        "seasonal": {
+          "presetId": null,
+          "auto": false
+        },
+        "animationId": "NONE",
+        "aura": {
+          "presetId": "azulejo",
+          "variantId": "ORIGINAL",
+          "format": "IMAGEM_UNICA"
+        },
+        "materialId": "papel-manteiga",
+        "customArt": null,
+        "layoutId": "CLASSICO",
+        "skinId": "PADRAO",
+        "container": {
+          "color": null,
+          "ink": "AUTO"
+        }
+      },
+      "artKind": "AURA",
+      "artId": "azulejo",
+      "palette": [
+        "#E76F51",
+        "#2A9D8F",
+        "#F4A261",
+        "#F1FAEE"
+      ],
+      "css": "conic-gradient(from 45deg,#E76F51 0 25%,#F4A261 0 50%,#2A9D8F 0 75%,#F1FAEE 0) 0 0/18px 18px",
+      "container": {
+        "color": "#2A2119",
+        "ink": "#F5EDE3",
+        "contrast": "13,6:1"
+      }
+    }
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000002",
+    "kind": {
+      "code": "PRATO_DO_DIA",
+      "label": "Prato do dia",
+      "lucideIcon": "hand-platter",
+      "border": "DUPLA"
+    },
+    "feed": "POST",
+    "mediaType": "TEXT",
+    "title": "Hoje tem feijoada completa",
+    "body": "Feijoada com costelinha, linguiça e paio, arroz, couve, farofa e laranja. Serve bem uma pessoa.",
+    "mediaUrl": null,
+    "altText": null,
+    "establishment": {
+      "id": 1,
+      "name": "Sabor Mineiro",
+      "city": "Belo Horizonte",
+      "uf": "MG",
+      "adultsOnly": false,
+      "pagePath": "/api/v1/establishments/1"
+    },
+    "cuisine": {
+      "code": "MINEIRA",
+      "label": "Mineira",
+      "group": "BRASIL"
+    },
+    "foodFormat": null,
+    "dietaryStyles": [],
+    "allergens": [
+      {
+        "code": "TRIGO",
+        "label": "Trigo",
+        "level": "PODE_CONTER",
+        "levelLabel": "Pode conter"
+      }
+    ],
+    "warnings": [
+      {
+        "code": "GLUTEN",
+        "label": "Contém glúten",
+        "group": "ADVERTENCIA"
+      }
+    ],
+    "allergenNotice": "Informação declarada por quem publicou, sem conferência da Anvisa nem do Friendly Eats. Confirme com o estabelecimento, inclusive sobre contaminação cruzada.",
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "advertising": false,
+    "advertisingLabel": null,
+    "startsAt": null,
+    "endsAt": null,
+    "price": {
+      "priceCents": 4590,
+      "priceFromCents": null,
+      "priceToCents": null,
+      "discountPercent": null,
+      "free": false,
+      "label": "R$ 45,90"
+    },
+    "recipe": null,
+    "alert": null,
+    "city": null,
+    "expiresAt": "2026-10-26T02:59:59Z",
+    "expired": false,
+    "status": "PUBLISHED",
+    "publishedAt": "2026-10-25T13:05:00Z",
+    "updatedAt": "2026-10-25T13:05:00Z",
+    "author": {
+      "id": 900,
+      "name": "Sabor Mineiro Ltda",
+      "handle": "sabormineiro",
+      "category": {
+        "code": "ESTABELECIMENTO",
+        "label": "Estabelecimento",
+        "color": "#E88F12",
+        "lightColor": "#7F4D06",
+        "glyph": "▭",
+        "glyphName": "retângulo",
+        "lucideIcon": "store"
+      },
+      "verified": true,
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/900/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 30,
+      "comments": 4,
+      "shares": 6
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactions": {
+      "open": true,
+      "likes": true,
+      "comments": true,
+      "shares": true,
+      "saves": true,
+      "commentAudience": "EVERYONE",
+      "viewerCanComment": false,
+      "commentNotice": "Entre na sua conta para comentar."
+    },
+    "shareUrl": "https://friendlyeats.app/p/0199a1b2-c3d4-7e5f-8a9b-000000000002",
+    "background": {
+      "config": {
+        "v": 1,
+        "color": null,
+        "gradientId": "brasa",
+        "seasonal": {
+          "presetId": null,
+          "auto": false
+        },
+        "animationId": "FUMEGAR",
+        "aura": null,
+        "materialId": null,
+        "customArt": null,
+        "layoutId": "CLASSICO",
+        "skinId": "PADRAO",
+        "container": {
+          "color": null,
+          "ink": "AUTO"
+        }
+      },
+      "artKind": "GRADIENT",
+      "artId": "brasa",
+      "palette": [
+        "#FFB703",
+        "#E85D04",
+        "#370617"
+      ],
+      "css": "linear-gradient(135deg,#FFB703,#E85D04 55%,#370617)",
+      "container": {
+        "color": "#2A2119",
+        "ink": "#F5EDE3",
+        "contrast": "13,6:1"
+      }
+    }
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000003",
+    "kind": {
+      "code": "RECEITA",
+      "label": "Receita",
+      "lucideIcon": "book-open",
+      "border": "TRACEJADA"
+    },
+    "feed": "POST",
+    "mediaType": "TEXT",
+    "title": "Pão de queijo de polvilho azedo",
+    "body": "A receita que faço em casa há 20 anos. O segredo é escaldar o polvilho com o leite fervendo e sovar bem antes de pôr o queijo.",
+    "mediaUrl": null,
+    "altText": null,
+    "establishment": null,
+    "cuisine": {
+      "code": "MINEIRA",
+      "label": "Mineira",
+      "group": "BRASIL"
+    },
+    "foodFormat": {
+      "code": "SALGADOS",
+      "label": "Salgados",
+      "group": "SALGADOS_E_PETISCOS"
+    },
+    "dietaryStyles": [
+      {
+        "code": "VEGETARIANO",
+        "label": "Vegetariano",
+        "group": null
+      },
+      {
+        "code": "SEM_GLUTEN",
+        "label": "Sem glúten",
+        "group": null
+      }
+    ],
+    "allergens": [
+      {
+        "code": "LEITE",
+        "label": "Leite (de todos os mamíferos)",
+        "level": "CONTEM",
+        "levelLabel": "Contém"
+      },
+      {
+        "code": "OVOS",
+        "label": "Ovos",
+        "level": "CONTEM",
+        "levelLabel": "Contém"
+      }
+    ],
+    "warnings": [
+      {
+        "code": "LACTOSE",
+        "label": "Contém lactose",
+        "group": "ADVERTENCIA"
+      }
+    ],
+    "allergenNotice": "Informação declarada por quem publicou, sem conferência da Anvisa nem do Friendly Eats. Confirme com o estabelecimento, inclusive sobre contaminação cruzada.",
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "advertising": false,
+    "advertisingLabel": null,
+    "startsAt": null,
+    "endsAt": null,
+    "price": null,
+    "recipe": {
+      "ingredients": [
+        "500 g de polvilho azedo",
+        "1 xícara de leite",
+        "1/2 xícara de óleo",
+        "2 ovos",
+        "250 g de queijo meia-cura ralado",
+        "1 colher (chá) de sal"
+      ],
+      "steps": [
+        "Ferva o leite com o óleo e o sal.",
+        "Escalde o polvilho com a mistura quente e mexa até esfriar.",
+        "Junte os ovos um a um e sove por 5 minutos.",
+        "Acrescente o queijo e faça bolinhas.",
+        "Asse a 200 °C por 25 minutos."
+      ],
+      "servings": 30,
+      "prepMinutes": 60
+    },
+    "alert": null,
+    "city": null,
+    "expiresAt": null,
+    "expired": false,
+    "status": "PUBLISHED",
+    "publishedAt": "2026-10-25T11:40:00Z",
+    "updatedAt": "2026-10-25T11:40:00Z",
+    "author": {
+      "id": 310,
+      "name": "Rafael Lima",
+      "handle": "chefrafa",
+      "category": {
+        "code": "CHEF",
+        "label": "Chef",
+        "color": "#D6C5FF",
+        "lightColor": "#7D5BBA",
+        "glyph": "⬠",
+        "glyphName": "pentágono",
+        "lucideIcon": "chef-hat"
+      },
+      "verified": false,
+      "avatarUrl": "/media-teste/avatars/rafa.png",
+      "profilePath": "/api/v1/users/310/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 48,
+      "comments": 9,
+      "shares": 15
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactions": {
+      "open": true,
+      "likes": true,
+      "comments": true,
+      "shares": true,
+      "saves": true,
+      "commentAudience": "EVERYONE",
+      "viewerCanComment": false,
+      "commentNotice": "Entre na sua conta para comentar."
+    },
+    "shareUrl": "https://friendlyeats.app/p/0199a1b2-c3d4-7e5f-8a9b-000000000003",
+    "background": {
+      "config": {
+        "v": 1,
+        "color": null,
+        "gradientId": null,
+        "seasonal": {
+          "presetId": null,
+          "auto": false
+        },
+        "animationId": "NONE",
+        "aura": null,
+        "materialId": null,
+        "customArt": null,
+        "layoutId": "CARDAPIO",
+        "skinId": "PADRAO",
+        "container": {
+          "color": null,
+          "ink": "AUTO"
+        }
+      },
+      "artKind": "LAYOUT",
+      "artId": "CARDAPIO",
+      "palette": [],
+      "css": null,
+      "container": {
+        "color": "#2A2119",
+        "ink": "#F5EDE3",
+        "contrast": "13,6:1"
+      }
+    }
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000004",
+    "kind": {
+      "code": "PERGUNTA",
+      "label": "Pergunta",
+      "lucideIcon": "message-circle-question",
+      "border": "BALAO"
+    },
+    "feed": "POST",
+    "mediaType": "TEXT",
+    "title": "Onde comer um bom acarajé em Curitiba?",
+    "body": "Mudei de Salvador e sinto falta. Aceito dicas de tabuleiro, restaurante ou feira.",
+    "mediaUrl": null,
+    "altText": null,
+    "establishment": null,
+    "cuisine": null,
+    "foodFormat": null,
+    "dietaryStyles": [],
+    "allergens": [],
+    "warnings": [],
+    "allergenNotice": null,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "advertising": false,
+    "advertisingLabel": null,
+    "startsAt": null,
+    "endsAt": null,
+    "price": null,
+    "recipe": null,
+    "alert": null,
+    "city": null,
+    "expiresAt": null,
+    "expired": false,
+    "status": "PUBLISHED",
+    "publishedAt": "2026-10-25T10:15:00Z",
+    "updatedAt": "2026-10-25T10:15:00Z",
+    "author": {
+      "id": 205,
+      "name": "Bruno Costa",
+      "handle": "brunocosta",
+      "category": {
+        "code": "COMENSAL",
+        "label": "Comensal",
+        "color": "#48A8FF",
+        "lightColor": "#05558F",
+        "glyph": "◇",
+        "glyphName": "losango",
+        "lucideIcon": "user-round"
+      },
+      "verified": false,
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/205/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 5,
+      "comments": 7,
+      "shares": 0
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactions": {
+      "open": true,
+      "likes": true,
+      "comments": true,
+      "shares": true,
+      "saves": true,
+      "commentAudience": "EVERYONE",
+      "viewerCanComment": false,
+      "commentNotice": "Entre na sua conta para comentar."
+    },
+    "shareUrl": "https://friendlyeats.app/p/0199a1b2-c3d4-7e5f-8a9b-000000000004",
+    "background": null
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000005",
+    "kind": {
+      "code": "PROMOCAO",
+      "label": "Promoção",
+      "lucideIcon": "badge-percent",
+      "border": "ETIQUETA"
+    },
+    "feed": "POST",
+    "mediaType": "TEXT",
+    "title": "Rodízio de massas com 20% de desconto",
+    "body": "Fui convidada pela Cantina Nonna Rosa e o rodízio está com desconto até domingo. Vale pedir o nhoque de batata.",
+    "mediaUrl": null,
+    "altText": null,
+    "establishment": {
+      "id": 2,
+      "name": "Cantina Nonna Rosa",
+      "city": "São Paulo",
+      "uf": "SP",
+      "adultsOnly": false,
+      "pagePath": "/api/v1/establishments/2"
+    },
+    "cuisine": {
+      "code": "ITALIANA",
+      "label": "Italiana",
+      "group": "EUROPA"
+    },
+    "foodFormat": null,
+    "dietaryStyles": [],
+    "allergens": [
+      {
+        "code": "OVOS",
+        "label": "Ovos",
+        "level": "CONTEM",
+        "levelLabel": "Contém"
+      },
+      {
+        "code": "TRIGO",
+        "label": "Trigo",
+        "level": "CONTEM",
+        "levelLabel": "Contém"
+      }
+    ],
+    "warnings": [],
+    "allergenNotice": "Informação declarada por quem publicou, sem conferência da Anvisa nem do Friendly Eats. Confirme com o estabelecimento, inclusive sobre contaminação cruzada.",
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "advertising": true,
+    "advertisingLabel": "Publicidade",
+    "startsAt": "2026-10-24T22:00:00Z",
+    "endsAt": "2026-11-02T02:59:00Z",
+    "price": {
+      "priceCents": null,
+      "priceFromCents": null,
+      "priceToCents": null,
+      "discountPercent": 20,
+      "free": false,
+      "label": "20% de desconto"
+    },
+    "recipe": null,
+    "alert": null,
+    "city": null,
+    "expiresAt": "2026-11-02T02:59:00Z",
+    "expired": false,
+    "status": "PUBLISHED",
+    "publishedAt": "2026-10-24T22:00:00Z",
+    "updatedAt": "2026-10-24T22:00:00Z",
+    "author": {
+      "id": 501,
+      "name": "Ana Come Bem",
+      "handle": "anacomebem",
+      "category": {
+        "code": "CRIADOR",
+        "label": "Criador",
+        "color": "#F7C638",
+        "lightColor": "#876A06",
+        "glyph": "✦",
+        "glyphName": "estrela",
+        "lucideIcon": "camera"
+      },
+      "verified": false,
+      "avatarUrl": "/media-teste/avatars/ana.png",
+      "profilePath": "/api/v1/users/501/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 21,
+      "comments": 2,
+      "shares": 4
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactions": {
+      "open": true,
+      "likes": true,
+      "comments": true,
+      "shares": true,
+      "saves": true,
+      "commentAudience": "EVERYONE",
+      "viewerCanComment": false,
+      "commentNotice": "Entre na sua conta para comentar."
+    },
+    "shareUrl": "https://friendlyeats.app/p/0199a1b2-c3d4-7e5f-8a9b-000000000005",
+    "background": {
+      "config": {
+        "v": 1,
+        "color": null,
+        "gradientId": null,
+        "seasonal": {
+          "presetId": null,
+          "auto": true
+        },
+        "animationId": "NONE",
+        "aura": null,
+        "materialId": null,
+        "customArt": null,
+        "layoutId": "CLASSICO",
+        "skinId": "PADRAO",
+        "container": {
+          "color": null,
+          "ink": "AUTO"
+        }
+      },
+      "artKind": "SEASONAL",
+      "artId": "primavera",
+      "palette": [
+        "#F28AB2",
+        "#E63946",
+        "#90BE6D",
+        "#F6C90E",
+        "#FFF0F3"
+      ],
+      "css": "linear-gradient(135deg,#F28AB2 0%,#E63946 25%,#90BE6D 50%,#F6C90E 75%,#FFF0F3 100%)",
+      "container": {
+        "color": "#2A2119",
+        "ink": "#F5EDE3",
+        "contrast": "13,6:1"
+      }
+    }
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000006",
+    "kind": {
+      "code": "EVENTO",
+      "label": "Evento",
+      "lucideIcon": "calendar-days",
+      "border": "DATA"
+    },
+    "feed": "POST",
+    "mediaType": "TEXT",
+    "title": "Feira do pão artesanal no sábado",
+    "body": "Padeiros da cidade, fermentação natural e oficina para crianças. Leve sua sacola.",
+    "mediaUrl": null,
+    "altText": null,
+    "establishment": null,
+    "cuisine": null,
+    "foodFormat": null,
+    "dietaryStyles": [],
+    "allergens": [],
+    "warnings": [],
+    "allergenNotice": null,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "advertising": false,
+    "advertisingLabel": null,
+    "startsAt": "2026-10-31T12:00:00Z",
+    "endsAt": "2026-10-31T19:00:00Z",
+    "price": {
+      "priceCents": null,
+      "priceFromCents": null,
+      "priceToCents": null,
+      "discountPercent": null,
+      "free": true,
+      "label": "Gratuito"
+    },
+    "recipe": null,
+    "alert": null,
+    "city": "Curitiba",
+    "expiresAt": "2026-10-31T19:00:00Z",
+    "expired": false,
+    "status": "PUBLISHED",
+    "publishedAt": "2026-10-24T18:00:00Z",
+    "updatedAt": "2026-10-24T18:00:00Z",
+    "author": {
+      "id": 610,
+      "name": "Confraria do Pão",
+      "handle": "confrariadopao",
+      "category": {
+        "code": "COMUNIDADE",
+        "label": "Comunidade",
+        "color": "#08DABD",
+        "lightColor": "#0B8170",
+        "glyph": "⬢",
+        "glyphName": "hexágono",
+        "lucideIcon": "users"
+      },
+      "verified": false,
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/610/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 17,
+      "comments": 1,
+      "shares": 9
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactions": {
+      "open": true,
+      "likes": true,
+      "comments": true,
+      "shares": true,
+      "saves": true,
+      "commentAudience": "EVERYONE",
+      "viewerCanComment": false,
+      "commentNotice": "Entre na sua conta para comentar."
+    },
+    "shareUrl": "https://friendlyeats.app/p/0199a1b2-c3d4-7e5f-8a9b-000000000006",
+    "background": {
+      "config": {
+        "v": 1,
+        "color": "#24382E",
+        "gradientId": null,
+        "seasonal": {
+          "presetId": null,
+          "auto": false
+        },
+        "animationId": "NONE",
+        "aura": null,
+        "materialId": null,
+        "customArt": null,
+        "layoutId": "POLAROID",
+        "skinId": "PADRAO",
+        "container": {
+          "color": "#F5EDE3",
+          "ink": "AUTO"
+        }
+      },
+      "artKind": "COLOR",
+      "artId": "#24382E",
+      "palette": [
+        "#24382E"
+      ],
+      "css": "#24382E",
+      "container": {
+        "color": "#F5EDE3",
+        "ink": "#17120D",
+        "contrast": "16,0:1"
+      }
+    }
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000007",
+    "kind": {
+      "code": "FOTO_PRATO",
+      "label": "Foto de prato",
+      "lucideIcon": "clapperboard",
+      "border": "SEM_MOLDURA"
+    },
+    "feed": "POST",
+    "mediaType": "IMAGE",
+    "title": "Chope cremoso no Boteco do Zé",
+    "body": "Colarinho de dois dedos e petisco de torresmo.",
+    "mediaUrl": "/media-teste/posts/7.png",
+    "altText": "Tulipa de chope gelado ao lado de uma porção de torresmo.",
+    "establishment": {
+      "id": 18,
+      "name": "Boteco do Zé",
+      "city": "Curitiba",
+      "uf": "PR",
+      "adultsOnly": true,
+      "pagePath": "/api/v1/establishments/18"
+    },
+    "cuisine": null,
+    "foodFormat": {
+      "code": "CERVEJA",
+      "label": "Cerveja e chope",
+      "group": "BEBIDAS"
+    },
+    "dietaryStyles": [],
+    "allergens": [],
+    "warnings": [],
+    "allergenNotice": null,
+    "ageRating": "AGE_18",
+    "ageRatingLabel": "18+",
+    "advertising": false,
+    "advertisingLabel": null,
+    "startsAt": null,
+    "endsAt": null,
+    "price": null,
+    "recipe": null,
+    "alert": null,
+    "city": null,
+    "expiresAt": null,
+    "expired": false,
+    "status": "PUBLISHED",
+    "publishedAt": "2026-10-24T16:00:00Z",
+    "updatedAt": "2026-10-24T16:00:00Z",
+    "author": {
+      "id": 501,
+      "name": "Ana Come Bem",
+      "handle": "anacomebem",
+      "category": {
+        "code": "CRIADOR",
+        "label": "Criador",
+        "color": "#F7C638",
+        "lightColor": "#876A06",
+        "glyph": "✦",
+        "glyphName": "estrela",
+        "lucideIcon": "camera"
+      },
+      "verified": false,
+      "avatarUrl": "/media-teste/avatars/ana.png",
+      "profilePath": "/api/v1/users/501/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 9,
+      "comments": 0,
+      "shares": 1
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactions": {
+      "open": true,
+      "likes": true,
+      "comments": true,
+      "shares": true,
+      "saves": true,
+      "commentAudience": "EVERYONE",
+      "viewerCanComment": false,
+      "commentNotice": "Entre na sua conta para comentar."
+    },
+    "shareUrl": "https://friendlyeats.app/p/0199a1b2-c3d4-7e5f-8a9b-000000000007",
+    "background": null
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000008",
+    "kind": {
+      "code": "PROMOCAO",
+      "label": "Promoção",
+      "lucideIcon": "badge-percent",
+      "border": "ETIQUETA"
+    },
+    "feed": "POST",
+    "mediaType": "TEXT",
+    "title": "Pão de queijo em dobro no café da manhã",
+    "body": "Na compra de um café coado, o segundo pão de queijo sai pela metade do preço.",
+    "mediaUrl": null,
+    "altText": null,
+    "establishment": {
+      "id": 1,
+      "name": "Sabor Mineiro",
+      "city": "Belo Horizonte",
+      "uf": "MG",
+      "adultsOnly": false,
+      "pagePath": "/api/v1/establishments/1"
+    },
+    "cuisine": null,
+    "foodFormat": null,
+    "dietaryStyles": [],
+    "allergens": [],
+    "warnings": [],
+    "allergenNotice": null,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "advertising": false,
+    "advertisingLabel": null,
+    "startsAt": "2026-10-10T10:00:00Z",
+    "endsAt": "2026-10-20T14:00:00Z",
+    "price": {
+      "priceCents": null,
+      "priceFromCents": 1200,
+      "priceToCents": 900,
+      "discountPercent": null,
+      "free": false,
+      "label": "De R$ 12,00 por R$ 9,00"
+    },
+    "recipe": null,
+    "alert": null,
+    "city": null,
+    "expiresAt": "2026-10-20T14:00:00Z",
+    "expired": true,
+    "status": "PUBLISHED",
+    "publishedAt": "2026-10-10T10:00:00Z",
+    "updatedAt": "2026-10-10T10:00:00Z",
+    "author": {
+      "id": 900,
+      "name": "Sabor Mineiro Ltda",
+      "handle": "sabormineiro",
+      "category": {
+        "code": "ESTABELECIMENTO",
+        "label": "Estabelecimento",
+        "color": "#E88F12",
+        "lightColor": "#7F4D06",
+        "glyph": "▭",
+        "glyphName": "retângulo",
+        "lucideIcon": "store"
+      },
+      "verified": true,
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/900/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 14,
+      "comments": 0,
+      "shares": 2
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactions": {
+      "open": true,
+      "likes": true,
+      "comments": true,
+      "shares": true,
+      "saves": true,
+      "commentAudience": "EVERYONE",
+      "viewerCanComment": false,
+      "commentNotice": "Entre na sua conta para comentar."
+    },
+    "shareUrl": "https://friendlyeats.app/p/0199a1b2-c3d4-7e5f-8a9b-000000000008",
+    "background": null
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000020",
+    "kind": {
+      "code": "ALERTA_SANITARIO",
+      "label": "Alerta sanitário",
+      "lucideIcon": "triangle-alert",
+      "border": "HAZARD"
+    },
+    "feed": "ALERT",
+    "mediaType": "TEXT",
+    "title": "Recolhimento de azeite de oliva por fraude",
+    "body": "A Anvisa determinou o recolhimento de lotes de azeite que, na análise, eram mistura de óleos vegetais. Não consuma e procure o local de compra para a troca.",
+    "mediaUrl": null,
+    "altText": null,
+    "establishment": null,
+    "cuisine": null,
+    "foodFormat": null,
+    "dietaryStyles": [],
+    "allergens": [],
+    "warnings": [],
+    "allergenNotice": null,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "advertising": false,
+    "advertisingLabel": null,
+    "startsAt": null,
+    "endsAt": null,
+    "price": null,
+    "recipe": null,
+    "alert": {
+      "product": "Azeite de oliva extravirgem 500 ml",
+      "brand": "Olivari Serra",
+      "lots": [
+        "L2391",
+        "L2392",
+        "L2405"
+      ],
+      "reason": "Mistura com óleos vegetais não declarados no rótulo (fraude).",
+      "sourceUrl": "https://www.gov.br/anvisa/pt-br/assuntos/noticias-anvisa/2026/recolhimento-azeite",
+      "sourceHost": "www.gov.br"
+    },
+    "city": null,
+    "expiresAt": null,
+    "expired": false,
+    "status": "PUBLISHED",
+    "publishedAt": "2026-10-25T09:00:00Z",
+    "updatedAt": "2026-10-25T09:00:00Z",
+    "author": {
+      "id": 700,
+      "name": "Anvisa",
+      "handle": "anvisa",
+      "category": {
+        "code": "OFICIAL",
+        "label": "Oficial",
+        "color": "#0C0A07",
+        "lightColor": "#0C0A07",
+        "glyph": "◎",
+        "glyphName": "círculo duplo",
+        "lucideIcon": "landmark"
+      },
+      "verified": true,
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/700/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 0,
+      "comments": 0,
+      "shares": 41
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactions": {
+      "open": true,
+      "likes": false,
+      "comments": false,
+      "shares": true,
+      "saves": true,
+      "commentAudience": "EVERYONE",
+      "viewerCanComment": false,
+      "commentNotice": "Alerta sanitário não recebe curtidas nem comentários: compartilhe ou salve."
+    },
+    "shareUrl": "https://friendlyeats.app/p/0199a1b2-c3d4-7e5f-8a9b-000000000020",
+    "background": null
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000021",
+    "kind": {
+      "code": "ALERTA_SANITARIO",
+      "label": "Alerta sanitário",
+      "lucideIcon": "triangle-alert",
+      "border": "HAZARD"
+    },
+    "feed": "ALERT",
+    "mediaType": "TEXT",
+    "title": "Amendoim torrado com aflatoxina acima do limite",
+    "body": "Lote com aflatoxinas acima do limite permitido. Suspensa a venda e o consumo.",
+    "mediaUrl": null,
+    "altText": null,
+    "establishment": null,
+    "cuisine": null,
+    "foodFormat": null,
+    "dietaryStyles": [],
+    "allergens": [
+      {
+        "code": "AMENDOIM",
+        "label": "Amendoim",
+        "level": "CONTEM",
+        "levelLabel": "Contém"
+      }
+    ],
+    "warnings": [],
+    "allergenNotice": "Informação declarada por quem publicou, sem conferência da Anvisa nem do Friendly Eats. Confirme com o estabelecimento, inclusive sobre contaminação cruzada.",
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "advertising": false,
+    "advertisingLabel": null,
+    "startsAt": null,
+    "endsAt": null,
+    "price": null,
+    "recipe": null,
+    "alert": {
+      "product": "Amendoim torrado e salgado 150 g",
+      "brand": "Grão Bom",
+      "lots": [
+        "todos os lotes com validade até 03/2027"
+      ],
+      "reason": "Aflatoxinas acima do limite da RDC 722/2022.",
+      "sourceUrl": "https://www.gov.br/anvisa/pt-br/assuntos/noticias-anvisa/2026/amendoim",
+      "sourceHost": "www.gov.br"
+    },
+    "city": null,
+    "expiresAt": null,
+    "expired": false,
+    "status": "PUBLISHED",
+    "publishedAt": "2026-10-22T15:30:00Z",
+    "updatedAt": "2026-10-22T15:30:00Z",
+    "author": {
+      "id": 700,
+      "name": "Anvisa",
+      "handle": "anvisa",
+      "category": {
+        "code": "OFICIAL",
+        "label": "Oficial",
+        "color": "#0C0A07",
+        "lightColor": "#0C0A07",
+        "glyph": "◎",
+        "glyphName": "círculo duplo",
+        "lucideIcon": "landmark"
+      },
+      "verified": true,
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/700/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 0,
+      "comments": 0,
+      "shares": 12
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactions": {
+      "open": true,
+      "likes": false,
+      "comments": false,
+      "shares": true,
+      "saves": true,
+      "commentAudience": "EVERYONE",
+      "viewerCanComment": false,
+      "commentNotice": "Alerta sanitário não recebe curtidas nem comentários: compartilhe ou salve."
+    },
+    "shareUrl": "https://friendlyeats.app/p/0199a1b2-c3d4-7e5f-8a9b-000000000021",
+    "background": null
+  }
+]

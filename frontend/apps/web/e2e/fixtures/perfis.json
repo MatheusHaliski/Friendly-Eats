@@ -1,0 +1,225 @@
+[
+  {
+    "id": 310,
+    "name": "Rafael Lima",
+    "handle": "chefrafa",
+    "category": {
+      "code": "CHEF",
+      "label": "Chef",
+      "color": "#D6C5FF",
+      "lightColor": "#7D5BBA",
+      "glyph": "⬠",
+      "glyphName": "pentágono",
+      "lucideIcon": "chef-hat"
+    },
+    "verified": false,
+    "privateProfile": false,
+    "avatarUrl": "/media-teste/avatars/rafa.png",
+    "bio": "Chef de cozinha mineira. Ensino a fazer pão de queijo de verdade.",
+    "pronouns": [
+      "ele/dele"
+    ],
+    "links": [
+      "https://chefrafa.com.br"
+    ],
+    "city": "Belo Horizonte",
+    "uf": "MG",
+    "memberSince": "2026-03-02T12:00:00Z",
+    "postCount": 1,
+    "postsPath": "/api/v1/users/310/posts",
+    "shareUrl": "https://friendlyeats.app/u/310"
+  },
+  {
+    "id": 501,
+    "name": "Ana Come Bem",
+    "handle": "anacomebem",
+    "category": {
+      "code": "CRIADOR",
+      "label": "Criador",
+      "color": "#F7C638",
+      "lightColor": "#876A06",
+      "glyph": "✦",
+      "glyphName": "estrela",
+      "lucideIcon": "camera"
+    },
+    "verified": false,
+    "privateProfile": false,
+    "avatarUrl": "/media-teste/avatars/ana.png",
+    "bio": "Crítica de comida de rua e boteco. Publis sempre com o chip Publicidade.",
+    "pronouns": [
+      "ela/dela"
+    ],
+    "links": [
+      "https://anacomebem.com.br",
+      "https://youtube.com/@anacomebem"
+    ],
+    "city": "São Paulo",
+    "uf": "SP",
+    "memberSince": "2026-05-10T12:00:00Z",
+    "postCount": 2,
+    "postsPath": "/api/v1/users/501/posts",
+    "shareUrl": "https://friendlyeats.app/u/501"
+  },
+  {
+    "id": 610,
+    "name": "Confraria do Pão",
+    "handle": "confrariadopao",
+    "category": {
+      "code": "COMUNIDADE",
+      "label": "Comunidade",
+      "color": "#08DABD",
+      "lightColor": "#0B8170",
+      "glyph": "⬢",
+      "glyphName": "hexágono",
+      "lucideIcon": "users"
+    },
+    "verified": false,
+    "privateProfile": false,
+    "avatarUrl": null,
+    "bio": "Confraria de padeiros caseiros e profissionais. Feiras e oficinas.",
+    "pronouns": [],
+    "links": [],
+    "city": "Curitiba",
+    "uf": "PR",
+    "memberSince": "2026-06-21T12:00:00Z",
+    "postCount": 1,
+    "postsPath": "/api/v1/users/610/posts",
+    "shareUrl": "https://friendlyeats.app/u/610"
+  },
+  {
+    "id": 700,
+    "name": "Anvisa",
+    "handle": "anvisa",
+    "category": {
+      "code": "OFICIAL",
+      "label": "Oficial",
+      "color": "#0C0A07",
+      "lightColor": "#0C0A07",
+      "glyph": "◎",
+      "glyphName": "círculo duplo",
+      "lucideIcon": "landmark"
+    },
+    "verified": true,
+    "privateProfile": false,
+    "avatarUrl": null,
+    "bio": "Agência Nacional de Vigilância Sanitária. Alertas e recolhimentos de alimentos.",
+    "pronouns": [],
+    "links": [
+      "https://www.gov.br/anvisa"
+    ],
+    "city": "Brasília",
+    "uf": "DF",
+    "memberSince": "2026-01-15T12:00:00Z",
+    "postCount": 2,
+    "postsPath": "/api/v1/users/700/posts",
+    "shareUrl": "https://friendlyeats.app/u/700"
+  },
+  {
+    "id": 900,
+    "name": "Sabor Mineiro Ltda",
+    "handle": "sabormineiro",
+    "category": {
+      "code": "ESTABELECIMENTO",
+      "label": "Estabelecimento",
+      "color": "#E88F12",
+      "lightColor": "#7F4D06",
+      "glyph": "▭",
+      "glyphName": "retângulo",
+      "lucideIcon": "store"
+    },
+    "verified": true,
+    "privateProfile": false,
+    "avatarUrl": null,
+    "bio": "Comida mineira de fogão a lenha desde 1998.",
+    "pronouns": [],
+    "links": [
+      "https://sabormineiro.com.br"
+    ],
+    "city": "Belo Horizonte",
+    "uf": "MG",
+    "memberSince": "2026-02-11T12:00:00Z",
+    "postCount": 2,
+    "postsPath": "/api/v1/users/900/posts",
+    "shareUrl": "https://friendlyeats.app/u/900"
+  },
+  {
+    "id": 42,
+    "name": "Júlia Andrade",
+    "handle": "juliandrade",
+    "category": {
+      "code": "COMENSAL",
+      "label": "Comensal",
+      "color": "#48A8FF",
+      "lightColor": "#05558F",
+      "glyph": "◇",
+      "glyphName": "losango",
+      "lucideIcon": "user-round"
+    },
+    "verified": false,
+    "privateProfile": false,
+    "avatarUrl": null,
+    "bio": "Comendo Belo Horizonte, um PF de cada vez.",
+    "pronouns": [
+      "ela/dela"
+    ],
+    "links": [],
+    "city": null,
+    "uf": null,
+    "memberSince": "2026-08-30T12:00:00Z",
+    "postCount": 1,
+    "postsPath": "/api/v1/users/42/posts",
+    "shareUrl": "https://friendlyeats.app/u/42"
+  },
+  {
+    "id": 205,
+    "name": "Bruno Costa",
+    "handle": "brunocosta",
+    "category": {
+      "code": "COMENSAL",
+      "label": "Comensal",
+      "color": "#48A8FF",
+      "lightColor": "#05558F",
+      "glyph": "◇",
+      "glyphName": "losango",
+      "lucideIcon": "user-round"
+    },
+    "verified": false,
+    "privateProfile": false,
+    "avatarUrl": null,
+    "bio": "Baiano em Curitiba.",
+    "pronouns": [],
+    "links": [],
+    "city": null,
+    "uf": null,
+    "memberSince": "2026-09-12T12:00:00Z",
+    "postCount": 1,
+    "postsPath": "/api/v1/users/205/posts",
+    "shareUrl": "https://friendlyeats.app/u/205"
+  },
+  {
+    "id": 808,
+    "name": "Marina Souza",
+    "handle": "marinasouza",
+    "category": {
+      "code": "COMENSAL",
+      "label": "Comensal",
+      "color": "#48A8FF",
+      "lightColor": "#05558F",
+      "glyph": "◇",
+      "glyphName": "losango",
+      "lucideIcon": "user-round"
+    },
+    "verified": false,
+    "privateProfile": true,
+    "avatarUrl": null,
+    "bio": "Doces e confeitaria.",
+    "pronouns": [],
+    "links": [],
+    "city": null,
+    "uf": null,
+    "memberSince": "2026-07-01T12:00:00Z",
+    "postCount": 0,
+    "postsPath": "/api/v1/users/808/posts",
+    "shareUrl": "https://friendlyeats.app/u/808"
+  }
+]

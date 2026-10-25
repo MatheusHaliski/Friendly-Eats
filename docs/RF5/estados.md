@@ -33,4 +33,14 @@ stateDiagram-v2
     Executando --> Concluida : todos os passos ok
     Concluida --> [*]
     Cancelada --> [*]
+    note right of EmCarencia
+        Avaliações fora do agregado (RF8),
+        páginas dos lugares (RF6) e posts (RF14)
+        fora do ar.
+    end note
+    note right of Concluida
+        Avaliações escritas e estabelecimentos
+        apagados, com as avaliações deles. Posts
+        e comentários sem conteúdo, fotos fora do bucket.
+    end note
 ```

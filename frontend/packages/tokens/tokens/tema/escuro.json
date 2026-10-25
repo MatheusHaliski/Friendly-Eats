@@ -1,0 +1,228 @@
+{
+  "tema": {
+    "escuro": {
+      "$description": "Cores do tema escuro (docs/DESIGN_SYSTEM.md).",
+      "color": {
+        "bg": {
+          "$type": "color",
+          "$value": "#17120D",
+          "$description": "Fundo do tema escuro (carvão quente). Todas as cores foram medidas contra ele."
+        },
+        "surface": {
+          "$type": "color",
+          "$value": "#17120D",
+          "$description": "Cartões e campos: o mesmo fundo, separados por borda (as cores de categoria foram medidas contra o fundo)."
+        },
+        "surface-sunken": {
+          "$type": "color",
+          "$value": "#2A2119",
+          "$description": "Só decorativo: trilho do histograma, faixas sem texto colorido."
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#F4EEE6"
+        },
+        "text-muted": {
+          "$type": "color",
+          "$value": "#C2B8AB",
+          "$description": "Texto secundário (9,51:1)."
+        },
+        "border": {
+          "$type": "color",
+          "$value": "#4A3F34",
+          "$description": "Divisor decorativo."
+        },
+        "border-strong": {
+          "$type": "color",
+          "$value": "#8C847A",
+          "$description": "Contorno de campo e botão (5,05:1, ≥ 3:1)."
+        },
+        "focus": {
+          "$type": "color",
+          "$value": "#F4EEE6",
+          "$description": "Anel de foco."
+        },
+        "brand": {
+          "$type": "color",
+          "$value": "#FF9F5A",
+          "$description": "Destaque do logo (9,18:1)."
+        },
+        "on-primary": {
+          "$type": "color",
+          "$value": "#17120D",
+          "$description": "Texto sobre o botão principal."
+        },
+        "primary": {
+          "$type": "color",
+          "$value": "#F4EEE6",
+          "$description": "Fundo do botão principal."
+        },
+        "feedback": {
+          "error": {
+            "$type": "color",
+            "$value": "#FFB86B",
+            "$description": "Erro de formulário: sempre com ícone circle-alert e texto (o vermelho é só do alerta sanitário)."
+          },
+          "success": {
+            "$type": "color",
+            "$value": "#6FE699",
+            "$description": "Confirmação: sempre com ícone e texto."
+          }
+        },
+        "account": {
+          "comensal": {
+            "fill": {
+              "$type": "color",
+              "$value": "#48A8FF"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#48A8FF"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#48A8FF"
+            }
+          },
+          "criador": {
+            "fill": {
+              "$type": "color",
+              "$value": "#F7C638"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#F7C638"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#F7C638"
+            }
+          },
+          "chef": {
+            "fill": {
+              "$type": "color",
+              "$value": "#D6C5FF"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#D6C5FF"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#D6C5FF"
+            }
+          },
+          "estabelecimento": {
+            "fill": {
+              "$type": "color",
+              "$value": "#E88F12"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#E88F12"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#E88F12"
+            }
+          },
+          "varejo": {
+            "fill": {
+              "$type": "color",
+              "$value": "#EE559F"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#EE559F"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#EE559F"
+            }
+          },
+          "comunidade": {
+            "fill": {
+              "$type": "color",
+              "$value": "#08DABD"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#08DABD"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#08DABD"
+            }
+          },
+          "oficial": {
+            "fill": {
+              "$type": "color",
+              "$value": "#0C0A07",
+              "$description": "Preto da conta Oficial: 1,06:1 sozinho, por isso o anel é obrigatório."
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#D6D0C8",
+              "$description": "Glifo da conta Oficial no tema escuro: a cor do anel (12,15:1)."
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#D6D0C8",
+              "$description": "Anel obrigatório de 2 px (12,15:1)."
+            }
+          }
+        },
+        "price": {
+          "1": {
+            "$type": "color",
+            "$value": "#E9DCC6"
+          },
+          "2": {
+            "$type": "color",
+            "$value": "#E6C08A"
+          },
+          "3": {
+            "$type": "color",
+            "$value": "#E3A15A"
+          },
+          "4": {
+            "$type": "color",
+            "$value": "#E0823A"
+          },
+          "empty": {
+            "$type": "color",
+            "$value": "#8C847A",
+            "$description": "Contorno dos cifrões vazados."
+          }
+        },
+        "star": {
+          "full": {
+            "$type": "color",
+            "$value": "#F7C948",
+            "$description": "Estrela cheia e meia estrela (11,87:1)."
+          },
+          "empty": {
+            "$type": "color",
+            "$value": "#8C847A",
+            "$description": "Estrela vazia, só contorno (5,05:1)."
+          }
+        },
+        "alert": {
+          "border": {
+            "$type": "color",
+            "$value": "#FF5A4F",
+            "$description": "Borda do alerta sanitário (único uso de vermelho)."
+          },
+          "hazard": {
+            "$type": "color",
+            "$value": "#F7C948"
+          },
+          "hazard-ink": {
+            "$type": "color",
+            "$value": "#17120D"
+          }
+        }
+      }
+    }
+  }
+}
