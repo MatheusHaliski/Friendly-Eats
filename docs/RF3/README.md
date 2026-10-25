@@ -2,7 +2,7 @@
 rf: RF3
 titulo: Consentimentos e privacidade (Privacy by Default)
 status: parcial
-cards: [FE-07, FE-08]
+cards: [FE-03]
 paths:
   - src/main/java/com/friendlyeats/application/account/RegistrationService.java
   - src/main/resources/db/migration/V1__baseline.sql

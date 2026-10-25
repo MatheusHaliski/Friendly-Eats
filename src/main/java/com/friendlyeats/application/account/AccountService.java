@@ -4,7 +4,9 @@ import com.friendlyeats.application.account.AccountViews.DeletionView;
 import com.friendlyeats.application.media.MediaJanitor;
 import com.friendlyeats.domain.model.AccountStatus;
 import com.friendlyeats.domain.model.UserAccount;
+import com.friendlyeats.infrastructure.persistence.postgres.EstablishmentRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.RecoveryCodeRepository;
+import com.friendlyeats.infrastructure.persistence.postgres.ReviewRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserAccountRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserMfaRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserPreferenceRepository;
@@ -42,11 +44,14 @@ public class AccountService {
     private final AccountNotifier notifier;
     private final Clock clock;
     private final Duration grace;
+    private final ReviewRepository reviews;
+    private final EstablishmentRepository establishments;
 
     public AccountService(UserAccountRepository users, UserMfaRepository mfa, RecoveryCodeRepository recovery,
                           UserPreferenceRepository preferences, PasswordEncoder passwords, SessionService sessions,
                           MediaJanitor media, AccountNotifier notifier, Clock clock,
-                          @Value("${friendly-eats.account.deletion-grace:30d}") Duration grace) {
+                          @Value("${friendly-eats.account.deletion-grace:30d}") Duration grace,
+                          ReviewRepository reviews, EstablishmentRepository establishments) {
         this.users = users;
         this.mfa = mfa;
         this.recovery = recovery;
@@ -57,6 +62,8 @@ public class AccountService {
         this.notifier = notifier;
         this.clock = clock;
         this.grace = grace;
+        this.reviews = reviews;
+        this.establishments = establishments;
     }
 
     /** Senha nova (já com o modo sudo confirmado): sai de todos os outros aparelhos. */
@@ -102,6 +109,9 @@ public class AccountService {
             return;
         }
         String photoKey = user.getPhotoObjectKey();
+        // avaliações escritas (RF8) e estabelecimentos da conta (RF6, com as avaliações deles) saem por inteiro
+        reviews.deleteAllWrittenBy(userId);
+        establishments.deleteAllOwnedBy(userId);
         mfa.deleteById(userId);
         recovery.deleteAllOf(userId);
         preferences.deleteById(userId);
@@ -110,7 +120,7 @@ public class AccountService {
         sessions.revokeAll(userId, null);
         // a foto de perfil sai do bucket só depois do commit (o banco já não aponta para ela)
         media.deleteAfterCommit(Collections.singletonList(photoKey));   // nulo é ignorado
-        // Próximos passos da saga: avaliações e fotos dos posts (RF8, RF9), Cassandra, DEK.
+        // Próximos passos da saga: posts e fotos (RF9), Cassandra, DEK.
         log.info("Conta {} eliminada", userId);
     }
 }

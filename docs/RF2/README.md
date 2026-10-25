@@ -2,7 +2,7 @@
 rf: RF2
 titulo: Perfil, preferências e foto de perfil
 status: parcial
-cards: [FE-04, FE-05, FE-06]
+cards: [FE-02]
 paths:
   - src/main/java/com/friendlyeats/domain/model/UserAccount.java
   - src/main/java/com/friendlyeats/domain/model/UserPreference.java

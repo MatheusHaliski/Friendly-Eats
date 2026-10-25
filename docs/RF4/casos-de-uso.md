@@ -18,11 +18,14 @@ flowchart LR
     SU(["Confirmar senha + código<br/>modo sudo"])
     P(["Trocar senha"])
     X(["Ler os Termos como visitante"])
+    XT(["Ler a taxonomia, a página do estabelecimento<br/>e as avaliações como visitante"])
+    X18(["Entrar para ver lugar 18+"])
 
     APP["App autenticador"]:::actor
 
     U --- L & O & S & F & D & P
-    A --- X
+    A --- X & XT
+    X18 -. «extend» tipo principal com bebida alcoólica .-> XT
     M -. «extend» 2FA ativo .-> L
     R -. «extend» conta em exclusão .-> L
     S -. «include» .-> S1

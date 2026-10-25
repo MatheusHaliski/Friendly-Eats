@@ -2,7 +2,7 @@
 rf: RF1
 titulo: Cadastro com tipo de conta e aceite dos Termos de Uso
 status: parcial
-cards: [FE-01, FE-02, FE-03, FE-07]
+cards: [FE-01, FE-07]
 paths:
   - src/main/java/com/friendlyeats/domain/model/UserAccount.java
   - src/main/java/com/friendlyeats/domain/model/UserCategoryEnum.java
@@ -56,7 +56,8 @@ paths:
    - **Oficial:** órgão (`ANVISA`, `VIGILANCIA_ESTADUAL`, `VIGILANCIA_MUNICIPAL`, `PROCON`, `MINISTERIO_AGRICULTURA`, `OUTRO_ORGAO`), CNPJ, site e representante.
    - CNPJ aceita o formato **alfanumérico** (IN RFB 2.229/2024).
 3. Estabelecimento (com CNPJ ou com CPF), varejo e oficial nascem com selo `PENDING`: leem e interagem, mas só publicam
-   como organização depois da moderação. Os demais nascem `NOT_REQUIRED`. No negócio com CPF, a moderação confere a
+   como organização depois da moderação. A página de um estabelecimento só fica pública com o selo `VERIFIED` da conta
+   dona ([RF6](../RF6/README.md)). Os demais nascem `NOT_REQUIRED`. No negócio com CPF, a moderação confere a
    identidade do titular e, quando houver, o alvará ou a licença sanitária.
 4. Idade: menos de 13 é recusado; menos de 16 exige `guardianEmail` e preferências protetivas; tipo diferente de
    comensal exige 18+.

@@ -28,12 +28,17 @@ tracejada).
 | [RF3](RF3/README.md) | Consentimentos e privacidade (Privacy by Default) | 🟡 parcial |
 | [RF4](RF4/README.md) | Login, sessão, controle de acesso e 2FA | 🟡 parcial |
 | [RF5](RF5/README.md) | Excluir conta com 30 dias para reativar e eliminação | 🟡 parcial |
+| [RF6](RF6/README.md) | Cadastrar estabelecimento: tipo, local e preço declarado | 🟡 parcial |
+| [RF7](RF7/README.md) | Classificar estabelecimento: culinária, formato, abordagem e estilos | 🟡 parcial |
+| [RF8](RF8/README.md) | Avaliar com estrelas (1 a 5) e nota agregada | 🟡 parcial |
 
-Próximos (domínio de comida, com a taxonomia de culinárias, tipos de comida, estabelecimentos, preço, local e
-estrelas): RF6 cadastrar e verificar estabelecimento · RF7 classificar estabelecimento · RF8 avaliar com estrelas ·
-RF9 publicar conteúdo · RF10 buscar e filtrar · RF11 página do estabelecimento · RF12 interações · RF13 moderação e
-avaliações falsas.
+Próximos (seguem a [taxonomia](TAXONOMIA_FRIENDLY_EATS.md#13-mapa-para-os-rfs)): RF9 publicar conteúdo, com
+cardápio e alergênicos por item · RF10 buscar e filtrar, com busca por raio · RF11 página do estabelecimento, com as
+facetas · RF12 interações, com a resposta do dono · RF13 moderação e avaliações falsas.
 
 ## Outros documentos
 
+- [Taxonomia](TAXONOMIA_FRIENDLY_EATS.md): atores, culinárias, formatos, abordagens, estilos, tipos de
+  estabelecimento, preço, estrelas e local, com os códigos estáveis usados do RF6 ao RF8
+- [Design System](DESIGN_SYSTEM.md): cores, glifos, chips e contraste das telas (a cor nunca é o único sinal)
 - [Termos de Uso](legal/TERMOS_DE_USO.md) (rascunho com marcadores `{{…}}`, para revisão jurídica)

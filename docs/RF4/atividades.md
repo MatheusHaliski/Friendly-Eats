@@ -19,3 +19,25 @@ flowchart TD
     RE --> S
     S --> AUT[200 AUTHENTICATED]
 ```
+
+## Autorização de uma requisição (`SecurityConfig`)
+
+```mermaid
+flowchart TD
+    R[Requisição] --> W{Método de escrita?}
+    W -- sim --> X{Cabeçalho X-XSRF-TOKEN<br/>confere com o cookie?}
+    X -- não --> F403[403]
+    X -- sim --> M
+    W -- não --> M{Rota}
+    M -- "GET /api/v1/legal/** ou /api/v1/taxonomy" --> OK[Passa sem sessão]
+    M -- "GET /api/v1/establishments/* ou<br/>/api/v1/establishments/*/reviews" --> OKE[Passa sem sessão]
+    M -- "/api/v1/auth/** ou /error" --> OK
+    M -- "qualquer outra" --> S{Sessão válida?}
+    S -- não --> U401[401]
+    S -- sim --> SRV[Serviço: conta ativa, dono, tipo de conta]
+    OKE --> AL{Serviço: tipo principal com<br/>bebida alcoólica? · RF6}
+    AL -- não --> PG[200 se a página está no ar, senão 404]
+    AL -- "sim, sem sessão" --> A401[401 · entre na sua conta, 18+]
+    AL -- "sim, menor de 18" --> N404[404]
+    AL -- "sim, 18+" --> PG
+```
