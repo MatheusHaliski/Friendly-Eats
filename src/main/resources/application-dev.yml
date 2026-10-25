@@ -1,0 +1,17 @@
+# Perfil de desenvolvimento local: mvn spring-boot:run (o plugin ativa "dev")
+# Segredo efêmero (AppSecrets), cookie sem __Host-/Secure para funcionar em http://localhost
+# e o código de verificação de e-mail aparece no log.
+server:
+  servlet:
+    session:
+      cookie:
+        name: fe_session
+        secure: false
+
+friendly-eats:
+  notifications:
+    log-codes: true
+  storage:
+    # chave pública do Garage local (criada por infra/garage/init.sh); só vale na sua máquina
+    access-key: ${S3_ACCESS_KEY:GK667269656e646c7965617473}
+    secret-key: ${S3_SECRET_KEY:667269656e646c792d656174732d6465762d6f6e6c7900000000000000000000}

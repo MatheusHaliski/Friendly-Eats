@@ -1,0 +1,30 @@
+# Perfil "it": testes de integração com Testcontainers.
+# Host/porta/credenciais vêm de @ServiceConnection; aqui só o que o container não fornece.
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate      # o schema é criado pelo Flyway (V1__baseline.sql); a entidade deve bater
+  flyway:
+    enabled: true
+  cassandra:
+    keyspace-name: friendly_eats
+    schema-action: none       # schema.cql é aplicado pelo init script do container
+    request:
+      timeout: 20s
+    connection:
+      init-query-timeout: 20s
+
+server:
+  servlet:
+    session:
+      cookie:
+        name: fe_session   # sem __Host-: os testes falam http com localhost
+        secure: false
+
+friendly-eats:
+  jobs:
+    enabled: false            # o job de exclusão é chamado direto nos testes
+  security:
+    login:
+      per-ip-minute: 10000    # todos os testes saem de 127.0.0.1; o limite por conta continua valendo
+      per-ip-hour: 10000

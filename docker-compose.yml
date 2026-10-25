@@ -1,0 +1,113 @@
+# Ambiente local Friendly Eats (card OS-03).
+#
+#   docker compose up -d                 # PostgreSQL + Valkey + Garage  (profile padrão "light")
+#   docker compose --profile full up -d  # + Cassandra 5 (demora ~1 min para ficar saudável)
+#
+# Credenciais abaixo são apenas de desenvolvimento.
+name: friendly-eats
+
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    container_name: os-postgres
+    environment:
+      POSTGRES_DB: friendly_eats
+      POSTGRES_USER: friendly
+      POSTGRES_PASSWORD: friendly
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U friendly -d friendly_eats"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  valkey:
+    image: valkey/valkey:9-alpine
+    container_name: os-valkey
+    command: ["valkey-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Object storage compatível com S3 (substitui o MinIO, arquivado em 2026).
+  # Bucket criado pelo serviço garage-init; endpoint S3 em http://localhost:3900.
+  garage:
+    image: dxflrs/garage:v2.4.1
+    container_name: os-garage
+    ports:
+      - "3900:3900"   # API S3
+      - "3902:3902"   # leitura pública das mídias (s3_web), o papel da CDN em dev
+      - "3903:3903"   # Admin API
+    volumes:
+      - ./infra/garage/garage.toml:/etc/garage.toml:ro
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+    healthcheck:
+      # a imagem não tem shell nem wget: o próprio binário consulta o nó
+      test: ["CMD", "/garage", "status"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  garage-init:
+    # init.sh fala com a Admin API v2 por HTTP; a imagem do curl traz o sh que a do Garage não tem
+    image: curlimages/curl:8.11.1
+    container_name: os-garage-init
+    depends_on:
+      garage:
+        condition: service_healthy
+    volumes:
+      - ./infra/garage/init.sh:/init.sh:ro
+    entrypoint: ["/bin/sh", "/init.sh"]
+    restart: "no"
+
+  cassandra:
+    image: cassandra:5.0
+    container_name: os-cassandra
+    profiles: ["full"]
+    environment:
+      CASSANDRA_CLUSTER_NAME: friendly-eats
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+      MAX_HEAP_SIZE: 1G
+      HEAP_NEWSIZE: 256M
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+      - ./src/main/resources/cassandra/schema.cql:/docker-entrypoint-initdb.d/schema.cql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' localhost 9042 >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+
+  # Aplica o schema.cql uma vez que o Cassandra estiver saudável.
+  cassandra-init:
+    image: cassandra:5.0
+    container_name: os-cassandra-init
+    profiles: ["full"]
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./src/main/resources/cassandra/schema.cql:/schema.cql:ro
+    entrypoint: ["/bin/sh", "-c", "cqlsh cassandra 9042 -f /schema.cql"]
+    restart: "no"
+
+volumes:
+  postgres-data:
+  valkey-data:
+  garage-meta:
+  garage-data:
+  cassandra-data:
