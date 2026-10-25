@@ -3,8 +3,8 @@
 import { isApiError, type CommentAudience, type ConsentPurpose, type ConsentView, type PreferencesView, type SensitiveContent } from '@friendly-eats/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
-import { useId, useRef, useState, type FormEvent } from 'react';
-import { Notice } from '@/components/Form';
+import { useId, useState, type FormEvent } from 'react';
+import { Notice, useDeferredFocus } from '@/components/Form';
 import { api } from '@/lib/api';
 import { CONSENTS_KEY, PROFILE_KEY, useConsents, usePreferences } from '@/lib/queries';
 import { ConsentSwitch } from './ConsentSwitch';
@@ -110,7 +110,7 @@ function Consents() {
   const queryClient = useQueryClient();
   const [result, setResult] = useState<Result>(null);
   const [pending, setPending] = useState<ConsentPurpose | null>(null);
-  const resultRef = useRef<HTMLDivElement>(null);
+  const [resultRef, focusResult] = useDeferredFocus<HTMLDivElement>();
 
   const toggle = useMutation({
     mutationFn: ({ purpose, granted }: { purpose: ConsentPurpose; granted: boolean }) => api.me.setConsent(purpose, granted),
@@ -127,7 +127,7 @@ function Consents() {
     },
     onError: (e) => {
       setResult({ tone: 'error', text: isApiError(e) ? e.detail : 'Não foi possível mudar agora. Tente de novo.' });
-      requestAnimationFrame(() => resultRef.current?.focus());
+      focusResult();
     },
     onSettled: () => setPending(null),
   });

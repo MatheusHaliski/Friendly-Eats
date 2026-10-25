@@ -11,6 +11,8 @@ paths:
   - frontend/apps/web/components/EstablishmentCard.tsx
   - frontend/apps/web/components/Pagination.tsx
   - frontend/apps/web/lib/explore-params.ts
+  - frontend/apps/web/components/explore/PlaceSearch.tsx
+  - frontend/apps/web/components/explore/PlaceDialog.tsx
 ---
 
 # RF10 · Buscar e filtrar estabelecimentos
@@ -81,4 +83,5 @@ paths:
 | Tela | app web: Explorar em `/` (busca por nome, chips, culinária específica, tipo de comida, preço com o rótulo em reais, nota mínima, estilos, "perto de mim" com raio e aviso de que a localização não é guardada, ordem e paginação). Os filtros ficam na URL; a coordenada só na memória da página, arredondada a ~110 m; mudar um filtro ou ligar/desligar "perto de mim" volta para a primeira página; e2e `explorar.spec.ts` com axe | ✅ |
 | Dados de exemplo | `config/DevSeed` (perfil `dev`, banco vazio): 10 lugares em SP, BH e Recife com avaliações | ✅ |
 | Testes | `SearchApiIT.searchShowsOnlyPublicPlacesAndCuisineIncludesItsDescendants` (inclui `chip`), `SearchApiIT.radiusSearchMeasuresTheHomeKitchenFromItsPublicPointAndSortsByDistance` | ✅ |
+| Modal do lugar | clicar no cartão (no Explorar e na aba Restaurantes do `/feed`) abre o `PlaceDialog`: nome e selo, tipo, culinária e formato, preço com o significado da escala nacional, nota com a contagem e o que ela significa, estilos com o aviso de autodeclaração, endereço conforme a visibilidade, responsável, "por que aparece aqui" (`filterReasons`) e os botões "Ver página do lugar" e "Como chegar" (só com endereço público); o nome continua um link real para `/lugares/[id]`; e2e `explorar.spec.ts` (teclado, Esc devolve o foco, axe com o modal aberto) | ✅ |
 | Pendências | sugestões e autocompletar; cache dos agregados no Valkey; C por categoria e município (job); mapa com pins; busca por bairro; facetas operacionais como filtro; histórico de buscas só com consentimento | ⏳ |

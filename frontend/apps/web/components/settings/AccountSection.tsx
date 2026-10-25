@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useId, useRef, useState, type FormEvent } from 'react';
 import { Dialog } from '@/components/Dialog';
-import { describedBy, ErrorSummary, FieldErrors, Notice } from '@/components/Form';
+import { describedBy, ErrorSummary, FieldErrors, Notice, useDeferredFocus } from '@/components/Form';
 import { IconDelete, IconInfo, IconLogout } from '@/components/icons';
 import { api } from '@/lib/api';
 import { mapSudoError } from '@/lib/field-errors';
@@ -105,8 +105,8 @@ export function DeleteAccountDialog({
 }) {
   const uid = useId();
   const cancelRef = useRef<HTMLButtonElement>(null);
-  const summaryRef = useRef<HTMLDivElement>(null);
-  const doneRef = useRef<HTMLButtonElement>(null);
+  const [summaryRef, focusSummary] = useDeferredFocus<HTMLDivElement>();
+  const [doneRef, focusDone] = useDeferredFocus<HTMLButtonElement>();
   const [understood, setUnderstood] = useState(false);
   const [sudo, setSudo] = useState<SudoValues>({ password: '', code: '' });
   const [errors, setErrors] = useState<Errors>(NONE);
@@ -118,13 +118,13 @@ export function DeleteAccountDialog({
     onSuccess: (view) => {
       setResult(view ?? { accountStatus: 'PENDING_DELETION', deletionScheduledFor: until.toISOString(), graceDays: GRACE_DAYS });
       // a API já encerrou todas as sessões; esta aba esquece a conta (e avisa as outras) quando o aviso fecha
-      requestAnimationFrame(() => doneRef.current?.focus());
+      focusDone();
     },
     onError: (e) => {
       if (isApiError(e, 403)) setErrors(mapSudoError(e.detail, withCode));
       else if (isApiError(e, 422)) setErrors({ fields: {}, general: e.errors.length ? e.errors : [e.detail] });
       else setErrors({ fields: {}, general: [isApiError(e) ? e.detail : 'Não foi possível pedir a exclusão agora. Tente de novo.'] });
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
     },
   });
 
@@ -145,7 +145,7 @@ export function DeleteAccountDialog({
     if (!understood) fields.understood = ['Marque a caixa para confirmar que entendeu.'];
     if (Object.keys(fields).length) {
       setErrors({ fields, general: [] });
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
       return;
     }
     setErrors(NONE);

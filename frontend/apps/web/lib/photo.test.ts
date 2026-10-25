@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { checkPhoto, initials, uploadProfilePhoto } from './photo';
+import { checkPhoto, initials, uploadPostPhoto, uploadProfilePhoto } from './photo';
 
 describe('checkPhoto', () => {
   it('aceita JPEG e PNG até 10 MB', () => {
@@ -27,6 +27,18 @@ describe('uploadProfilePhoto', () => {
     expect(api.media.requestUpload).toHaveBeenCalledWith({ kind: 'IMAGE', contentType: 'image/jpeg', sizeBytes: 3 });
     expect(upload).toHaveBeenCalledWith(ticket, file);
     expect(view).toEqual({ avatarUrl: '/m/avatars/1.jpg' });
+  });
+});
+
+describe('uploadPostPhoto', () => {
+  it('pede a URL, envia ao bucket e devolve a chave para o mediaObjectKey (sem gravar no perfil)', async () => {
+    const ticket = { objectKey: 'uploads/42/p.png', uploadUrl: 'https://b/y', method: 'PUT', headers: { 'Content-Type': 'image/png' }, expiresAt: '', maxBytes: 1 };
+    const api = { media: { requestUpload: vi.fn(async () => ticket) } };
+    const upload = vi.fn(async () => undefined);
+    const file = new File(['abcd'], 'prato.png', { type: 'image/png' });
+    await expect(uploadPostPhoto(file, { api: api as never, upload })).resolves.toBe('uploads/42/p.png');
+    expect(api.media.requestUpload).toHaveBeenCalledWith({ kind: 'IMAGE', contentType: 'image/png', sizeBytes: 4 });
+    expect(upload).toHaveBeenCalledWith(ticket, file);
   });
 });
 

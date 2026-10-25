@@ -1,4 +1,5 @@
-// Foto de perfil (RF2): pede a URL pré-assinada, envia direto ao bucket e grava a chave no perfil.
+// Foto de perfil (RF2) e do post (RF9): pede a URL pré-assinada e envia direto ao bucket; o perfil grava a chave na
+// hora, o post a leva no mediaObjectKey.
 import { uploadToBucket, type Api, type ProfileView } from '@friendly-eats/api';
 
 export const PHOTO_TYPES = ['image/jpeg', 'image/png'] as const;
@@ -23,6 +24,21 @@ export async function uploadProfilePhoto(file: File, { api, upload = uploadToBuc
   const ticket = await api.media.requestUpload({ kind: 'IMAGE', contentType: file.type, sizeBytes: file.size });
   await upload(ticket, file);
   return api.me.setPhoto(ticket.objectKey);
+}
+
+export interface PostPhotoDeps {
+  api: Pick<Api, 'media'>;
+  upload?: typeof uploadToBucket;
+}
+
+/**
+ * Foto do post (RF9): POST /api/v1/media/uploads → PUT na URL pré-assinada. Devolve a chave do envio, que vai no
+ * {@code mediaObjectKey} do post; a API limpa a foto (sem EXIF/GPS) quando o post é gravado.
+ */
+export async function uploadPostPhoto(file: File, { api, upload = uploadToBucket }: PostPhotoDeps): Promise<string> {
+  const ticket = await api.media.requestUpload({ kind: 'IMAGE', contentType: file.type, sizeBytes: file.size });
+  await upload(ticket, file);
+  return ticket.objectKey;
 }
 
 /** Iniciais do nome (sem foto): "Júlia Andrade" → "JA". */

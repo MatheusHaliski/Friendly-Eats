@@ -3,8 +3,8 @@
 import { isApiError } from '@friendly-eats/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
-import { useId, useRef, useState, type FormEvent } from 'react';
-import { FieldErrors, Notice } from '@/components/Form';
+import { useId, useState, type FormEvent } from 'react';
+import { FieldErrors, Notice, useDeferredFocus } from '@/components/Form';
 import { IconEmail, IconLogin } from '@/components/icons';
 import { api } from '@/lib/api';
 import { SESSION_KEY, useSession } from '@/lib/queries';
@@ -20,12 +20,12 @@ export function VerifyEmailView() {
   const [codeError, setCodeError] = useState<string[] | undefined>();
   const [info, setInfo] = useState<{ tone: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [wait, startWait] = useCountdown();
-  const infoRef = useRef<HTMLDivElement>(null);
+  const [infoRef, focusInfo] = useDeferredFocus<HTMLDivElement>();
   const user = session.data;
 
   const show = (tone: 'success' | 'error' | 'info', text: string) => {
     setInfo({ tone, text });
-    requestAnimationFrame(() => infoRef.current?.focus());
+    focusInfo();
   };
 
   const verify = useMutation({

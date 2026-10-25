@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public enum PostKind {
 
-    FOTO_PRATO("Foto de prato", "camera", "SEM_MOLDURA", FeedType.POST,
+    FOTO_PRATO("Foto de prato", "clapperboard", "SEM_MOLDURA", FeedType.POST,
             "Qualquer conta ativa (organizações depois do selo)."),
     RECEITA("Receita", "book-open", "TRACEJADA", FeedType.POST,
             "Qualquer conta ativa (organizações depois do selo)."),

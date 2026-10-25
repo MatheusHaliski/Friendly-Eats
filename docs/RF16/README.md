@@ -7,6 +7,12 @@ paths:
   - src/main/java/com/friendlyeats/application/background/**
   - src/main/java/com/friendlyeats/api/BackgroundController.java
   - src/test/java/com/friendlyeats/application/background/**
+  - frontend/apps/web/components/studio/FrameStudio.tsx
+  - frontend/apps/web/components/studio/SeasonDialog.tsx
+  - frontend/apps/web/components/studio/Swatch.tsx
+  - frontend/apps/web/components/post/PostFrame.tsx
+  - frontend/apps/web/lib/frame.ts
+  - frontend/apps/web/e2e/estudio.spec.ts
 ---
 
 # RF16 · Moldura do post
@@ -19,7 +25,7 @@ paths:
 | **Origem** | Estúdio de moldura do Orange Social (RF28 de lá), adaptado à comida: cartelas da época com a cozinha de cada estação, padrões de mesa e o layout Cardápio |
 | **Base legal (LGPD)** | Art. 7º, V (execução do serviço). A configuração da moldura não é dado pessoal. Arte enviada ou gerada por IA é conteúdo do usuário: depende da moderação ([RF13](../TAXONOMIA_FRIENDLY_EATS.md#13-mapa-para-os-rfs)) |
 | **Acessibilidade** | WCAG 1.4.3 (tinta × container ≥ 4,5:1), 2.2.2 (animação para em ≤ 5 s), 2.3.1 (sem flashes), `prefers-reduced-motion` e a preferência `reduceMotion` ([RF2](../RF2/README.md)) |
-| **Status** | 🟡 Parcial. Pronto, com testes: catálogo público com ETag, cartela automática pela data de São Paulo, recomendação por tipo de conta, validação e forma canônica no POST/PATCH do post, moldura resolvida na página e no card. Falta: arte própria (envio e IA) e as telas do estúdio no app |
+| **Status** | 🟡 Parcial. Pronto, com testes: catálogo público com ETag, cartela automática pela data de São Paulo, recomendação por tipo de conta, validação e forma canônica no POST/PATCH do post, moldura resolvida na página e no card. Estúdio e moldura no app web prontos. Falta: arte própria (envio e IA) |
 
 ## Critérios de aceite
 
@@ -83,5 +89,5 @@ paths:
 | API | `BackgroundController`: `GET /api/v1/backgrounds/catalog` (ETag, `304`) e `/recommendations` | ✅ |
 | Post | coluna `post.background` (V3, até 2048 bytes, nula em alerta); `PostPublishingService` valida na criação e na edição ([RF9](../RF9/README.md)) e `PostViews` devolve `background` resolvido na página e no card ([RF14](../RF14/README.md)); `PostApiIT.frameFromTheCatalogIsValidatedAndResolvedButAlertsNeverHaveOne` | ✅ |
 | Testes | `BackgroundRulesTest` (cartelas e prioridades, Páscoa e Carnaval, Black Friday fora do automático, forma canônica, chaves e ids desconhecidos, uma arte por vez, Cardápio, alerta, menor de 16, contraste de todas as skins e cores de container, leitura e recomendação) | ✅ |
-| Telas | estúdio com as abas Cor, Padrão e material, Layout e Container; prévia ao vivo | ⏳ |
+| Telas | app web: estúdio em publicar e editar (`FrameStudio`) com as abas Cor (cores, gradientes, cartela da época com rascunho Aplicar/Cancelar e "automática pela data", animação), Padrão e material (com a direção recomendada), Layout (Cardápio limpa a arte e o material, com a frase explicando) e Container (tinta AUTO ou fixa, contraste calculado e aviso abaixo de 4,5:1); uma arte por vez; prévia ao vivo; desabilitado em alerta; `PostFrame` desenha a moldura no card (texturas, lousa e frutas da Feira no cliente; animação desliga com `prefers-reduced-motion` e `reduceMotion`); e2e `estudio.spec.ts` com axe | ✅ |
 | Arte própria | envio ou IA, com moderação e checagem de flashes (RF13) | ⏳ |

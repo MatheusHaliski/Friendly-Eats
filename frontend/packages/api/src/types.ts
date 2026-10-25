@@ -579,3 +579,512 @@ export interface Problem {
   instance?: string;
   errors?: string[];
 }
+
+// ------------------------------------------------------------ posts (application/post/PostViews.java, RF14 · RF9 · RF12)
+
+/** PostKind: os 7 tipos de post de comida. */
+export type PostKindCode =
+  | 'FOTO_PRATO'
+  | 'RECEITA'
+  | 'PERGUNTA'
+  | 'PRATO_DO_DIA'
+  | 'PROMOCAO'
+  | 'EVENTO'
+  | 'ALERTA_SANITARIO';
+
+/** PostKind.getBorder: a forma da borda do card (nunca a cor; só o alerta tem a faixa hazard). */
+export type PostBorder = 'SEM_MOLDURA' | 'TRACEJADA' | 'BALAO' | 'DUPLA' | 'ETIQUETA' | 'DATA' | 'HAZARD';
+
+/** FeedType: PROFILE fica em GET /api/v1/users (RF15). */
+export type FeedCode = 'PROFILE' | 'POST' | 'ALERT';
+
+export type PostStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'REMOVED';
+export type AgeRatingCode = 'LIVRE' | 'AGE_18';
+export type AllergenLevelCode = 'CONTEM' | 'PODE_CONTER';
+export type ShareChannelCode = 'COPY_LINK' | 'NATIVE' | 'WHATSAPP' | 'TELEGRAM' | 'X' | 'EMAIL';
+
+/**
+ * profile/AccountBadge: a bolinha do tipo de conta. {@code color} é a do tema escuro e {@code lightColor} a do claro;
+ * fora do card emoldurado a tela usa os tokens, que têm as mesmas cores.
+ */
+export interface AccountBadgeView {
+  code: AccountTypeCode;
+  label: string;
+  color: string;
+  lightColor: string;
+  glyph: string;
+  glyphName: string;
+  lucideIcon: string;
+}
+
+/** PostViews.AuthorView: {@code profilePath} (caminho da API) nulo = conta excluída ou fora do ar, sem link. */
+export interface AuthorView {
+  id: number | null;
+  name: string;
+  handle: string | null;
+  /** Nulo na conta excluída ("Conta excluída", sem bolinha). */
+  category: AccountBadgeView | null;
+  verified: boolean;
+  avatarUrl: string | null;
+  profilePath: string | null;
+  available: boolean;
+}
+
+export interface KindView {
+  code: PostKindCode;
+  label: string;
+  lucideIcon: string;
+  border: PostBorder;
+}
+
+/** PostViews.PlaceRefView: só vem quando a página do lugar está no ar para quem vê. */
+export interface PlaceRefView {
+  id: number;
+  name: string;
+  city: string | null;
+  uf: string | null;
+  adultsOnly: boolean;
+  pagePath: string;
+}
+
+export interface AllergenView {
+  code: string;
+  label: string;
+  level: AllergenLevelCode;
+  levelLabel: string;
+}
+
+/** PostViews.PriceView ({@code label} pronto: "R$ 25,00", "De R$ 50,00 por R$ 35,00", "20% de desconto", "Gratuito"). */
+export interface PostPriceView {
+  priceCents: number | null;
+  priceFromCents: number | null;
+  priceToCents: number | null;
+  discountPercent: number | null;
+  free: boolean;
+  label: string;
+}
+
+export interface RecipeView {
+  ingredients: string[];
+  steps: string[];
+  servings: number | null;
+  prepMinutes: number | null;
+}
+
+/** PostViews.AlertView; {@code sourceHost} vai no rótulo "Fonte: …". */
+export interface AlertView {
+  product: string;
+  brand: string;
+  lots: string[];
+  reason: string;
+  sourceUrl: string;
+  sourceHost: string | null;
+}
+
+export interface CountersView {
+  likes: number;
+  comments: number;
+  shares: number;
+}
+
+export interface ViewerStateView {
+  liked: boolean;
+  saved: boolean;
+  isAuthor: boolean;
+}
+
+/** PostViews.InteractionsView (RF12): {@code commentNotice} diz por que quem vê não pode comentar. */
+export interface InteractionsView {
+  open: boolean;
+  likes: boolean;
+  comments: boolean;
+  shares: boolean;
+  saves: boolean;
+  commentAudience: CommentAudience;
+  viewerCanComment: boolean;
+  commentNotice: string | null;
+}
+
+/** BackgroundService.ContainerView: {@code contrast} já formatado ("12,1:1"). */
+export interface FrameContainerView {
+  color: string;
+  ink: string;
+  contrast: string;
+}
+
+export type FrameArtKind = 'COLOR' | 'GRADIENT' | 'SEASONAL' | 'AURA' | 'LAYOUT' | 'NONE';
+
+/** BackgroundService.BackgroundView: a moldura resolvida (RF16); {@code config} é a forma canônica gravada. */
+export interface BackgroundView {
+  config: FrameConfig;
+  artKind: FrameArtKind;
+  artId: string | null;
+  palette: string[];
+  css: string | null;
+  container: FrameContainerView;
+}
+
+/** PostViews.PostDetailView (GET /api/v1/posts/{id}). */
+export interface PostDetailView {
+  id: string;
+  kind: KindView;
+  feed: FeedCode;
+  mediaType: MediaKind;
+  title: string;
+  body: string | null;
+  mediaUrl: string | null;
+  altText: string | null;
+  establishment: PlaceRefView | null;
+  cuisine: Coded | null;
+  foodFormat: Coded | null;
+  dietaryStyles: Coded[];
+  allergens: AllergenView[];
+  warnings: Coded[];
+  allergenNotice: string | null;
+  ageRating: AgeRatingCode;
+  ageRatingLabel: string;
+  advertising: boolean;
+  advertisingLabel: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  price: PostPriceView | null;
+  recipe: RecipeView | null;
+  alert: AlertView | null;
+  city: string | null;
+  expiresAt: string | null;
+  expired: boolean;
+  status: PostStatus;
+  publishedAt: string;
+  updatedAt: string;
+  author: AuthorView;
+  counts: CountersView;
+  viewer: ViewerStateView;
+  interactions: InteractionsView;
+  shareUrl: string;
+  background: BackgroundView | null;
+}
+
+/** PostViews.PostCardView: {@code excerpt} (até 160) no lugar do texto; sem receita, aviso, cidade e interações. */
+export interface PostCardView {
+  id: string;
+  kind: KindView;
+  feed: FeedCode;
+  mediaType: MediaKind;
+  title: string;
+  excerpt: string | null;
+  mediaUrl: string | null;
+  altText: string | null;
+  establishment: PlaceRefView | null;
+  cuisine: Coded | null;
+  foodFormat: Coded | null;
+  dietaryStyles: Coded[];
+  allergens: AllergenView[];
+  warnings: Coded[];
+  ageRating: AgeRatingCode;
+  ageRatingLabel: string;
+  advertising: boolean;
+  advertisingLabel: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  price: PostPriceView | null;
+  alert: AlertView | null;
+  expiresAt: string | null;
+  expired: boolean;
+  status: PostStatus;
+  publishedAt: string;
+  author: AuthorView;
+  counts: CountersView;
+  viewer: ViewerStateView;
+  /** Caminho da API (/api/v1/posts/{id}); a tela usa /posts/{id}. */
+  detailPath: string;
+  background: BackgroundView | null;
+}
+
+/** PostViews.FeedPageView: {@code nextCursor} nulo = fim. */
+export interface FeedPageView {
+  items: PostCardView[];
+  nextCursor: string | null;
+}
+
+/** GET /api/v1/posts. */
+export interface FeedParams {
+  feed?: 'POST' | 'ALERT';
+  kind?: PostKindCode;
+  establishmentId?: number;
+  cursor?: string;
+  size?: number;
+}
+
+/** GET /api/v1/posts/trending: {@code category} = tipo de conta do autor. */
+export interface TrendingParams {
+  feed?: 'POST' | 'ALERT';
+  category?: AccountTypeCode;
+  size?: number;
+}
+
+// ------------------------------------------------------------ vocabulário do formulário (application/post/PostVocabulary.java, RF9)
+
+/**
+ * PostVocabulary.KindItem. {@code requiredFields} e {@code optionalFields} são nomes de campo do PostDraft; os
+ * obrigatórios podem trazer alternativas ("priceCents | free: true") e qualificadores ("establishmentId (dono)").
+ */
+export interface PostKindItem {
+  code: PostKindCode;
+  label: string;
+  lucideIcon: string;
+  border: PostBorder;
+  feed: 'POST' | 'ALERT';
+  whoCanPublish: string;
+  requiredFields: string[];
+  optionalFields: string[];
+  photoRequired: boolean;
+  expires: string | null;
+}
+
+export interface AllergenItem {
+  code: string;
+  label: string;
+  kind: 'ALERGENICO' | 'ADVERTENCIA';
+  status: 'VIGENTE' | 'PROPOSTO';
+}
+
+/** PostVocabulary.Vocabulary (GET /api/v1/posts/vocabulary); {@code publishableKinds} vazio sem sessão. */
+export interface PostVocabulary {
+  kinds: PostKindItem[];
+  publishableKinds: PostKindCode[];
+  allergens: AllergenItem[];
+  warnings: AllergenItem[];
+  allergenLevels: Coded[];
+  ageRatings: Coded[];
+  shareChannels: Coded[];
+  allergenNotice: string;
+}
+
+// ------------------------------------------------------------ publicar e editar (application/post/PostDrafts.java, RF9)
+
+export interface RecipeDraft {
+  ingredients: string[];
+  steps: string[];
+  servings: number | null;
+  prepMinutes: number | null;
+}
+
+export interface AlertDraft {
+  product: string;
+  brand: string;
+  lots: string[];
+  reason: string;
+  sourceUrl: string;
+}
+
+/** PostDrafts.PostDraft (POST /api/v1/posts). Datas em ISO-8601; preços em centavos. */
+export interface PostDraft {
+  kind: PostKindCode;
+  title: string;
+  body?: string | null;
+  mediaObjectKey?: string | null;
+  altText?: string | null;
+  establishmentId?: number | null;
+  cuisine?: string | null;
+  foodFormat?: string | null;
+  dietaryStyles?: string[] | null;
+  allergens?: Record<string, AllergenLevelCode> | null;
+  warnings?: string[] | null;
+  ageRating?: AgeRatingCode | null;
+  advertising?: boolean | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  priceCents?: number | null;
+  priceFromCents?: number | null;
+  priceToCents?: number | null;
+  discountPercent?: number | null;
+  free?: boolean | null;
+  recipe?: RecipeDraft | null;
+  alert?: AlertDraft | null;
+  city?: string | null;
+  /** Moldura do RF16; null = padrão. Alerta sanitário não aceita moldura. */
+  background?: FrameConfig | null;
+}
+
+/** PATCH /api/v1/posts/{id}: chave ausente mantém, null limpa; o tipo não muda. */
+export type PostPatch = Partial<Omit<PostDraft, 'kind'>>;
+
+// ------------------------------------------------------------ interações (application/post/InteractionViews.java, RF12)
+
+export interface CommentView {
+  id: number;
+  author: AuthorView;
+  body: string;
+  createdAt: string;
+  canDelete: boolean;
+}
+
+/** {@code nextAfter} vai no parâmetro {@code after} da próxima página; nulo = fim. */
+export interface CommentPageView {
+  items: CommentView[];
+  nextAfter: number | null;
+  total: number;
+}
+
+export interface CommentCreatedView {
+  comment: CommentView;
+  comments: number;
+}
+
+export interface LikeStateView {
+  liked: boolean;
+  likes: number;
+}
+
+export interface SaveStateView {
+  saved: boolean;
+}
+
+/** {@code counted}: primeira vez desta conta neste canal (só então o número sobe). */
+export interface ShareResultView {
+  shareUrl: string;
+  channel: ShareChannelCode;
+  shares: number;
+  counted: boolean;
+}
+
+// ------------------------------------------------------------ perfis (application/profile/ProfileViews.java, RF15)
+
+/** Perfil privado (para quem não é o titular): só nome, @, bolinha e selo; o resto vem null. */
+export interface PublicProfileView {
+  id: number;
+  name: string;
+  handle: string;
+  category: AccountBadgeView;
+  verified: boolean;
+  privateProfile: boolean;
+  avatarUrl: string | null;
+  bio: string | null;
+  pronouns: string[] | null;
+  links: string[] | null;
+  city: string | null;
+  uf: string | null;
+  memberSince: string | null;
+  postCount: number | null;
+  postsPath: string | null;
+  shareUrl: string | null;
+}
+
+export interface ProfileCardView {
+  id: number;
+  name: string;
+  handle: string;
+  category: AccountBadgeView;
+  verified: boolean;
+  avatarUrl: string | null;
+  bio: string | null;
+  city: string | null;
+  uf: string | null;
+  profilePath: string;
+}
+
+export interface ProfilePageView {
+  items: ProfileCardView[];
+  nextCursor: string | null;
+}
+
+/** GET /api/v1/users: {@code q} = parte do nome ou do @ (até 80). */
+export interface ProfileListParams {
+  type?: AccountTypeCode;
+  city?: string;
+  q?: string;
+  cursor?: string;
+  size?: number;
+}
+
+// ------------------------------------------------------------ moldura (application/background/*, RF16)
+
+/** Configuração da moldura enviada no {@code background} do post (BackgroundValidator, v = 1). */
+export interface FrameConfig {
+  v: 1;
+  color?: string | null;
+  gradientId?: string | null;
+  seasonal?: { presetId?: string | null; auto?: boolean } | null;
+  animationId?: string | null;
+  aura?: { presetId: string; variantId?: FrameAuraVariant; format?: FrameAuraFormat } | null;
+  materialId?: string | null;
+  layoutId?: FrameLayoutId | null;
+  skinId?: string | null;
+  container?: { color?: string | null; ink?: string | null } | null;
+}
+
+export type FrameAuraVariant = 'ORIGINAL' | 'SUAVE';
+export type FrameAuraFormat = 'IMAGEM_UNICA' | 'MOSAICO';
+export type FrameLayoutId = 'CLASSICO' | 'POLAROID' | 'CARDAPIO';
+
+/** BackgroundCatalog.Item: cor (id = #RRGGBB), gradiente, animação ou material. */
+export interface FrameCatalogItem {
+  id: string;
+  name: string;
+  css: string | null;
+  palette: string[];
+}
+
+/** BackgroundCatalog.Aura: o "padrão" de mesa; {@code css} nulo = arte gerada no cliente (Feira). */
+export interface FrameAura {
+  id: string;
+  name: string;
+  mood: string;
+  palette: string[];
+  technique: string;
+  css: string | null;
+}
+
+export interface FrameSeason {
+  id: string;
+  name: string;
+  window: string;
+  priority: number;
+  colors: string[];
+  /** false = só por escolha (Black Friday nunca entra no modo automático). */
+  auto: boolean;
+}
+
+export interface FrameLayout {
+  id: FrameLayoutId;
+  name: string;
+  /** true = o layout já traz arte própria (Cardápio). */
+  ownArt: boolean;
+}
+
+export interface FrameSkin {
+  id: string;
+  name: string;
+  containerColor: string;
+}
+
+export interface FrameRules {
+  minContrast: number;
+  maxConfigBytes: number;
+  maxAnimationSeconds: number;
+  feedsWithoutFrame: FeedCode[];
+}
+
+/** BackgroundCatalog.CatalogView (GET /api/v1/backgrounds/catalog, com ETag). */
+export interface FrameCatalog {
+  version: string;
+  activeSeasonId: string | null;
+  colors: FrameCatalogItem[];
+  gradients: FrameCatalogItem[];
+  seasons: FrameSeason[];
+  animations: FrameCatalogItem[];
+  auras: FrameAura[];
+  materials: FrameCatalogItem[];
+  layouts: FrameLayout[];
+  skins: FrameSkin[];
+  containerColors: FrameCatalogItem[];
+  rules: FrameRules;
+}
+
+/** BackgroundService.Recommendation: padrão + material, ou a cartela do dia. */
+export interface FrameRecommendation {
+  auraId: string | null;
+  materialId: string | null;
+  seasonId: string | null;
+  reason: string;
+}

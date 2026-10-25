@@ -1,0 +1,510 @@
+{
+  "version": "5f1c2a9d0e7b3c41",
+  "activeSeasonId": "primavera",
+  "colors": [
+    {
+      "id": "#2A2119",
+      "name": "Carvão",
+      "css": "#2A2119",
+      "palette": [
+        "#2A2119"
+      ]
+    },
+    {
+      "id": "#3B1F2B",
+      "name": "Berinjela",
+      "css": "#3B1F2B",
+      "palette": [
+        "#3B1F2B"
+      ]
+    },
+    {
+      "id": "#1E2A38",
+      "name": "Noite",
+      "css": "#1E2A38",
+      "palette": [
+        "#1E2A38"
+      ]
+    },
+    {
+      "id": "#24382E",
+      "name": "Manjericão",
+      "css": "#24382E",
+      "palette": [
+        "#24382E"
+      ]
+    },
+    {
+      "id": "#7A2E1F",
+      "name": "Páprica",
+      "css": "#7A2E1F",
+      "palette": [
+        "#7A2E1F"
+      ]
+    },
+    {
+      "id": "#E88F12",
+      "name": "Laranja",
+      "css": "#E88F12",
+      "palette": [
+        "#E88F12"
+      ]
+    },
+    {
+      "id": "#E9C46A",
+      "name": "Mel",
+      "css": "#E9C46A",
+      "palette": [
+        "#E9C46A"
+      ]
+    },
+    {
+      "id": "#F5EDE3",
+      "name": "Farinha",
+      "css": "#F5EDE3",
+      "palette": [
+        "#F5EDE3"
+      ]
+    }
+  ],
+  "gradients": [
+    {
+      "id": "brasa",
+      "name": "Brasa",
+      "css": "linear-gradient(135deg,#FFB703,#E85D04 55%,#370617)",
+      "palette": [
+        "#FFB703",
+        "#E85D04",
+        "#370617"
+      ]
+    },
+    {
+      "id": "acai",
+      "name": "Açaí",
+      "css": "linear-gradient(135deg,#7B2CBF,#240046)",
+      "palette": [
+        "#7B2CBF",
+        "#240046"
+      ]
+    },
+    {
+      "id": "matcha",
+      "name": "Matcha",
+      "css": "linear-gradient(135deg,#B5E48C,#2D6A4F)",
+      "palette": [
+        "#B5E48C",
+        "#2D6A4F"
+      ]
+    },
+    {
+      "id": "caramelo",
+      "name": "Caramelo",
+      "css": "linear-gradient(135deg,#E9C46A,#8D5524)",
+      "palette": [
+        "#E9C46A",
+        "#8D5524"
+      ]
+    },
+    {
+      "id": "pimenta",
+      "name": "Pimenta",
+      "css": "linear-gradient(135deg,#FF4D2E,#7A0C02)",
+      "palette": [
+        "#FF4D2E",
+        "#7A0C02"
+      ]
+    },
+    {
+      "id": "cafe",
+      "name": "Café",
+      "css": "linear-gradient(135deg,#8B5A2B,#1B110A)",
+      "palette": [
+        "#8B5A2B",
+        "#1B110A"
+      ]
+    }
+  ],
+  "seasons": [
+    {
+      "id": "verao",
+      "name": "Verão (manga, melancia, maracujá)",
+      "window": "21/12–20/03",
+      "priority": 4,
+      "colors": [
+        "#FFB703",
+        "#FB8500",
+        "#E63946",
+        "#90BE6D",
+        "#F4E1C1"
+      ],
+      "auto": true
+    },
+    {
+      "id": "outono",
+      "name": "Outono (abóbora, caqui)",
+      "window": "20/03–21/06",
+      "priority": 4,
+      "colors": [
+        "#C8553D",
+        "#E09F3E",
+        "#9E2A2B",
+        "#7A6C5D",
+        "#F2D0A4"
+      ],
+      "auto": true
+    },
+    {
+      "id": "inverno",
+      "name": "Inverno (caldos, pinhão, vinho)",
+      "window": "21/06–22/09",
+      "priority": 4,
+      "colors": [
+        "#5E2A2B",
+        "#8C6E5D",
+        "#C9D6E3",
+        "#2E4A62",
+        "#E8DCC8"
+      ],
+      "auto": true
+    },
+    {
+      "id": "primavera",
+      "name": "Primavera (morango, flores comestíveis)",
+      "window": "22/09–21/12",
+      "priority": 4,
+      "colors": [
+        "#F28AB2",
+        "#E63946",
+        "#90BE6D",
+        "#F6C90E",
+        "#FFF0F3"
+      ],
+      "auto": true
+    },
+    {
+      "id": "carnaval",
+      "name": "Carnaval (comida de bloco)",
+      "window": "sexta a Quarta de Cinzas (Páscoa − 51 a − 46)",
+      "priority": 2,
+      "colors": [
+        "#FF2E88",
+        "#FFD23F",
+        "#00C2A8",
+        "#7B2FF7",
+        "#E88F12"
+      ],
+      "auto": true
+    },
+    {
+      "id": "pascoa",
+      "name": "Páscoa (chocolate)",
+      "window": "Domingo de Ramos ao Domingo de Páscoa",
+      "priority": 2,
+      "colors": [
+        "#5C3317",
+        "#8B5A2B",
+        "#D2A679",
+        "#F3E5AB",
+        "#F28AB2"
+      ],
+      "auto": true
+    },
+    {
+      "id": "junina",
+      "name": "Festas Juninas e Julinas (quentão, pamonha)",
+      "window": "01/06–31/07",
+      "priority": 3,
+      "colors": [
+        "#E63946",
+        "#F4A261",
+        "#2A9D8F",
+        "#F1C453",
+        "#8D5524"
+      ],
+      "auto": true
+    },
+    {
+      "id": "namorados",
+      "name": "Dia dos Namorados (jantar a dois)",
+      "window": "05/06–12/06",
+      "priority": 1,
+      "colors": [
+        "#E5383B",
+        "#FF758F",
+        "#FFB3C1",
+        "#9D0208",
+        "#FFF0F3"
+      ],
+      "auto": true
+    },
+    {
+      "id": "dia-da-pizza",
+      "name": "Dia da Pizza",
+      "window": "10/07",
+      "priority": 1,
+      "colors": [
+        "#C1121F",
+        "#F4F1DE",
+        "#2D6A4F",
+        "#F2CC8F",
+        "#3D2B1F"
+      ],
+      "auto": true
+    },
+    {
+      "id": "black-friday",
+      "name": "Black Friday (só por escolha)",
+      "window": "dia seguinte à 4ª quinta de novembro",
+      "priority": 1,
+      "colors": [
+        "#2B2B2B",
+        "#F7C948",
+        "#E88F12",
+        "#8A8F96",
+        "#F5EDE3"
+      ],
+      "auto": false
+    },
+    {
+      "id": "natal",
+      "name": "Ceia de Natal e Réveillon",
+      "window": "01/12–06/01",
+      "priority": 3,
+      "colors": [
+        "#C1121F",
+        "#2D6A4F",
+        "#E9C46A",
+        "#F5EDE3",
+        "#7A2E1F"
+      ],
+      "auto": true
+    }
+  ],
+  "animations": [
+    {
+      "id": "NONE",
+      "name": "Sem animação",
+      "css": null,
+      "palette": []
+    },
+    {
+      "id": "FUMEGAR",
+      "name": "Fumegar",
+      "css": "vapor sobe e some, 2 × 2,4 s",
+      "palette": []
+    },
+    {
+      "id": "DERIVA",
+      "name": "Deriva",
+      "css": "background-position 0 → 100 %, 4,8 s",
+      "palette": []
+    }
+  ],
+  "auras": [
+    {
+      "id": "toalha-xadrez",
+      "name": "Toalha xadrez",
+      "mood": "piquenique · cantina",
+      "palette": [
+        "#C1121F",
+        "#F5EDE3"
+      ],
+      "technique": "xadrez",
+      "css": "repeating-linear-gradient(0deg,#C1121F80 0 12px,#0000 12px 24px),repeating-linear-gradient(90deg,#C1121F80 0 12px,#0000 12px 24px),#F5EDE3"
+    },
+    {
+      "id": "azulejo",
+      "name": "Azulejo",
+      "mood": "boteco · cozinha da vó",
+      "palette": [
+        "#E76F51",
+        "#2A9D8F",
+        "#F4A261",
+        "#F1FAEE"
+      ],
+      "technique": "azulejo",
+      "css": "conic-gradient(from 45deg,#E76F51 0 25%,#F4A261 0 50%,#2A9D8F 0 75%,#F1FAEE 0) 0 0/18px 18px"
+    },
+    {
+      "id": "forno",
+      "name": "Forno a lenha",
+      "mood": "pizzaria · padaria",
+      "palette": [
+        "#FFB703",
+        "#E85D04",
+        "#9D0208",
+        "#3A0E0A"
+      ],
+      "technique": "mesh quente",
+      "css": "radial-gradient(70% 60% at 50% 100%,#E85D04cc,#0000 70%),radial-gradient(50% 40% at 30% 80%,#FFB703aa,#0000 70%),radial-gradient(60% 50% at 70% 70%,#9D0208aa,#0000 75%),#2A0F0A"
+    },
+    {
+      "id": "mare",
+      "name": "Maré",
+      "mood": "frutos do mar · praia",
+      "palette": [
+        "#90E0EF",
+        "#00B4D8",
+        "#0077B6",
+        "#F5EDE3"
+      ],
+      "technique": "ondas",
+      "css": "radial-gradient(120% 60% at 50% 120%,#0077B6,#0000 60%),repeating-linear-gradient(170deg,#90E0EF2e 0 9px,#0000 9px 22px),linear-gradient(180deg,#00B4D866,#0B2233)"
+    },
+    {
+      "id": "favo",
+      "name": "Favo de mel",
+      "mood": "doceria · café da manhã",
+      "palette": [
+        "#E9C46A",
+        "#B08D57",
+        "#2B2118",
+        "#F5EDE3"
+      ],
+      "technique": "metal escovado",
+      "css": "repeating-linear-gradient(90deg,#ffffff12 0 1px,#0000001a 1px 3px),conic-gradient(from 20deg,#B08D57,#E9C46A 12%,#7A5C2E 25%,#F3DFA2 40%,#6B4F2A 55%,#E9C46A 72%,#8C6A3A 88%,#B08D57)"
+    },
+    {
+      "id": "feira",
+      "name": "Feira",
+      "mood": "feira livre · hortifrúti",
+      "palette": [
+        "#E63946",
+        "#F7C948",
+        "#90BE6D",
+        "#F4A261",
+        "#7B2CBF"
+      ],
+      "technique": "frutas em SVG geradas com a seed do post",
+      "css": null
+    },
+    {
+      "id": "horta",
+      "name": "Horta",
+      "mood": "vegetal · natural",
+      "palette": [
+        "#A7C957",
+        "#6A994E",
+        "#F2E8CF",
+        "#386641"
+      ],
+      "technique": "blobs desfocados",
+      "css": "radial-gradient(45% 45% at 25% 30%,#A7C957aa,#0000 70%),radial-gradient(40% 45% at 75% 70%,#6A994Eaa,#0000 70%),radial-gradient(50% 40% at 70% 20%,#F2E8CF55,#0000 70%),#22311F"
+    },
+    {
+      "id": "neon",
+      "name": "Neon de boteco",
+      "mood": "bar · noite",
+      "palette": [
+        "#14110E",
+        "#FF2E88",
+        "#3DDC6B",
+        "#F7C948"
+      ],
+      "technique": "meio-tom",
+      "css": "radial-gradient(#FF2E8877 1.2px,#0000 1.7px) 0 0/7px 7px,radial-gradient(#3DDC6B55 1px,#0000 1.6px) 3.5px 3.5px/7px 7px,#14110E"
+    }
+  ],
+  "materials": [
+    {
+      "id": "papel-manteiga",
+      "name": "Papel manteiga",
+      "css": null,
+      "palette": []
+    },
+    {
+      "id": "linho",
+      "name": "Linho",
+      "css": null,
+      "palette": []
+    },
+    {
+      "id": "inox",
+      "name": "Inox",
+      "css": null,
+      "palette": []
+    },
+    {
+      "id": "vidro",
+      "name": "Vidro",
+      "css": null,
+      "palette": []
+    }
+  ],
+  "layouts": [
+    {
+      "id": "CLASSICO",
+      "name": "Clássico",
+      "ownArt": false
+    },
+    {
+      "id": "POLAROID",
+      "name": "Polaroid",
+      "ownArt": false
+    },
+    {
+      "id": "CARDAPIO",
+      "name": "Cardápio (lousa)",
+      "ownArt": true
+    }
+  ],
+  "skins": [
+    {
+      "id": "PADRAO",
+      "name": "Padrão",
+      "containerColor": "#2A2119"
+    },
+    {
+      "id": "MONO",
+      "name": "Mono",
+      "containerColor": "#191714"
+    },
+    {
+      "id": "LEVE",
+      "name": "Leve",
+      "containerColor": "#33281E"
+    }
+  ],
+  "containerColors": [
+    {
+      "id": "#2A2119",
+      "name": "Carvão",
+      "css": "#2A2119",
+      "palette": [
+        "#2A2119"
+      ]
+    },
+    {
+      "id": "#1E2A38",
+      "name": "Noite",
+      "css": "#1E2A38",
+      "palette": [
+        "#1E2A38"
+      ]
+    },
+    {
+      "id": "#F5EDE3",
+      "name": "Farinha",
+      "css": "#F5EDE3",
+      "palette": [
+        "#F5EDE3"
+      ]
+    },
+    {
+      "id": "#E88F12",
+      "name": "Laranja",
+      "css": "#E88F12",
+      "palette": [
+        "#E88F12"
+      ]
+    }
+  ],
+  "rules": {
+    "minContrast": 4.5,
+    "maxConfigBytes": 2048,
+    "maxAnimationSeconds": 5,
+    "feedsWithoutFrame": [
+      "ALERT"
+    ]
+  }
+}

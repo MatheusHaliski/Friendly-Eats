@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    APP["App web ⏳<br/>formulário por tipo"] --> SEC["SecurityFilterChain<br/>escrita com sessão e X-XSRF-TOKEN<br/>GET público de /posts/vocabulary"]
+    APP["App web<br/>/publicar · formulário por tipo"] --> SEC["SecurityFilterChain<br/>escrita com sessão e X-XSRF-TOKEN<br/>GET público de /posts/vocabulary"]
     SEC --> PC["PostPublishingController<br/>POST /posts · PATCH e DELETE /posts/id<br/>archive · restore · vocabulary"]
     PC --> VR["ViewerResolver"]
     PC --> PS["PostPublishingService"]

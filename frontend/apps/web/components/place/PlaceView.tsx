@@ -16,6 +16,7 @@ import { placeKey, useTaxonomy } from '@/lib/queries';
 import { DIMENSIONS } from '@/lib/review';
 import { loginHref } from '@/lib/safe-redirect';
 import { MyReviewArea } from './MyReviewArea';
+import { PlacePosts } from './PlacePosts';
 import { ReviewList } from './ReviewList';
 
 /** Página do estabelecimento (RF6, RF7, RF8). */
@@ -132,6 +133,8 @@ function PlaceContent({ place }: { place: EstablishmentView }) {
           <MyReviewArea place={place} />
 
           <ReviewList placeId={String(place.id)} dimensions={dimensions} />
+
+          <PlacePosts placeId={String(place.id)} />
         </div>
 
         <aside aria-label="Informações do lugar" className="grid gap-4">
@@ -205,7 +208,9 @@ function PlaceContent({ place }: { place: EstablishmentView }) {
                 <AccountBadge code={place.owner.category.code} label={place.owner.category.label} />
               </p>
               <p className="flex flex-wrap items-center gap-1.5">
-                <span className="font-semibold">{place.owner.name}</span>
+                <Link href={`/u/${place.owner.id}`} className="font-semibold underline">
+                  {place.owner.name}
+                </Link>
                 {place.owner.verified && <VerifiedSeal />}
                 <span className="text-muted">@{place.owner.handle}</span>
               </p>

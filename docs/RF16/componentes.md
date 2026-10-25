@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    APP["App web<br/>estúdio de moldura ⏳ · card do post"] --> SEC["SecurityFilterChain"]
+    APP["App web<br/>estúdio de moldura · card do post"] --> SEC["SecurityFilterChain"]
     SEC --> BC["BackgroundController<br/>GET /backgrounds/catalog · /recommendations<br/>público"]
     SEC --> PC["PostPublishingController (RF9)<br/>POST/PATCH com background<br/>PostFeedController (RF14)"]
     BC --> BS["BackgroundService"]

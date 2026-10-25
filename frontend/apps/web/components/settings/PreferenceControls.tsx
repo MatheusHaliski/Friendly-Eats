@@ -2,8 +2,8 @@
 
 import { isApiError, type PreferencesPatch, type PreferencesView } from '@friendly-eats/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRef, useState, type ReactNode, type RefObject } from 'react';
-import { Notice } from '@/components/Form';
+import { useState, type ReactNode, type RefObject } from 'react';
+import { Notice, useDeferredFocus } from '@/components/Form';
 import { IconLocked } from '@/components/icons';
 import { api } from '@/lib/api';
 import { PREFERENCES_KEY } from '@/lib/queries';
@@ -14,7 +14,7 @@ export type Result = { tone: 'success' | 'error'; text: string } | null;
 export function useSavePreferences(successText: string, onSaved?: (view: PreferencesView) => void) {
   const queryClient = useQueryClient();
   const [result, setResult] = useState<Result>(null);
-  const resultRef = useRef<HTMLDivElement>(null);
+  const [resultRef, focusResult] = useDeferredFocus<HTMLDivElement>();
   const mutation = useMutation({
     mutationFn: (patch: PreferencesPatch) => api.me.updatePreferences(patch),
     onMutate: () => setResult(null),
@@ -22,12 +22,12 @@ export function useSavePreferences(successText: string, onSaved?: (view: Prefere
       queryClient.setQueryData(PREFERENCES_KEY, view);
       onSaved?.(view);
       setResult({ tone: 'success', text: successText });
-      requestAnimationFrame(() => resultRef.current?.focus());
+      focusResult();
     },
     onError: (e) => {
       const text = isApiError(e) ? (e.errors.length ? e.errors.join(' ') : e.detail) : 'Não foi possível salvar agora. Tente de novo.';
       setResult({ tone: 'error', text });
-      requestAnimationFrame(() => resultRef.current?.focus());
+      focusResult();
     },
   });
   return { mutation, result, setResult, resultRef };

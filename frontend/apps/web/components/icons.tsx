@@ -10,8 +10,38 @@
 //   shield-check (2FA ativada), key-round (senha e segurança), lock (bloqueado até consentir), clock (prazo),
 //   copy (copiar), download (baixar), image-up (enviar foto; camera é da conta Criador), monitor e smartphone
 //   (aparelho da sessão).
+// Posts (RF9 · RF12 · RF14 · RF15 · RF16): tipos de post → clapperboard (foto de prato: camera é da conta Criador),
+//   book-open, message-circle-question, hand-platter, badge-percent, calendar-days, triangle-alert (alerta) e
+//   shield-alert (fonte oficial); heart (curtir), message-circle (comentar), share-2 (compartilhar), bookmark e
+//   bookmark-check (salvar), send (enviar comentário), archive e archive-restore (arquivar e restaurar),
+//   newspaper (Feed), square-plus (Publicar), trending-up (em alta; flame fica reservado), hourglass (encerrado),
+//   calendar-clock (vigência), eye-off (perfil privado), external-link (abre outro site), link (link do perfil).
 import {
+  Archive,
+  ArchiveRestore,
   BadgeCheck,
+  BadgePercent,
+  BookOpen,
+  Bookmark,
+  BookmarkCheck,
+  CalendarClock,
+  CalendarDays,
+  Clapperboard,
+  ExternalLink,
+  EyeOff,
+  HandPlatter,
+  Heart,
+  Hourglass,
+  Link as LinkIcon,
+  MessageCircle,
+  MessageCircleQuestion,
+  Newspaper,
+  Send,
+  Share2,
+  ShieldAlert,
+  SquarePlus,
+  TrendingUp,
+  TriangleAlert,
   Bean,
   Beef,
   Camera,
@@ -108,6 +138,39 @@ export const IconDownload = decorative(Download);
 export const IconPhotoUpload = decorative(ImageUp);
 export const IconDesktop = decorative(Monitor);
 export const IconPhone = decorative(Smartphone);
+
+export const IconLike = decorative(Heart);
+export const IconComment = decorative(MessageCircle);
+export const IconShare = decorative(Share2);
+export const IconSave = decorative(Bookmark);
+export const IconSaved = decorative(BookmarkCheck);
+export const IconSend = decorative(Send);
+export const IconArchive = decorative(Archive);
+export const IconRestore = decorative(ArchiveRestore);
+export const IconFeed = decorative(Newspaper);
+export const IconPublish = decorative(SquarePlus);
+export const IconTrending = decorative(TrendingUp);
+export const IconExpired = decorative(Hourglass);
+export const IconPeriod = decorative(CalendarClock);
+export const IconPrivate = decorative(EyeOff);
+export const IconExternal = decorative(ExternalLink);
+export const IconLink = decorative(LinkIcon);
+export const IconAlert = decorative(TriangleAlert);
+export const IconOfficialSource = decorative(ShieldAlert);
+
+/**
+ * Ícone de cada tipo de post, pelo código. A API manda {@code camera} na foto de prato, mas camera é da conta
+ * Criador (DESIGN_SYSTEM.md, seção 1): o post de foto usa clapperboard.
+ */
+export const POST_KIND_ICONS: Record<string, ReturnType<typeof decorative>> = {
+  FOTO_PRATO: decorative(Clapperboard),
+  RECEITA: decorative(BookOpen),
+  PERGUNTA: decorative(MessageCircleQuestion),
+  PRATO_DO_DIA: decorative(HandPlatter),
+  PROMOCAO: decorative(BadgePercent),
+  EVENTO: decorative(CalendarDays),
+  ALERTA_SANITARIO: decorative(TriangleAlert),
+};
 
 /** Pictogramas dos 8 chips de culinária, pelo nome que a API manda em ChipView.lucideIcon. */
 export const CHIP_ICONS: Record<string, ReturnType<typeof decorative>> = {

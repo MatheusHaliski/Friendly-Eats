@@ -117,3 +117,125 @@ export function mapSudoError(detail: string, withCode: boolean): MappedErrors {
   const field = withCode && /código/.test(detail) ? 'code' : 'password';
   return { fields: { [field]: [detail] }, general: [] };
 }
+
+// ------------------------------------------------------------ post (RF9): mensagens do PostRules, do PostPublishingService
+// e do BackgroundValidator (RF16). Os campos vêm entre aspas ("priceCents"); o resto, pelo texto.
+
+/** Nome do campo do PostDraft → rótulo da tela. */
+export const POST_FIELD_LABELS: Record<string, string> = {
+  title: 'Título',
+  body: 'Texto',
+  altText: 'Texto alternativo',
+  mediaObjectKey: 'Foto',
+  establishmentId: 'Lugar',
+  cuisine: 'Culinária',
+  foodFormat: 'Tipo de comida',
+  dietaryStyles: 'Estilos alimentares',
+  allergens: 'Alergênicos',
+  warnings: 'Advertências',
+  ageRating: 'Classificação',
+  advertising: 'Publicidade',
+  city: 'Cidade',
+  startsAt: 'Início',
+  endsAt: 'Fim',
+  priceCents: 'Preço',
+  priceFromCents: 'Preço de',
+  priceToCents: 'Preço por',
+  discountPercent: 'Desconto',
+  free: 'Gratuito',
+  recipe: 'Receita',
+  'recipe.ingredients': 'Ingredientes',
+  'recipe.steps': 'Modo de preparo',
+  alert: 'Alerta',
+  'alert.product': 'Produto',
+  'alert.brand': 'Marca',
+  'alert.lots': 'Lotes',
+  'alert.reason': 'Motivo',
+  'alert.sourceUrl': 'Fonte oficial',
+  background: 'Moldura',
+};
+
+const POST_RULES: Rule[] = [
+  { test: /"recipe\.ingredients"|ingrediente/i, field: 'ingredients' },
+  { test: /"recipe\.steps"|passo do modo de preparo/i, field: 'steps' },
+  { test: /^Rendimento/, field: 'servings' },
+  { test: /^Tempo de preparo/, field: 'prepMinutes' },
+  { test: /^Receita precisa/, field: 'ingredients' },
+  { test: /"alert\.product"|produto do alerta/i, field: 'alertProduct' },
+  { test: /"alert\.brand"|marca do produto/i, field: 'alertBrand' },
+  { test: /"alert\.lots"|lotes afetados/i, field: 'alertLots' },
+  { test: /"alert\.reason"|motivo do alerta/i, field: 'alertReason' },
+  { test: /"alert\.sourceUrl"|fonte (oficial )?do alerta|fonte oficial|"sourceUrl"/i, field: 'alertSourceUrl' },
+  { test: /^Alerta sanitário precisa/, field: 'alertProduct' },
+  { test: /moldura|única arte|já traz arte própria|container|contraste|Cartela da época|^Padrão desconhecido|^Gradiente desconhecido|^Animação|^Material desconhecido|^Skin|^Variação de padrão|^Formato de padrão|^Layout desconhecido|^Cor dos textos|^Arte própria/i, field: 'background' },
+  { test: /"title"|título|^Escreva a pergunta/i, field: 'title' },
+  { test: /"body"/, field: 'body' },
+  { test: /"altText"|^Descreva a foto/, field: 'altText' },
+  { test: /foto|"mediaObjectKey"/i, field: 'photo' },
+  { test: /"establishmentId"|^Estabelecimento não encontrado|^O lugar está fechado/, field: 'place' },
+  { test: /"cuisine"/, field: 'cuisine' },
+  { test: /"foodFormat"/, field: 'foodFormat' },
+  { test: /"dietaryStyles"|estilos alimentares/i, field: 'dietaryStyles' },
+  { test: /"warnings"|advertência/i, field: 'warnings' },
+  { test: /^Alergênico|lista vigente da Anvisa|^Nível de/, field: 'allergens' },
+  { test: /18\+|"ageRating"|sempre Livre/, field: 'ageRating' },
+  { test: /Publicidade|"advertising"/, field: 'advertising' },
+  { test: /"city"/, field: 'city' },
+  { test: /"endsAt"/, field: 'endsAt' },
+  { test: /"startsAt"|vigência|horário do evento/, field: 'startsAt' },
+  { test: /o preço "de" precisa ser maior/, field: 'priceTo' },
+  { test: /"priceFromCents"|"priceToCents"|"de\/por"/, field: 'priceFrom' },
+  { test: /"discountPercent"|^Desconto/, field: 'discount' },
+  { test: /"priceCents"|^Preço em centavos|^Evento: informe o preço|"free"/, field: 'price' },
+];
+
+/** Campo do PostDraft citado entre aspas → campo da tela. */
+const POST_QUOTED: Record<string, string> = {
+  title: 'title',
+  body: 'body',
+  altText: 'altText',
+  mediaObjectKey: 'photo',
+  establishmentId: 'place',
+  cuisine: 'cuisine',
+  foodFormat: 'foodFormat',
+  dietaryStyles: 'dietaryStyles',
+  allergens: 'allergens',
+  warnings: 'warnings',
+  ageRating: 'ageRating',
+  advertising: 'advertising',
+  city: 'city',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  priceCents: 'price',
+  free: 'price',
+  priceFromCents: 'priceFrom',
+  priceToCents: 'priceTo',
+  discountPercent: 'discount',
+  recipe: 'ingredients',
+  'recipe.ingredients': 'ingredients',
+  'recipe.steps': 'steps',
+  alert: 'alertProduct',
+  'alert.product': 'alertProduct',
+  'alert.brand': 'alertBrand',
+  'alert.lots': 'alertLots',
+  'alert.reason': 'alertReason',
+  'alert.sourceUrl': 'alertSourceUrl',
+  background: 'background',
+};
+
+/** Troca "priceCents" por “Preço” (aceita os nomes com ponto, como "recipe.steps"). */
+export function humanizePostMessage(msg: string): string {
+  return msg.replace(/"([\w.]+)"/g, (m, key: string) => (POST_FIELD_LABELS[key] ? `“${POST_FIELD_LABELS[key]}”` : m));
+}
+
+/** Publicar e editar post (RF9 · RF16): cada frase do 422 vai para o campo da tela; o resto, para o resumo. */
+export function mapPostErrors(errors: string[], visible?: Set<string>): MappedErrors {
+  const out: MappedErrors = { fields: {}, general: [] };
+  for (const raw of errors) {
+    const quoted = [...raw.matchAll(/"([\w.]+)"/g)].map((m) => POST_QUOTED[m[1]!]).find(Boolean);
+    const target = quoted ?? POST_RULES.find((r) => r.test.test(raw))?.field;
+    const field = target && (!visible || visible.has(target)) ? target : null;
+    add(out, field, humanizePostMessage(raw));
+  }
+  return out;
+}

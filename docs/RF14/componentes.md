@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    APP["App web ⏳<br/>feed, página do post, em alta"] --> SEC["SecurityFilterChain<br/>GET público de /posts, /posts/id,<br/>/posts/trending e /establishments/id/posts"]
+    APP["App web<br/>/feed com abas e segmentos · /posts/id"] --> SEC["SecurityFilterChain<br/>GET público de /posts, /posts/id,<br/>/posts/trending e /establishments/id/posts"]
     SEC --> FC["PostFeedController"]
     FC --> VR["ViewerResolver"]
     FC --> QS["PostQueryService"]

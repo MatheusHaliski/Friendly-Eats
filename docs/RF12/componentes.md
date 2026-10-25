@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    APP["App web ⏳<br/>botões, caixa e folha de compartilhamento"] --> SEC["SecurityFilterChain<br/>GET público de /posts/id/comments<br/>escrita com sessão e X-XSRF-TOKEN"]
+    APP["App web<br/>InteractionBar · Comments · compartilhar"] --> SEC["SecurityFilterChain<br/>GET público de /posts/id/comments<br/>escrita com sessão e X-XSRF-TOKEN"]
     SEC --> IC["PostInteractionController<br/>like · save · comments · shares"]
     IC --> VR["ViewerResolver"]
     IC --> IS["PostInteractionService"]

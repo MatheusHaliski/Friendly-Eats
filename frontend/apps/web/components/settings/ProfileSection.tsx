@@ -2,10 +2,10 @@
 
 import { isApiError, type ProfilePatch, type ProfileView, type SessionUserView, type TaxonomyCatalog } from '@friendly-eats/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useId, useRef, useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { AccountBadge, verificationText } from '@/components/AccountBadge';
 import { DetailInput } from '@/components/auth/RegisterView';
-import { ErrorSummary, Field, Notice } from '@/components/Form';
+import { ErrorSummary, Field, Notice, useDeferredFocus } from '@/components/Form';
 import { api } from '@/lib/api';
 import { mapProfileErrors, type MappedErrors } from '@/lib/field-errors';
 import { formatDate } from '@/lib/format';
@@ -89,8 +89,8 @@ function ProfileForm({
   const uid = useId();
   const id = (f: string) => `${uid}-${f}`;
   const queryClient = useQueryClient();
-  const summaryRef = useRef<HTMLDivElement>(null);
-  const savedRef = useRef<HTMLDivElement>(null);
+  const [summaryRef, focusSummary] = useDeferredFocus<HTMLDivElement>();
+  const [savedRef, focusSaved] = useDeferredFocus<HTMLDivElement>();
   const [values, setValues] = useState({
     name: profile.name,
     handle: profile.handle,
@@ -181,7 +181,7 @@ function ProfileForm({
       setCuisines(view.favoriteCuisines ?? []);
       setStyles(view.dietaryStyles ?? []);
       setSaved(backToReview ? 'Perfil salvo. Como a conta tem selo, os dados voltaram para a conferência.' : 'Perfil salvo.');
-      requestAnimationFrame(() => savedRef.current?.focus());
+      focusSaved();
     },
     onError: (e) => {
       if (isApiError(e, 422)) {
@@ -193,7 +193,7 @@ function ProfileForm({
       } else {
         setErrors({ fields: {}, general: [isApiError(e) ? e.detail : 'Não foi possível salvar agora. Tente de novo.'] });
       }
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
     },
   });
 
@@ -203,14 +203,14 @@ function ProfileForm({
     const local = validate();
     if (Object.keys(local.fields).length || local.general.length) {
       setErrors(local);
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
       return;
     }
     setErrors(EMPTY);
     const patch = buildPatch();
     if (!Object.keys(patch).length) {
       setSaved('Nada mudou desde a última vez que você salvou.');
-      requestAnimationFrame(() => savedRef.current?.focus());
+      focusSaved();
       return;
     }
     save.mutate(patch);

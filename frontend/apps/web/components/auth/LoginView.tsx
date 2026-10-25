@@ -4,8 +4,8 @@ import { isApiError, type LoginResult } from '@friendly-eats/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useId, useRef, useState, type FormEvent } from 'react';
-import { describedBy, FieldErrors, Notice } from '@/components/Form';
+import { useId, useState, type FormEvent } from 'react';
+import { describedBy, FieldErrors, Notice, useDeferredFocus } from '@/components/Form';
 import { IconDeadline, IconLogin } from '@/components/icons';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/format';
@@ -32,8 +32,8 @@ export function LoginView() {
   const [fieldError, setFieldError] = useState<Record<string, string[]>>({});
   const [result, setResult] = useState<LoginResult | null>(null);
   const [wait, startWait] = useCountdown();
-  const alertRef = useRef<HTMLDivElement>(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
+  const [alertRef, focusAlert] = useDeferredFocus<HTMLDivElement>();
+  const [headingRef, focusHeading] = useDeferredFocus<HTMLHeadingElement>();
 
   function handleResult(r: LoginResult) {
     setError(null);
@@ -45,7 +45,7 @@ export function LoginView() {
       return;
     }
     setStep(r.status === 'MFA_REQUIRED' ? 'codigo' : 'reativar');
-    requestAnimationFrame(() => headingRef.current?.focus());
+    focusHeading();
   }
 
   function handleError(e: unknown) {
@@ -62,7 +62,7 @@ export function LoginView() {
     } else {
       setError('Não foi possível entrar agora. Verifique a conexão e tente de novo.');
     }
-    requestAnimationFrame(() => alertRef.current?.focus());
+    focusAlert();
   }
 
   const login = useMutation({ mutationFn: () => api.auth.login({ email: email.trim(), password }), onSuccess: handleResult, onError: handleError });

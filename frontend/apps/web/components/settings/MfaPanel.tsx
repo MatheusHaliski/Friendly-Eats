@@ -3,7 +3,7 @@
 import { isApiError, type MfaSetupView, type MfaStatusView, type RecoveryCodesView } from '@friendly-eats/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
-import { describedBy, ErrorSummary, FieldErrors, Notice } from '@/components/Form';
+import { describedBy, ErrorSummary, FieldErrors, Notice, useDeferredFocus } from '@/components/Form';
 import { IconMfaOn } from '@/components/icons';
 import { api } from '@/lib/api';
 import { mapSudoError } from '@/lib/field-errors';
@@ -47,7 +47,7 @@ export function MfaPanel({ account }: { account: string }) {
   const [errors, setErrors] = useState<Errors>(NONE);
   const [done, setDone] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const summaryRef = useRef<HTMLDivElement>(null);
+  const [summaryRef, focusSummary] = useDeferredFocus<HTMLDivElement>();
   const doneRef = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
 
@@ -57,7 +57,7 @@ export function MfaPanel({ account }: { account: string }) {
       return;
     }
     if (step === 'inicio') requestAnimationFrame(() => (done ? doneRef.current : headingRef.current)?.focus());
-    else requestAnimationFrame(() => headingRef.current?.focus());
+    else headingRef.current?.focus();
   }, [step, done]);
 
   const enabled = status.data?.enabled === true;
@@ -73,7 +73,7 @@ export function MfaPanel({ account }: { account: string }) {
     const mapped = apiErrors(e, withCode);
     setErrors(mapped);
     if (isApiError(e, 409)) void queryClient.invalidateQueries({ queryKey: MFA_KEY });
-    requestAnimationFrame(() => summaryRef.current?.focus());
+    focusSummary();
   }
 
   function refresh(view?: MfaStatusView) {
@@ -104,7 +104,7 @@ export function MfaPanel({ account }: { account: string }) {
       if (isApiError(e, 422)) {
         setErrors({ fields: { code: e.errors.length ? e.errors : [e.detail] }, general: [] });
         if (/expirou/.test(e.detail)) setErrors({ fields: {}, general: [e.detail] });
-        requestAnimationFrame(() => summaryRef.current?.focus());
+        focusSummary();
       } else fail(e, false);
     },
   });
@@ -136,7 +136,7 @@ export function MfaPanel({ account }: { account: string }) {
     const local = checkSudo(sudo, withCode);
     if (Object.keys(local).length) {
       setErrors({ fields: local, general: [] });
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
       return;
     }
     setErrors(NONE);
@@ -150,7 +150,7 @@ export function MfaPanel({ account }: { account: string }) {
     e.preventDefault();
     if (!/^\d{6}$/.test(code.trim())) {
       setErrors({ fields: { code: ['O código tem 6 números.'] }, general: [] });
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
       return;
     }
     setErrors(NONE);

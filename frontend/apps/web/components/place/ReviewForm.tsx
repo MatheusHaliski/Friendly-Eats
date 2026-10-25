@@ -11,8 +11,8 @@ import {
 } from '@friendly-eats/api';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useId, useRef, useState, type FormEvent } from 'react';
-import { describedBy, ErrorSummary, FieldErrors, Notice } from '@/components/Form';
+import { useId, useState, type FormEvent } from 'react';
+import { describedBy, ErrorSummary, FieldErrors, Notice, useDeferredFocus } from '@/components/Form';
 import { StarRatingInput } from '@/components/StarRatingInput';
 import { api } from '@/lib/api';
 import { mapReviewErrors, type MappedErrors } from '@/lib/field-errors';
@@ -42,7 +42,7 @@ export function ReviewForm({ placeId, initial, dimensions, visitModes, onSaved, 
   const [body, setBody] = useState(initial?.body ?? '');
   const [errors, setErrors] = useState<MappedErrors>(EMPTY);
   const [serverMessage, setServerMessage] = useState<string | null>(null);
-  const summaryRef = useRef<HTMLDivElement>(null);
+  const [summaryRef, focusSummary] = useDeferredFocus<HTMLDivElement>();
   const modes = (visitModes?.length ? visitModes : VISIT_MODES).map((m) => ({ code: m.code as VisitModeCode, label: m.label }));
   const shownDims = dimensionsFor(mode, dimensions);
   const dimLabels = Object.fromEntries(dimensions.map((d) => [d.code, d.label]));
@@ -61,7 +61,7 @@ export function ReviewForm({ placeId, initial, dimensions, visitModes, onSaved, 
         // 403 (organização, dono, conta não ativa), 404 (lugar fora do ar) e 409 (removida pela moderação)
         setServerMessage(isApiError(e) ? e.detail : 'Não foi possível salvar agora. Tente de novo.');
       }
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
     },
   });
 
@@ -85,7 +85,7 @@ export function ReviewForm({ placeId, initial, dimensions, visitModes, onSaved, 
     if (body.length > MAX_BODY) local.fields.body = [`O texto pode ter até ${MAX_BODY} caracteres.`];
     if (Object.keys(local.fields).length) {
       setErrors(local);
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
       return;
     }
     setErrors(EMPTY);

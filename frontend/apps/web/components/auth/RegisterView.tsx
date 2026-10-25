@@ -4,9 +4,9 @@ import { isApiError, type AccountTypeCode } from '@friendly-eats/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useId, useRef, useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { AccountDot } from '@/components/AccountBadge';
-import { describedBy, ErrorSummary, Field, FieldErrors, Notice } from '@/components/Form';
+import { describedBy, ErrorSummary, Field, FieldErrors, Notice, useDeferredFocus } from '@/components/Form';
 import { ACCOUNT_ICONS } from '@/components/icons';
 import { ACCOUNT_TYPES } from '@/lib/account-types';
 import { api } from '@/lib/api';
@@ -31,7 +31,7 @@ export function RegisterView() {
   const [details, setDetails] = useState<Record<string, string>>({});
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [errors, setErrors] = useState<MappedErrors>(EMPTY);
-  const summaryRef = useRef<HTMLDivElement>(null);
+  const [summaryRef, focusSummary] = useDeferredFocus<HTMLDivElement>();
 
   const age = ageOn(values.dateOfBirth);
   const under16 = age !== null && age < 16;
@@ -65,7 +65,7 @@ export function RegisterView() {
       } else {
         setErrors({ fields: {}, general: [isApiError(e) ? e.detail : 'Não foi possível criar a conta agora. Tente de novo.'] });
       }
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
     },
   });
 
@@ -92,7 +92,7 @@ export function RegisterView() {
     const local = validate();
     if (Object.keys(local.fields).length || local.general.length) {
       setErrors(local);
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
       return;
     }
     setErrors(EMPTY);

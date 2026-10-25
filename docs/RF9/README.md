@@ -16,6 +16,17 @@ paths:
   - src/main/java/com/friendlyeats/api/PostPublishingController.java
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/PostRepository.java
   - src/main/resources/db/migration/V3__posts.sql
+  - frontend/apps/web/app/publicar/page.tsx
+  - frontend/apps/web/app/posts/*/editar/page.tsx
+  - frontend/apps/web/components/publish/PublishView.tsx
+  - frontend/apps/web/components/publish/PhotoPicker.tsx
+  - frontend/apps/web/components/publish/PlacePicker.tsx
+  - frontend/apps/web/components/publish/AllergenFields.tsx
+  - frontend/apps/web/components/post/AuthorActions.tsx
+  - frontend/apps/web/lib/post-form.ts
+  - frontend/apps/web/lib/photo.ts
+  - frontend/apps/web/lib/field-errors.ts
+  - frontend/apps/web/e2e/publicar.spec.ts
 ---
 
 # RF9 · Publicar conteúdo: posts de comida
@@ -31,7 +42,7 @@ paths:
 | **Consumidor (CDC)** | Promoção de criador leva o chip **Publicidade** (art. 36); o "de/por" precisa ter o "de" maior que o "por" (art. 37); o prato do dia mostra o preço cobrado (art. 31) |
 | **ECA Digital** | Post de bebida alcoólica é 18+ sozinho; menor de 18 não publica 18+; menor de 16 usa só molduras do catálogo ([RF16](../RF16/README.md)) |
 | **Anvisa** | Alergênicos da RDC 26/2015 (RDC 727/2022, Anexo III), autodeclarados, sempre com o aviso de contaminação cruzada; alerta sanitário só de conta Oficial, com a fonte oficial (RDC 655/2022) |
-| **Status** | 🟡 Parcial: API, regras dos 7 tipos, foto sem EXIF, alergênicos, 18+, expiração, moldura e testes prontos; vídeo, cardápio por item, lista/guia e check-in, rascunho pela API e as telas ainda não |
+| **Status** | 🟡 Parcial: API, regras dos 7 tipos, foto sem EXIF, alergênicos, 18+, expiração, moldura, telas de publicar e editar no app web e testes prontos; vídeo, cardápio por item, lista/guia e check-in e rascunho pela API ainda não |
 
 ## Critérios de aceite
 
@@ -113,4 +124,4 @@ paths:
 | Testes | `PostRulesTest` (`eachKindHasItsPublishersAndOrganizationsWaitForTheSeal`, `dishPhotoNeedsThePhotoWithAltTextAndFieldsOfOtherKindsAreRefused`, `allergensFollowTheCurrentAnvisaListAndWarningsHaveTheirOwnField`, `alcoholicFormatOrBarMakesThePostAdultsOnlyButTheAlertIsAlwaysForEveryone`, `promotionNeedsPeriodAndFromToOrDiscountAndTheCreatorNeedsTheAdvertisingChip`, `eventIsPaidOrFreeTheDailyDishHasAPriceAndTheAlertNeedsAnOfficialHttpsSource`, `dailyDishExpiresAt2359InSaoPauloOnThePublicationDay`, `recipeNeedsIngredientsAndSteps`); `PostDomainTest` (transições, remoção, alerta, expiração); `PostApiIT.dishPhotoGoesStraightToTheBucketWithoutExifAndTheOldPhotoLeavesIt` (Garage real), `PostApiIT.eachKindHasItsPublishersAndTheOwnersPostsAreAboutTheirOwnPlace`, `PostApiIT.authorEditsArchivesRestoresAndDeletesOwnPost`, `PostApiIT.frameFromTheCatalogIsValidatedAndResolvedButAlertsNeverHaveOne`, `PostApiIT.vocabularyListsKindsAllergensAndWhatTheViewerCanPublish`; `SchemaConsistencyTest` | ✅ |
 | Dados de exemplo | `DevSeed` (perfil `dev`): um post de cada tipo e um alerta da conta Oficial verificada "Vigilância Sanitária de Exemplo", com curtidas e comentários | ✅ |
 | Pendências | vídeo (falta o processamento sem metadados); cardápio por item com alergênicos e `PRICE_SRC_MENU`; lista/guia, check-in e avaliação como post (pesquisa 04); rascunho pela API; chef vinculado publicando prato do dia; hash perceptual contra repostagem; moderação e denúncia (RF13); fila prioritária do alerta e encerramento pela fonte | ⏳ |
-| Tela | formulário de publicação por tipo, com o aviso de alergênicos | ⏳ |
+| Tela | app web `/publicar` e `/posts/[id]/editar`: tipo só entre os `publishableKinds` da conta, formulário montado pelo `GET /posts/vocabulary` (obrigatórios e opcionais do tipo), foto pela URL pré-assinada (`uploadPostPhoto`), lugar entre os da conta, alergênicos com nível e o aviso de autodeclaração, 18+, publicidade, vigência, preço, receita, alerta (só Oficial) e o estúdio de moldura ([RF16](../RF16/README.md)); 422 por campo (`mapPostErrors`); editar, arquivar, restaurar e excluir com diálogo (`AuthorActions`); e2e `publicar.spec.ts` com axe | ✅ |

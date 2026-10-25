@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mapProfileErrors, mapRegisterErrors, mapReviewErrors, mapSudoError } from './field-errors';
+import { mapPostErrors, mapProfileErrors, mapRegisterErrors, mapReviewErrors, mapSudoError } from './field-errors';
 
 describe('erros do 422 por campo', () => {
   it('cadastro: frases do RegistrationService e do UserTypeDetailsValidator', () => {
@@ -72,5 +72,46 @@ describe('mapProfileErrors', () => {
   it('modo sudo: o código só vai para o campo do código quando há 2FA', () => {
     expect(mapSudoError('Senha incorreta.', false).fields).toEqual({ password: ['Senha incorreta.'] });
     expect(mapSudoError('Senha ou código do app autenticador incorretos.', true).fields).toHaveProperty('code');
+  });
+});
+
+describe('mapPostErrors (RF9 · RF16)', () => {
+  it('cada frase do PostRules vai para o seu campo, com o rótulo da tela', () => {
+    const r = mapPostErrors([
+      'Dê um título ao post.',
+      'Descreva a foto em "altText" (texto alternativo para quem usa leitor de tela).',
+      'Foto de prato precisa da foto: envie antes (POST /api/v1/media/uploads) e informe "mediaObjectKey".',
+      '"discountPercent" não se aplica a Foto de prato.',
+      'No "de/por", o preço "de" precisa ser maior que o "por".',
+      'Informe o preço do prato do dia em centavos ("priceCents"): o preço exibido é o cobrado (CDC art. 31).',
+      'Liste ao menos um ingrediente (com a quantidade, ex.: "2 xícaras de farinha").',
+      'A fonte do alerta precisa ser um endereço https, ex.: https://www.gov.br/anvisa/….',
+      'Gergelim ainda não está na lista vigente da Anvisa (proposta de 2025).',
+      'Menores de 18 anos não publicam conteúdo de bebida alcoólica (18+).',
+      'Texto com contraste 1,4:1 sobre o container (mínimo 4,5:1). Sugestão: tinta #17120D (11,1:1).',
+      'Informe o lugar ("establishmentId"): prato do dia do dono é sobre um lugar dele.',
+      'Algo inesperado.',
+    ]);
+    expect(r.fields).toEqual({
+      title: ['Dê um título ao post.'],
+      altText: ['Descreva a foto em “Texto alternativo” (texto alternativo para quem usa leitor de tela).'],
+      photo: ['Foto de prato precisa da foto: envie antes (POST /api/v1/media/uploads) e informe “Foto”.'],
+      discount: ['“Desconto” não se aplica a Foto de prato.'],
+      priceTo: ['No "de/por", o preço "de" precisa ser maior que o "por".'],
+      price: ['Informe o preço do prato do dia em centavos (“Preço”): o preço exibido é o cobrado (CDC art. 31).'],
+      ingredients: ['Liste ao menos um ingrediente (com a quantidade, ex.: "2 xícaras de farinha").'],
+      alertSourceUrl: ['A fonte do alerta precisa ser um endereço https, ex.: https://www.gov.br/anvisa/….'],
+      allergens: ['Gergelim ainda não está na lista vigente da Anvisa (proposta de 2025).'],
+      ageRating: ['Menores de 18 anos não publicam conteúdo de bebida alcoólica (18+).'],
+      background: ['Texto com contraste 1,4:1 sobre o container (mínimo 4,5:1). Sugestão: tinta #17120D (11,1:1).'],
+      place: ['Informe o lugar (“Lugar”): prato do dia do dono é sobre um lugar dele.'],
+    });
+    expect(r.general).toEqual(['Algo inesperado.']);
+  });
+
+  it('campo que não está na tela vai para o resumo', () => {
+    const r = mapPostErrors(['"recipe" não se aplica a Foto de prato.'], new Set(['title']));
+    expect(r.fields).toEqual({});
+    expect(r.general).toEqual(['“Receita” não se aplica a Foto de prato.']);
   });
 });

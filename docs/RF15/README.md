@@ -7,6 +7,11 @@ paths:
   - src/main/java/com/friendlyeats/application/profile/**
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/ProfileDirectoryQueries.java
   - src/main/java/com/friendlyeats/api/UserProfileController.java
+  - frontend/apps/web/app/u/*/page.tsx
+  - frontend/apps/web/components/profile/ProfileView.tsx
+  - frontend/apps/web/components/feed/ProfilesPanel.tsx
+  - frontend/apps/web/components/feed/ProfileCard.tsx
+  - frontend/apps/web/e2e/perfil.spec.ts
 ---
 
 # RF15 · Perfil público e feed de perfis
@@ -19,7 +24,7 @@ paths:
 | **Origem** | RF25 da Orange Social (perfil público com o feed do autor) e o `FeedType.PROFILE` |
 | **Base legal (LGPD)** | Minimização (Art. 6º, III): nunca saem e-mail, telefone, nascimento, documentos nem a cidade de residência. A cidade mostrada é a de atuação declarada no cadastro do tipo de conta, e só para quem não é comensal |
 | **ECA Digital** | Menor de 16 tem o perfil privado travado ([RF2](../RF2/README.md)): não entra no feed de perfis e os posts dele não abrem para os outros |
-| **Status** | 🟡 Parcial: perfil, posts do autor com cursor, perfil privado, feed de perfis com filtros e testes prontos; seguir, contadores de seguidores e telas ainda não |
+| **Status** | 🟡 Parcial: perfil, posts do autor com cursor, perfil privado, feed de perfis com filtros, telas do perfil público e da aba Perfis e testes prontos; seguir e contadores de seguidores ainda não |
 
 ## Critérios de aceite
 
@@ -64,4 +69,4 @@ paths:
 | API | `UserProfileController`: `GET /api/v1/users`, `/api/v1/users/{id}/profile`, `/api/v1/users/{id}/posts`; GET públicos no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Testes | `UserProfileApiIT.profileShowsOnlyPublicDataAndTheAuthorsPostsPageByCursor`, `UserProfileApiIT.privateProfileShowsTheMinimumAndClosesThePostsExceptForTheHolder`, `UserProfileApiIT.profileFeedListsActivePublicAccountsWithBadgeAndSealAndFilters` | ✅ |
 | Pendências | seguir e deixar de seguir, com contadores; perfil privado liberado para seguidores; feed de perfis por relevância e perto de mim; perfil do estabelecimento com os lugares dele; denúncia de perfil (RF13) | ⏳ |
-| Tela | perfil público com os posts e a vitrine de perfis com os filtros | ⏳ |
+| Tela | app web `/u/[id]` (avatar, nome, @, tipo de conta, selo, bio, links, cidade, membro desde, posts e compartilhar; perfil privado mostra só o mínimo) e a aba Perfis do `/feed` com filtros de tipo, cidade e nome; e2e `perfil.spec.ts` com axe | ✅ |

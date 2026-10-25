@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useEffect, useRef, type ReactNode } from 'react';
+import { forwardRef, useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { IconFormError, IconInfo, IconSuccess } from './icons';
 
 /** Mensagens de erro de um campo: ícone circle-alert + texto, nunca só a cor. */
@@ -89,6 +89,21 @@ export const ErrorSummary = forwardRef<HTMLDivElement, { title?: string; items: 
     );
   },
 );
+
+/**
+ * Foco depois do commit. Quem pede o foco no mesmo evento em que monta o elemento (ex.: `setErrors` + resumo de
+ * erros) não pode usar `requestAnimationFrame`: com a máquina ocupada, o quadro roda antes de o React montar o
+ * elemento e o `ref` ainda está nulo. Aqui o pedido vira estado, e o efeito foca só depois do render que o montou.
+ */
+export function useDeferredFocus<T extends HTMLElement>(): [RefObject<T | null>, () => void] {
+  const ref = useRef<T>(null);
+  const [request, setRequest] = useState(0);
+  useEffect(() => {
+    if (request) ref.current?.focus();
+  }, [request]);
+  const focus = useCallback(() => setRequest((n) => n + 1), []);
+  return [ref, focus];
+}
 
 /** Foca o elemento quando a chave muda (ex.: novo envio com erro). */
 export function useFocusOnChange<T extends HTMLElement>(key: unknown) {

@@ -49,7 +49,7 @@ class PostApiIT extends PostItBase {
                 .containsEntry("mediaType", "IMAGE").containsEntry("feed", "POST").containsEntry("ageRating", "LIVRE")
                 .containsEntry("allergenNotice", com.friendlyeats.domain.taxonomy.Allergen.NOTICE)
                 .containsEntry("shareUrl", "http://localhost:3000/p/" + id).containsEntry("background", null);
-        assertThat(map(p, "kind")).containsEntry("code", "FOTO_PRATO").containsEntry("lucideIcon", "camera")
+        assertThat(map(p, "kind")).containsEntry("code", "FOTO_PRATO").containsEntry("lucideIcon", "clapperboard")
                 .containsEntry("border", "SEM_MOLDURA");
         assertThat(map(p, "establishment")).containsEntry("name", "Sabor Mineiro").containsEntry("adultsOnly", false);
         assertThat(map(p, "cuisine")).containsEntry("code", "MINEIRA").containsEntry("group", "BRASIL");

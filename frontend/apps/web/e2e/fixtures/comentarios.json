@@ -1,0 +1,76 @@
+{
+  "0199a1b2-c3d4-7e5f-8a9b-000000000001": [
+    {
+      "id": 11,
+      "author": {
+        "id": 205,
+        "name": "Bruno Costa",
+        "handle": "brunocosta",
+        "category": {
+          "code": "COMENSAL",
+          "label": "Comensal",
+          "color": "#48A8FF",
+          "lightColor": "#05558F",
+          "glyph": "◇",
+          "glyphName": "losango",
+          "lucideIcon": "user-round"
+        },
+        "verified": false,
+        "avatarUrl": null,
+        "profilePath": "/api/v1/users/205/profile",
+        "available": true
+      },
+      "body": "Fui ontem e confirmo: o tutu acaba cedo mesmo!",
+      "createdAt": "2026-10-25T14:40:00Z",
+      "canDelete": false
+    },
+    {
+      "id": 12,
+      "author": {
+        "id": 310,
+        "name": "Rafael Lima",
+        "handle": "chefrafa",
+        "category": {
+          "code": "CHEF",
+          "label": "Chef",
+          "color": "#D6C5FF",
+          "lightColor": "#7D5BBA",
+          "glyph": "⬠",
+          "glyphName": "pentágono",
+          "lucideIcon": "chef-hat"
+        },
+        "verified": false,
+        "avatarUrl": "/media-teste/avatars/rafa.png",
+        "profilePath": "/api/v1/users/310/profile",
+        "available": true
+      },
+      "body": "Couve na manteiga é o segredo. Boa dica.",
+      "createdAt": "2026-10-25T15:02:00Z",
+      "canDelete": false
+    },
+    {
+      "id": 13,
+      "author": {
+        "id": 501,
+        "name": "Ana Come Bem",
+        "handle": "anacomebem",
+        "category": {
+          "code": "CRIADOR",
+          "label": "Criador",
+          "color": "#F7C638",
+          "lightColor": "#876A06",
+          "glyph": "✦",
+          "glyphName": "estrela",
+          "lucideIcon": "camera"
+        },
+        "verified": false,
+        "avatarUrl": "/media-teste/avatars/ana.png",
+        "profilePath": "/api/v1/users/501/profile",
+        "available": true
+      },
+      "body": "Qual o preço do PF com suco?",
+      "createdAt": "2026-10-25T15:30:00Z",
+      "canDelete": false
+    }
+  ]
+}

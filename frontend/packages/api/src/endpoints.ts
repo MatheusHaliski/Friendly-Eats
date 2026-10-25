@@ -1,38 +1,60 @@
 // Um método por rota da API usada pelo web (controllers em src/main/java/com/friendlyeats/api/).
 import { createClient, type ApiClient, type ClientOptions } from './client.ts';
 import type {
+  AccountTypeCode,
+  CommentCreatedView,
+  CommentPageView,
   ConsentList,
   ConsentPurpose,
   ConsentView,
   DeletionRequest,
   DeletionView,
   EstablishmentView,
+  FeedPageView,
+  FeedParams,
+  FrameCatalog,
+  FrameRecommendation,
+  LikeStateView,
   LoginRequest,
   LoginResult,
   MfaSetupView,
   MfaStatusView,
   PasswordChange,
+  PostDetailView,
+  PostDraft,
+  PostPatch,
+  PostVocabulary,
   PreferencesPatch,
   PreferencesView,
+  ProfileListParams,
+  ProfilePageView,
   ProfilePatch,
   ProfileView,
+  PublicProfileView,
   RecoveryCodesView,
   RegisterRequest,
   ReviewDraft,
   ReviewPage,
   ReviewView,
+  SaveStateView,
   SearchPage,
   SearchParams,
   SessionUserView,
   SessionView,
+  ShareChannelCode,
+  ShareResultView,
   SudoRequest,
   TaxonomyCatalog,
   TermsView,
+  TrendingParams,
   UploadRequest,
   UploadTicket,
 } from './types.ts';
 
+const seg = (v: number | string) => encodeURIComponent(String(v));
+
 export function createApi(client: ApiClient = createClient()) {
+  const post = (id: string) => `/api/v1/posts/${seg(id)}`;
   return {
     client,
 
@@ -116,6 +138,55 @@ export function createApi(client: ApiClient = createClient()) {
       },
       deleteMyReview: (id: number | string) =>
         client.del(`/api/v1/establishments/${encodeURIComponent(String(id))}/reviews/me`),
+      /** Posts sobre o lugar (RF14): 404/401 como a página do lugar. */
+      posts: (id: number | string, params: { kind?: string; cursor?: string; size?: number } = {}, signal?: AbortSignal) =>
+        client.get<FeedPageView>(`/api/v1/establishments/${seg(id)}/posts`, { query: { ...params }, signal }),
+    },
+
+    posts: {
+      /** Vocabulário do formulário (RF9, público); com sessão traz publishableKinds. */
+      vocabulary: () => client.get<PostVocabulary>('/api/v1/posts/vocabulary'),
+      /** Feed de posts ou de alertas (RF14), por cursor. */
+      feed: (params: FeedParams = {}, signal?: AbortSignal) => client.get<FeedPageView>('/api/v1/posts', { query: { ...params }, signal }),
+      trending: (params: TrendingParams = {}, signal?: AbortSignal) =>
+        client.get<FeedPageView>('/api/v1/posts/trending', { query: { ...params }, signal }),
+      /** 401 = post 18+ sem login; 404 = não visível. */
+      get: (id: string) => client.get<PostDetailView>(post(id)),
+      create: (draft: PostDraft) => client.post<PostDetailView>('/api/v1/posts', draft),
+      /** Chave ausente mantém; null limpa (o JSON leva o null). */
+      update: (id: string, patch: PostPatch) => client.patch<PostDetailView>(post(id), patch),
+      archive: (id: string) => client.post<PostDetailView>(`${post(id)}/archive`),
+      restore: (id: string) => client.post<PostDetailView>(`${post(id)}/restore`),
+      remove: (id: string) => client.del(post(id)),
+
+      // interações (RF12): PUT/DELETE idempotentes
+      like: (id: string) => client.put<LikeStateView>(`${post(id)}/like`).then((r) => r.data),
+      unlike: (id: string) => client.delJson<LikeStateView>(`${post(id)}/like`),
+      save: (id: string) => client.put<SaveStateView>(`${post(id)}/save`).then((r) => r.data),
+      unsave: (id: string) => client.delJson<SaveStateView>(`${post(id)}/save`),
+      comments: (id: string, after = 0, limit = 20) =>
+        client.get<CommentPageView>(`${post(id)}/comments`, { query: { after, limit } }),
+      comment: (id: string, body: string) => client.post<CommentCreatedView>(`${post(id)}/comments`, { body }),
+      removeComment: (id: string, commentId: number) => client.del(`${post(id)}/comments/${seg(commentId)}`),
+      share: (id: string, channel: ShareChannelCode) => client.post<ShareResultView>(`${post(id)}/shares`, { channel }),
+    },
+
+    users: {
+      /** Feed de perfis (RF15). */
+      list: (params: ProfileListParams = {}, signal?: AbortSignal) =>
+        client.get<ProfilePageView>('/api/v1/users', { query: { ...params }, signal }),
+      /** 404 = conta fora do ar; perfil privado vem com o mínimo. */
+      profile: (id: number | string) => client.get<PublicProfileView>(`/api/v1/users/${seg(id)}/profile`),
+      /** 403 = perfil privado para quem não é o titular. */
+      posts: (id: number | string, params: { cursor?: string; size?: number } = {}) =>
+        client.get<FeedPageView>(`/api/v1/users/${seg(id)}/posts`, { query: { ...params } }),
+    },
+
+    backgrounds: {
+      /** Catálogo do estúdio de moldura (RF16, ETag + max-age 1 h: o navegador revalida). */
+      catalog: () => client.get<FrameCatalog>('/api/v1/backgrounds/catalog'),
+      recommendations: (category: AccountTypeCode, feed: 'POST' | 'ALERT' = 'POST', media: 'TEXT' | 'IMAGE' = 'TEXT') =>
+        client.get<FrameRecommendation[]>('/api/v1/backgrounds/recommendations', { query: { category, feed, media } }),
     },
   };
 }

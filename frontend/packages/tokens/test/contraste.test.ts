@@ -36,6 +36,8 @@ const TEXTO = [
   'color-account-varejo-ink',
   'color-account-comunidade-ink',
   'color-account-oficial-ink',
+  // alerta sanitário (RF14): a borda vermelha também colore o rótulo "Alerta sanitário" do card
+  'color-alert-border',
 ] as const;
 
 const NAO_TEXTUAL = [
@@ -60,6 +62,12 @@ describe.each<Tema>(['light', 'dark'])('tema %s', (tema) => {
 
   it('o texto do botão principal tem 4,5:1', () => {
     expect(contraste(t['color-on-primary'], t['color-primary'])).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('a faixa hazard do alerta sanitário: listras e texto sobre ela com 4,5:1 (DESIGN_SYSTEM.md, seção 7)', () => {
+    expect(contraste(t['color-alert-hazard-ink'], t['color-alert-hazard'])).toBeGreaterThanOrEqual(4.5);
+    // a faixa encosta no fundo do card: o amarelo precisa de 3:1 no escuro; no claro, a listra escura dá o contorno
+    expect(Math.max(contraste(t['color-alert-hazard'], t['color-bg']), contraste(t['color-alert-hazard-ink'], t['color-bg']))).toBeGreaterThanOrEqual(3);
   });
 });
 

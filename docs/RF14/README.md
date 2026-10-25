@@ -15,6 +15,23 @@ paths:
   - src/main/java/com/friendlyeats/infrastructure/cache/redis/**
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/PostFeedQueries.java
   - src/main/java/com/friendlyeats/api/PostFeedController.java
+  - frontend/apps/web/app/feed/page.tsx
+  - frontend/apps/web/app/posts/*/page.tsx
+  - frontend/apps/web/components/feed/FeedView.tsx
+  - frontend/apps/web/components/feed/Tabs.tsx
+  - frontend/apps/web/components/post/PostCard.tsx
+  - frontend/apps/web/components/post/PostBits.tsx
+  - frontend/apps/web/components/post/PostList.tsx
+  - frontend/apps/web/components/post/PostPage.tsx
+  - frontend/apps/web/components/place/PlacePosts.tsx
+  - frontend/apps/web/components/place/PlaceView.tsx
+  - frontend/apps/web/components/SiteHeader.tsx
+  - frontend/apps/web/lib/post-queries.ts
+  - frontend/apps/web/lib/post-format.ts
+  - frontend/packages/api/src/types.ts
+  - frontend/packages/api/src/endpoints.ts
+  - frontend/apps/web/e2e/feed.spec.ts
+  - frontend/apps/web/e2e/support/mock-posts.ts
 ---
 
 # RF14 · Feed e página do post, com o ranking em alta
@@ -27,7 +44,7 @@ paths:
 | **Origem** | RF24 e RF25 da Orange Social (página do post, cursor `(created_at, id)`, 404 sem dizer o motivo) e o Trending Score no Valkey (ADR-03 de lá) |
 | **Base legal (LGPD)** | Art. 7º, V. O autor aparece com nome, @, bolinha e selo; conta eliminada vira "Conta excluída", sem link. Perfil privado não entra no feed |
 | **ECA Digital / Termos** | Post 18+ (bebida alcoólica) não aparece para o visitante nem para o menor de 18, a mesma regra da página do lugar ([RF6](../RF6/README.md)) |
-| **Status** | 🟡 Parcial: página do post, feed com cursor e filtros, posts do lugar, "em alta" com recálculo e testes prontos; timeline no Cassandra, feed de quem eu sigo, descoberta local por distância, visualizações únicas e telas ainda não |
+| **Status** | 🟡 Parcial: página do post, feed com cursor e filtros, posts do lugar, "em alta" com recálculo, telas do feed (abas e segmentos) e da página do post e testes prontos; timeline no Cassandra, feed de quem eu sigo, descoberta local por distância e visualizações únicas ainda não |
 
 ## Critérios de aceite
 
@@ -95,4 +112,4 @@ paths:
 | API | `PostFeedController`: `GET /api/v1/posts`, `/api/v1/posts/{id}`, `/api/v1/posts/trending`, `/api/v1/establishments/{id}/posts`; GET públicos no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Testes | `FeedCursorTest` (cursor e preço em reais), `TrendingScoreTest` (fórmula e chaves); `PostApiIT.feedPagesByCursorAndHidesExpiredAdultPrivateAndInactiveContent`, `PostApiIT.trendingRanksByInteractionsAndOnlyShowsWhatTheViewerCanSee`, `PostApiIT.frameFromTheCatalogIsValidatedAndResolvedButAlertsNeverHaveOne` (moldura no card e na página) | ✅ |
 | Pendências | timeline no Cassandra (o perfil `dev` sobe sem ele); feed de quem eu sigo e mistura 70/30 com a descoberta local; alertas da região fixados no topo; distância e diversidade (MMR) no ranking; visualizações únicas (HyperLogLog); "por que estou vendo isto?" | ⏳ |
-| Tela | feed com cards por tipo, página do post e aba "em alta" | ⏳ |
+| Tela | app web `/feed` com as abas **Posts** (segmentado por tipo de post, na URL como `?tipo=`), **Alertas sanitários** (faixa hazard, sem moldura), **Perfis** e **Restaurantes** (busca do [RF10](../RF10/README.md) com o modal do lugar); "Em alta" com filtro por tipo de conta (`?conta=`); card de post com moldura, selo do tipo, preço, alergênicos, 18+, publicidade e expirado; página `/posts/[id]` (401 convida a entrar, 404); "Posts deste lugar" na página do lugar; links Feed e Publicar no cabeçalho; e2e `feed.spec.ts` com axe nos dois temas | ✅ |

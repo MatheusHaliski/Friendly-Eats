@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    APP["App web ⏳<br/>perfil e vitrine de perfis"] --> SEC["SecurityFilterChain<br/>GET público de /users,<br/>/users/id/profile e /users/id/posts"]
+    APP["App web<br/>/u/id e aba Perfis"] --> SEC["SecurityFilterChain<br/>GET público de /users,<br/>/users/id/profile e /users/id/posts"]
     SEC --> UC["UserProfileController"]
     UC --> VR["ViewerResolver"]
     UC --> PS["PublicProfileService"]

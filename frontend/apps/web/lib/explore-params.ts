@@ -1,6 +1,6 @@
 // Filtros do Explorar (RF10) ↔ URL ↔ parâmetros de GET /api/v1/establishments.
 // A localização da pessoa nunca vai para a URL: lat/lng ficam só na memória da página.
-import type { CuisineChipCode, PriceLevelCode, SearchParams, SearchSort } from '@friendly-eats/api';
+import type { CuisineChipCode, PriceLevelCode, SearchParams, SearchSort, TaxonomyCatalog } from '@friendly-eats/api';
 
 export const RADII_KM = [1, 2, 5, 10, 25] as const;
 export const DEFAULT_RADIUS_KM = 5;
@@ -123,4 +123,31 @@ export function toSearchParams(f: ExploreFilters, coords: Coords | null): Search
 /** Minimização (LGPD): ~110 m de precisão bastam para "perto de mim". */
 export function roundCoords(lat: number, lng: number): Coords {
   return { lat: Math.round(lat * 1000) / 1000, lng: Math.round(lng * 1000) / 1000 };
+}
+
+const PRICE_TEXT: Record<string, string> = { PRICE_1: '$ Econômico', PRICE_2: '$$ Moderado', PRICE_3: '$$$ Caro', PRICE_4: '$$$$ Muito caro' };
+const SORT_TEXT: Record<SearchSort, string> = { RELEVANCE: 'relevância', DISTANCE: 'distância', RATING: 'nota' };
+
+/**
+ * "Por que aparece aqui" (modal do lugar): os filtros ativos em frases. Sem filtro, diz que é a lista geral e a
+ * ordem. Os rótulos vêm da taxonomia quando ela já carregou.
+ */
+export function filterReasons(
+  f: ExploreFilters,
+  taxonomy?: Pick<TaxonomyCatalog, 'cuisines' | 'formats' | 'dietaryStyles' | 'cuisineChips'>,
+  near = false,
+): string[] {
+  const label = (list: Array<{ code: string; label: string }> | undefined, code: string) => list?.find((x) => x.code === code)?.label ?? code;
+  const out: string[] = [];
+  if (f.q.trim()) out.push(`O nome combina com a busca “${f.q.trim()}”.`);
+  if (f.chip) out.push(`Culinária do grupo ${label(taxonomy?.cuisineChips, f.chip)}.`);
+  if (f.cuisine.length) out.push(`Culinária: ${f.cuisine.map((c) => label(taxonomy?.cuisines, c)).join(', ')}.`);
+  if (f.format.length) out.push(`Tipo de comida: ${f.format.map((c) => label(taxonomy?.formats, c)).join(', ')}.`);
+  if (f.price.length) out.push(`Faixa de preço: ${f.price.map((p) => PRICE_TEXT[p] ?? p).join(', ')}.`);
+  if (f.minRating !== null) out.push(`Nota ${String(f.minRating).replace('.', ',')} ou mais.`);
+  if (f.dietary.length) out.push(`Estilos alimentares: ${f.dietary.map((c) => label(taxonomy?.dietaryStyles, c)).join(', ')}.`);
+  if (near) out.push(`Dentro do raio de ${f.radiusKm} km de onde você está.`);
+  if (!out.length) out.push('Aparece na lista geral, sem filtros.');
+  out.push(`Ordem: por ${SORT_TEXT[f.sort === 'DISTANCE' && !near ? 'RELEVANCE' : f.sort]}.`);
+  return out;
 }

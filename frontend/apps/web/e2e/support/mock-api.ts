@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { BrowserContext, Page, Route } from '@playwright/test';
+import { PostsState } from './mock-posts';
 import type {
   ConsentList,
   ConsentView,
@@ -53,6 +54,9 @@ export const BUCKET_ORIGIN = 'http://media.localhost:3900';
 /** Onde as fotos já tratadas ficam públicas (PublicLinks.mediaUrl). */
 export const MEDIA_PUBLIC = '/media-teste/';
 const AVATAR_PNG = fileURLToPath(new URL('../fixtures/avatar.png', import.meta.url));
+const PRATO_PNG = fileURLToPath(new URL('../fixtures/prato.png', import.meta.url));
+/** Foto de prato para os testes de publicar (o mesmo PNG servido nas fotos dos posts). */
+export const PRATO_FIXTURE = PRATO_PNG;
 
 /** Estado da conta logada: perfil, preferências, consentimentos, 2FA e sessões (Configurações, RF2 a RF5). */
 export interface AccountState {
@@ -86,6 +90,8 @@ export class MockApi {
   csrfToken = `csrf-${Math.random().toString(36).slice(2)}`;
   readonly myReviews = new Map<string, ReviewView>();
   private accountState: AccountState | null = null;
+  /** Posts, comentários, perfis e moldura (RF9 · RF12 · RF14 · RF15 · RF16). */
+  readonly posts: PostsState = this.makePosts();
   private overrides: Array<{ method: string; pattern: RegExp; handler: Handler }> = [];
 
   constructor(
@@ -93,11 +99,26 @@ export class MockApi {
     private readonly context: BrowserContext,
   ) {}
 
+  private makePosts(): PostsState {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- o estado dos posts lê a sessão atual
+    const host = this;
+    return new PostsState(fixture, {
+      get session() {
+        return host.session;
+      },
+      uploads: () => (host.session ? host.account.uploads : null),
+    });
+  }
+
   async install(): Promise<void> {
     await this.page.route('**/api/v1/**', (route) => this.handle(route));
     await this.page.route(`${BUCKET_ORIGIN}/**`, (route) => this.bucket(route));
     await this.page.route(`**${MEDIA_PUBLIC}**`, (route) =>
-      route.fulfill({ status: 200, headers: { 'Content-Type': 'image/png' }, body: readFileSync(AVATAR_PNG) }),
+      route.fulfill({
+        status: 200,
+        headers: { 'Content-Type': 'image/png' },
+        body: readFileSync(route.request().url().includes('/posts/') ? PRATO_PNG : AVATAR_PNG),
+      }),
     );
   }
 
@@ -271,6 +292,9 @@ export class MockApi {
     if (m === 'GET' && p === '/api/v1/taxonomy') return { status: 200, body: fixture('taxonomia'), headers: { 'Cache-Control': 'max-age=3600, public' } };
 
     if (m === 'GET' && p === '/api/v1/establishments') return { status: 200, body: this.search(rec.search) };
+
+    const postsReply = this.posts.handle(rec);
+    if (postsReply) return postsReply;
 
     if (placeMatch) {
       const [, id, reviews, me] = placeMatch;
@@ -550,6 +574,15 @@ export class MockApi {
         rating: card.rating,
         adultsOnly: card.adultsOnly,
         status: card.status,
+        location: {
+          ...base.location,
+          city: card.location.city,
+          uf: card.location.uf,
+          neighborhood: card.location.neighborhood,
+          approximate: card.location.approximate,
+          street: card.location.approximate ? null : base.location.street,
+          streetNumber: card.location.approximate ? null : base.location.streetNumber,
+        },
         classification: { ...base.classification, chip: card.chip, primaryCuisine: card.primaryCuisine, primaryFormat: card.primaryFormat },
       };
     }

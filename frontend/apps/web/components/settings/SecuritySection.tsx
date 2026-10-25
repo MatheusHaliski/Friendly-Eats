@@ -3,7 +3,7 @@
 import { isApiError, type SessionView } from '@friendly-eats/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useId, useRef, useState, type FormEvent } from 'react';
-import { ErrorSummary, Field, Notice } from '@/components/Form';
+import { ErrorSummary, Field, Notice, useDeferredFocus } from '@/components/Form';
 import { IconDesktop, IconPhone } from '@/components/icons';
 import { Switch } from '@/components/Switch';
 import { api } from '@/lib/api';
@@ -42,8 +42,8 @@ function PasswordForm({ withCode }: { withCode: boolean }) {
   const [again, setAgain] = useState('');
   const [errors, setErrors] = useState<Errors>(NONE);
   const [done, setDone] = useState<string | null>(null);
-  const summaryRef = useRef<HTMLDivElement>(null);
-  const doneRef = useRef<HTMLDivElement>(null);
+  const [summaryRef, focusSummary] = useDeferredFocus<HTMLDivElement>();
+  const [doneRef, focusDone] = useDeferredFocus<HTMLDivElement>();
 
   const change = useMutation({
     mutationFn: () =>
@@ -55,7 +55,7 @@ function PasswordForm({ withCode }: { withCode: boolean }) {
       const closed = r?.otherSessionsClosed ?? 0;
       setDone(`Senha trocada.${closed ? ` Encerramos ${plural(closed, 'outra sessão', 'outras sessões')}.` : ''}`);
       void queryClient.invalidateQueries({ queryKey: SESSIONS_KEY });
-      requestAnimationFrame(() => doneRef.current?.focus());
+      focusDone();
     },
     onError: (e) => {
       if (isApiError(e, 403)) {
@@ -67,7 +67,7 @@ function PasswordForm({ withCode }: { withCode: boolean }) {
         const wait = isApiError(e, 429) && e.retryAfterSeconds ? ` Aguarde ${plural(Math.ceil(e.retryAfterSeconds / 60), 'minuto', 'minutos')}.` : '';
         setErrors({ fields: {}, general: [isApiError(e) ? `${e.detail}${wait}` : 'Não foi possível trocar a senha agora. Tente de novo.'] });
       }
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
     },
   });
 
@@ -83,7 +83,7 @@ function PasswordForm({ withCode }: { withCode: boolean }) {
     if (again !== next) fields.confirm = ['A confirmação não é igual à senha nova.'];
     if (Object.keys(fields).length) {
       setErrors({ fields, general: [] });
-      requestAnimationFrame(() => summaryRef.current?.focus());
+      focusSummary();
       return;
     }
     setErrors(NONE);
@@ -189,12 +189,12 @@ function Sessions() {
   const queryClient = useQueryClient();
   const sessions = useQuery({ queryKey: SESSIONS_KEY, queryFn: () => api.me.sessions() });
   const [result, setResult] = useState<Result>(null);
-  const resultRef = useRef<HTMLDivElement>(null);
+  const [resultRef, focusResult] = useDeferredFocus<HTMLDivElement>();
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   const report = (r: Result) => {
     setResult(r);
-    requestAnimationFrame(() => resultRef.current?.focus());
+    focusResult();
   };
 
   const end = useMutation({

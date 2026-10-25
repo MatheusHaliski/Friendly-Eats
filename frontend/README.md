@@ -31,8 +31,9 @@ frontend/
 │   ├── tokens/             tokens DTCG (tokens/*.json) → Style Dictionary 5 → dist/tokens.css e dist/tokens.ts
 │   └── api/                tipos escritos a partir dos records Java + fetch com sessão e CSRF
 └── apps/web/
-    ├── app/                rotas: / (Explorar), /lugares/[id], /entrar, /cadastro, /confirmar-email, /termos, /conta
-    ├── components/         telas e componentes (explore/, place/, auth/, account/)
+    ├── app/                rotas: / (Explorar), /lugares/[id], /entrar, /cadastro, /confirmar-email, /termos, /conta,
+    │                       /configuracoes/*, /feed, /posts/[id], /posts/[id]/editar, /publicar, /u/[id], /p/[id]
+    ├── components/         telas e componentes (explore/, place/, auth/, account/, feed/, post/, publish/, studio/, profile/)
     ├── lib/                filtros na URL, formatação pt-BR, erros por campo, Markdown dos Termos…
     └── e2e/                Playwright + axe; fixtures JSON e API simulada (support/mock-api.ts)
 ```

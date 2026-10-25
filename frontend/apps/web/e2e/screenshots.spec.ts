@@ -96,4 +96,72 @@ test.describe('capturas de tela', () => {
     await expect(page.getByTestId('lista-lugares')).toBeVisible();
     await page.screenshot({ path: path.join(dir!, 'explorar-celular-escuro.png'), fullPage: true });
   });
+  // ---------------------------------------------------------------- posts, feed, estúdio e perfis (RF9 · RF12 · RF14 · RF15 · RF16)
+  type Tela = { nome: string; path: string; logado?: 'comensal' | 'estabelecimento'; pronto: (p: import('@playwright/test').Page) => Promise<void>; depois?: (p: import('@playwright/test').Page) => Promise<void> };
+  const telasPosts: Tela[] = [
+    { nome: 'feed-posts', path: '/feed', logado: 'comensal', pronto: (p) => expect(p.getByTestId('lista-posts').getByRole('listitem').first()).toBeVisible() },
+    { nome: 'feed-alertas', path: '/feed?aba=alertas', pronto: (p) => expect(p.getByTestId('lista-alertas')).toBeVisible() },
+    { nome: 'feed-perfis', path: '/feed?aba=perfis', pronto: (p) => expect(p.getByTestId('lista-perfis')).toBeVisible() },
+    {
+      nome: 'feed-restaurantes-modal',
+      path: '/feed?aba=restaurantes',
+      pronto: (p) => expect(p.getByTestId('lista-lugares')).toBeVisible(),
+      depois: async (p) => {
+        await p.getByRole('link', { name: 'Sabor Mineiro' }).click();
+        await expect(p.getByTestId('modal-lugar')).toContainText('Rua');
+      },
+    },
+    { nome: 'post', path: '/posts/0199a1b2-c3d4-7e5f-8a9b-000000000001', logado: 'comensal', pronto: (p) => expect(p.getByTestId('comentario').first()).toBeVisible() },
+    { nome: 'post-receita-cardapio', path: '/posts/0199a1b2-c3d4-7e5f-8a9b-000000000003', pronto: (p) => expect(p.getByTestId('receita')).toBeVisible() },
+    { nome: 'post-alerta', path: '/posts/0199a1b2-c3d4-7e5f-8a9b-000000000020', logado: 'comensal', pronto: (p) => expect(p.getByTestId('faixa-alerta')).toBeVisible() },
+    {
+      nome: 'publicar-estudio',
+      path: '/publicar',
+      logado: 'estabelecimento',
+      pronto: (p) => expect(p.getByRole('heading', { level: 1, name: 'Publicar' })).toBeVisible(),
+      depois: async (p) => {
+        await p.getByRole('radio', { name: /Prato do dia/ }).check();
+        await p.getByRole('textbox', { name: /^Título/ }).fill('Feijoada completa');
+        await p.getByRole('button', { name: /^Brasa/ }).click();
+      },
+    },
+    {
+      nome: 'estudio-contraste-baixo',
+      path: '/publicar',
+      logado: 'comensal',
+      pronto: (p) => expect(p.getByRole('heading', { level: 1, name: 'Publicar' })).toBeVisible(),
+      depois: async (p) => {
+        await p.getByRole('radio', { name: /Receita/ }).check();
+        await p.getByRole('tab', { name: 'Container' }).click();
+        await p.getByRole('button', { name: /^Farinha/ }).click();
+        await p.getByRole('button', { name: /^Clara/ }).click();
+        await expect(p.getByTestId('contraste').getByRole('alert')).toBeVisible();
+      },
+    },
+    { nome: 'perfil-publico', path: '/u/310', pronto: (p) => expect(p.getByTestId('posts-perfil')).toBeVisible() },
+    { nome: 'perfil-privado', path: '/u/808', pronto: (p) => expect(p.getByText('Perfil privado')).toBeVisible() },
+  ];
+  for (const tela of telasPosts) {
+    for (const tema of ['claro', 'escuro'] as const) {
+      for (const tamanho of ['computador', 'celular'] as const) {
+        test(`${tela.nome} (${tema}, ${tamanho})`, async ({ page, api }) => {
+          if (tela.logado === 'estabelecimento') api.login('estabelecimento', { categoryVerification: 'VERIFIED' });
+          else if (tela.logado) api.login();
+          await page.setViewportSize(tamanho === 'computador' ? { width: 1280, height: 900 } : { width: 390, height: 844 });
+          await page.emulateMedia({ colorScheme: tema === 'claro' ? 'light' : 'dark', reducedMotion: 'reduce' });
+          await page.goto(tela.path);
+          await tela.pronto(page);
+          if (tela.depois) await tela.depois(page);
+          if (!tela.nome.includes('modal')) {
+            // carrega as fotos com loading="lazy" e volta ao topo (o cabeçalho é fixo)
+            await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+            await page.waitForLoadState('networkidle');
+            await page.evaluate(() => window.scrollTo(0, 0));
+          }
+          await page.waitForLoadState('networkidle');
+          await page.screenshot({ path: path.join(dir!, `${tela.nome}-${tamanho}-${tema}.png`), fullPage: !tela.nome.includes('modal') });
+        });
+      }
+    }
+  }
 });

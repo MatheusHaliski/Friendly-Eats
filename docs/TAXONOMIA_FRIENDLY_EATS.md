@@ -1007,7 +1007,7 @@ lista ou guia, o check-in e o vídeo.
 
 | Código | Rótulo | Ícone Lucide | Borda | Feed | Quem publica | Obrigatório | Sai do feed |
 |---|---|---|---|---|---|---|---|
-| `FOTO_PRATO` | Foto de prato | `camera` | `SEM_MOLDURA` | `POST` | qualquer conta ativa | foto e texto alternativo | nunca |
+| `FOTO_PRATO` | Foto de prato | `clapperboard` (o `camera` é da conta Criador, DESIGN_SYSTEM) | `SEM_MOLDURA` | `POST` | qualquer conta ativa | foto e texto alternativo | nunca |
 | `RECEITA` | Receita | `book-open` | `TRACEJADA` | `POST` | qualquer conta ativa | ingredientes e modo de preparo | nunca |
 | `PERGUNTA` | Pergunta | `message-circle-question` | `BALAO` | `POST` | qualquer conta ativa, exceto `OFICIAL` | a pergunta | nunca |
 | `PRATO_DO_DIA` | Prato do dia | `hand-platter` | `DUPLA` | `POST` | só `ESTABELECIMENTO` `VERIFIED`, sobre um lugar dela | lugar e preço em centavos | às 23h59 de `America/Sao_Paulo` do dia |

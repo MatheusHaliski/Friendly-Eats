@@ -155,3 +155,71 @@ describe('uploadToBucket', () => {
     expect(err.detail).toMatch(/Escolha a foto de novo/);
   });
 });
+
+describe('posts, interações, perfis e moldura (RF9 · RF12 · RF14 · RF15 · RF16)', () => {
+  it('feed por cursor: monta a query só com o que veio', async () => {
+    const fetch = vi.fn().mockImplementation(async () => json(200, { items: [], nextCursor: null }));
+    const api = createApi(createClient({ fetch, cookies: () => '' }));
+    await api.posts.feed({ feed: 'POST', kind: 'RECEITA', cursor: 'abc', size: 10 });
+    await api.posts.feed({ feed: 'ALERT' });
+    await api.establishments.posts(5, { cursor: undefined, size: 6 });
+    await api.users.list({ type: 'CHEF', city: 'Curitiba', q: '' });
+    expect(fetch.mock.calls.map((c) => c[0])).toEqual([
+      '/api/v1/posts?feed=POST&kind=RECEITA&cursor=abc&size=10',
+      '/api/v1/posts?feed=ALERT',
+      '/api/v1/establishments/5/posts?size=6',
+      '/api/v1/users?type=CHEF&city=Curitiba',
+    ]);
+  });
+
+  it('PATCH do post leva o null (limpa) e omite o ausente (mantém)', async () => {
+    const fetch = vi.fn().mockResolvedValue(json(200, { id: 'p1' }));
+    const api = createApi(createClient({ fetch, cookies: () => 'XSRF-TOKEN=t' }));
+    await api.posts.update('p1', { title: 'Novo', background: null, priceCents: undefined });
+    const [url, init] = fetch.mock.calls[0]!;
+    expect(url).toBe('/api/v1/posts/p1');
+    expect(init.method).toBe('PATCH');
+    expect(init.headers['X-XSRF-TOKEN']).toBe('t');
+    expect(JSON.parse(String(init.body))).toEqual({ title: 'Novo', background: null });
+  });
+
+  it('curtir é PUT e descurtir é DELETE com corpo; os dois com CSRF', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(json(200, { liked: true, likes: 13 }))
+      .mockResolvedValueOnce(json(200, { liked: false, likes: 12 }))
+      .mockResolvedValueOnce(json(200, { saved: false }));
+    const api = createApi(createClient({ fetch, cookies: () => 'XSRF-TOKEN=t' }));
+    await expect(api.posts.like('p 1')).resolves.toEqual({ liked: true, likes: 13 });
+    await expect(api.posts.unlike('p 1')).resolves.toEqual({ liked: false, likes: 12 });
+    await expect(api.posts.unsave('p 1')).resolves.toEqual({ saved: false });
+    expect(fetch.mock.calls.map((c) => [c[1].method, c[0]])).toEqual([
+      ['PUT', '/api/v1/posts/p%201/like'],
+      ['DELETE', '/api/v1/posts/p%201/like'],
+      ['DELETE', '/api/v1/posts/p%201/save'],
+    ]);
+    expect(fetch.mock.calls.every((c) => c[1].headers['X-XSRF-TOKEN'] === 't')).toBe(true);
+  });
+
+  it('comentários paginam por after; compartilhar manda o canal; apagar devolve 204', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(json(200, { items: [], nextAfter: null, total: 0 }))
+      .mockResolvedValueOnce(json(200, { shareUrl: 'https://friendlyeats.app/p/p1', channel: 'WHATSAPP', shares: 3, counted: true }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    const api = createApi(createClient({ fetch, cookies: () => 'XSRF-TOKEN=t' }));
+    await api.posts.comments('p1', 41, 20);
+    await expect(api.posts.share('p1', 'WHATSAPP')).resolves.toMatchObject({ counted: true });
+    await expect(api.posts.removeComment('p1', 9)).resolves.toBeUndefined();
+    expect(fetch.mock.calls[0]![0]).toBe('/api/v1/posts/p1/comments?after=41&limit=20');
+    expect(JSON.parse(String(fetch.mock.calls[1]![1].body))).toEqual({ channel: 'WHATSAPP' });
+    expect(fetch.mock.calls[2]![0]).toBe('/api/v1/posts/p1/comments/9');
+  });
+
+  it('recomendações da moldura levam tipo de conta, feed e mídia', async () => {
+    const fetch = vi.fn().mockResolvedValue(json(200, []));
+    const api = createApi(createClient({ fetch, cookies: () => '' }));
+    await api.backgrounds.recommendations('CHEF', 'POST', 'IMAGE');
+    expect(fetch.mock.calls[0]![0]).toBe('/api/v1/backgrounds/recommendations?category=CHEF&feed=POST&media=IMAGE');
+  });
+});

@@ -13,6 +13,11 @@ paths:
   - src/main/java/com/friendlyeats/application/post/CommentPolicy.java
   - src/main/java/com/friendlyeats/api/PostInteractionController.java
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/PostCommentRepository.java
+  - frontend/apps/web/components/post/InteractionBar.tsx
+  - frontend/apps/web/components/post/Comments.tsx
+  - frontend/apps/web/lib/share.ts
+  - frontend/apps/web/app/p/*/page.tsx
+  - frontend/apps/web/e2e/post.spec.ts
 ---
 
 # RF12 · Interações: curtir, salvar, comentar e compartilhar
@@ -87,4 +92,4 @@ paths:
 | Links | `PublicLinks.postShareUrl` ([RF2](../RF2/README.md)) | ✅ |
 | Testes | `PostDomainTest.commentIsTrimmedValidatedAndRemovableByWriterOrPostOwner`, `PostDomainTest.alertTakesOnlySharesAndSavesAndExpiryIsByTheDeadline`; `InteractionApiIT.likeAndSaveAreIdempotentCountedOnceAndNeedAnActiveLogin`, `InteractionApiIT.commentsFollowTheAuthorsAudienceAndMinorsAreProtected`, `InteractionApiIT.shareReturnsThePublicLinkAndCountsEachAccountAndChannelOnce`, `InteractionApiIT.foodAlertTakesOnlySharesAndSaves`, `InteractionApiIT.accountEliminationRemovesPostsCommentsLikesAndPhotos` | ✅ |
 | Pendências | seguir perfis (libera `FOLLOWERS`); resposta identificada do estabelecimento (`RULE_OWNER_REPLY`) e "melhor resposta" da pergunta; "Meus salvos"; notificações (Cassandra) e tempo real; denúncia e moderação de comentários (RF13); limite de ritmo por conta | ⏳ |
-| Tela | botões com contagem, caixa de mensagens e folha de compartilhamento | ⏳ |
+| Tela | app web: curtir e salvar com contagem e `aria-live` (`InteractionBar`), comentários paginados por `after` com envio e exclusão do próprio e o aviso quando fechados (`Comments`), compartilhar pelos canais do vocabulário ou copiando o link (`share.ts`); alerta sanitário só salva e compartilha; o link público `/p/[id]` redireciona para o post; e2e `post.spec.ts` com axe | ✅ |

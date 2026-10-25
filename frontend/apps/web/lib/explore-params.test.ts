@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filtersToSearch, parseFilters, roundCoords, toSearchParams } from './explore-params';
+import { filterReasons, filtersToSearch, parseFilters, roundCoords, toSearchParams } from './explore-params';
 
 describe('filtros do Explorar na URL', () => {
   it('ida e volta mantém os filtros e descarta lixo', () => {
@@ -38,5 +38,31 @@ describe('parâmetros da API', () => {
 
   it('arredonda a coordenada (~110 m)', () => {
     expect(roundCoords(-19.93612, -43.93456)).toEqual({ lat: -19.936, lng: -43.935 });
+  });
+});
+
+describe('por que o lugar aparece (modal)', () => {
+  it('sem filtros: lista geral, por relevância', () => {
+    expect(filterReasons(parseFilters(new URLSearchParams()))).toEqual(['Aparece na lista geral, sem filtros.', 'Ordem: por relevância.']);
+  });
+
+  it('filtros em frases, com os rótulos da taxonomia', () => {
+    const f = parseFilters(new URLSearchParams('q=sabor&chip=BRASILEIRA&price=PRICE_2&minRating=4.5&dietary=VEGANO&sort=DISTANCE&radiusKm=10'));
+    const taxonomy = {
+      cuisines: [],
+      formats: [],
+      dietaryStyles: [{ code: 'VEGANO', label: 'Vegano', group: null }],
+      cuisineChips: [{ code: 'BRASILEIRA' as const, label: 'Brasileira', lucideIcon: 'cooking-pot', darkHex: '#000000', lightHex: '#000000' }],
+    };
+    expect(filterReasons(f, taxonomy, true)).toEqual([
+      'O nome combina com a busca “sabor”.',
+      'Culinária do grupo Brasileira.',
+      'Faixa de preço: $$ Moderado.',
+      'Nota 4,5 ou mais.',
+      'Estilos alimentares: Vegano.',
+      'Dentro do raio de 10 km de onde você está.',
+      'Ordem: por distância.',
+    ]);
+    expect(filterReasons(f, taxonomy, false).at(-1)).toBe('Ordem: por relevância.');
   });
 });

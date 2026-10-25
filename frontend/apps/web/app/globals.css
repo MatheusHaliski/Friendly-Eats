@@ -23,6 +23,9 @@
   --color-price-3: var(--fe-color-price-3);
   --color-price-4: var(--fe-color-price-4);
   --color-price-empty: var(--fe-color-price-empty);
+  --color-alert: var(--fe-color-alert-border);
+  --color-hazard: var(--fe-color-alert-hazard);
+  --color-hazard-ink: var(--fe-color-alert-hazard-ink);
   --font-sans: var(--fe-font-family-sans);
   --font-mono: var(--fe-font-family-mono);
   --radius-sm: var(--fe-radius-sm);
@@ -287,6 +290,12 @@
     color: var(--chip);
   }
 
+  .fe-pill[aria-pressed='true'] {
+    border-width: 3px;
+    background: var(--fe-color-surface-sunken);
+    font-weight: 800;
+  }
+
   .fe-visually-hidden-input:checked + .fe-pill {
     border-width: 3px;
     background: var(--fe-color-surface-sunken);
@@ -401,6 +410,333 @@
     border-radius: var(--fe-radius-sm);
     background: var(--fe-color-qr-light);
     color: var(--fe-color-qr-dark);
+  }
+
+  /* ---------------------------------------------------------------- posts (RF14) e moldura (RF16) */
+
+  /* Container do post: opaco, com autor, foto e texto. A borda muda de forma conforme o tipo (nunca de cor; só o
+     alerta sanitário tem a faixa hazard e a borda vermelha). */
+  .fe-post {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 1rem;
+    border: 1.5px solid var(--fe-color-border-strong);
+    border-radius: var(--fe-radius-md);
+    background: var(--fe-color-surface);
+    color: var(--fe-color-text);
+  }
+  .fe-post[data-border='TRACEJADA'] {
+    border-style: dashed;
+    border-width: 2px;
+  }
+  .fe-post[data-border='BALAO'] {
+    border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+    margin-bottom: 0.625rem;
+  }
+  .fe-post[data-border='BALAO']::after {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    bottom: -0.7rem;
+    width: 1.1rem;
+    height: 0.7rem;
+    background: var(--fe-color-border-strong);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+  }
+  .fe-post[data-border='DUPLA'] {
+    border: 5px double var(--fe-color-border-strong);
+  }
+  .fe-post[data-border='ETIQUETA'] {
+    border-left-width: 0.625rem;
+    border-radius: 0.25rem var(--fe-radius-md) var(--fe-radius-md) 0.25rem;
+  }
+  .fe-post[data-border='DATA'] {
+    border-top-width: 0.625rem;
+  }
+  .fe-post[data-border='HAZARD'] {
+    border: 2px solid var(--fe-color-alert-border);
+    padding-top: 0;
+    overflow: hidden;
+  }
+  /* Encerrado (prato do dia, promoção, evento vencidos): a borda vira tracejado cinza, com o rótulo ao lado. */
+  .fe-post[data-expired='true'] {
+    border-style: dashed;
+    border-width: 2px;
+    border-color: var(--fe-color-border-strong);
+  }
+  .fe-post[data-expired='true']::after {
+    display: none;
+  }
+
+  /* Faixa hazard do alerta sanitário: listras amarelo × carvão (11,87:1) e o rótulo num bloco amarelo. */
+  .fe-hazard {
+    margin: 0 -1rem;
+    padding: 0.5rem 1rem;
+    background: repeating-linear-gradient(-45deg, var(--fe-color-alert-hazard) 0 12px, var(--fe-color-alert-hazard-ink) 12px 24px);
+  }
+  .fe-hazard-label {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--fe-radius-sm);
+    background: var(--fe-color-alert-hazard);
+    color: var(--fe-color-alert-hazard-ink);
+    font-weight: 800;
+  }
+
+  /* Bolinha dentro do card emoldurado: fica numa pílula com o fundo do tema, onde as cores foram medidas. */
+  .fe-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0 0.5rem;
+    border-radius: var(--fe-radius-pill);
+    background: var(--fe-badge-bg, transparent);
+    color: var(--fe-badge-ink, inherit);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .fe-post:not([data-framed='true']) .fe-badge-pill {
+    padding: 0;
+  }
+
+  /* Moldura: a arte fica só na faixa entre a borda externa e o container. */
+  .fe-frame {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+    padding: 0.75rem;
+    border-radius: calc(var(--fe-radius-md) + 0.5rem);
+    overflow: hidden;
+  }
+  .fe-frame[data-layout='POLAROID'] {
+    padding: 0.75rem 0.75rem 2.5rem;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 0 var(--fe-color-border);
+  }
+  .fe-frame[data-layout='CARDAPIO'] {
+    padding: 1rem;
+    border-radius: 0.375rem;
+  }
+  .fe-frame-art {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: var(--fe-color-surface-sunken);
+  }
+  .fe-frame-paint {
+    position: absolute;
+    inset: 0;
+  }
+  .fe-frame-art[data-soft='true'] .fe-frame-paint {
+    filter: saturate(0.6) brightness(0.9);
+  }
+  .fe-frame-art[data-mosaic='true'] {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .fe-frame-art[data-mosaic='true'] .fe-frame-tile {
+    position: relative;
+    overflow: hidden;
+  }
+  /* Lousa do layout Cardápio (arte própria do layout): moldura de madeira e giz. */
+  .fe-frame-lousa {
+    background:
+      repeating-linear-gradient(90deg, #ffffff0d 0 1px, #0000 1px 9px),
+      radial-gradient(120% 90% at 30% 20%, #3a4a41, #1d2621 70%);
+    box-shadow: inset 0 0 0 0.375rem #7a5230, inset 0 0 0 0.5rem #4a3019;
+  }
+  /* Materiais: o catálogo manda só o nome; a textura é desenhada aqui, por cima da arte. */
+  .fe-frame-mat {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .fe-mat-papel-manteiga {
+    background:
+      repeating-linear-gradient(8deg, #ffffff14 0 2px, #0000 2px 7px),
+      linear-gradient(135deg, #fff8e81f, #ffffff08);
+  }
+  .fe-mat-linho {
+    opacity: 0.6;
+    background:
+      repeating-linear-gradient(0deg, #ffffff1a 0 1px, #0000 1px 4px),
+      repeating-linear-gradient(90deg, #0000001a 0 1px, #0000 1px 4px);
+  }
+  .fe-mat-inox {
+    mix-blend-mode: overlay;
+    background:
+      repeating-linear-gradient(90deg, #ffffff22 0 1px, #00000026 1px 3px),
+      linear-gradient(120deg, #fff0, #fff6 30%, #fff0 55%, #fff5 80%, #fff0);
+  }
+  .fe-mat-vidro {
+    background: linear-gradient(135deg, #ffffff38, #ffffff0a 38%, #ffffff24 58%, #ffffff08);
+    box-shadow: inset 0 0 0 1px #ffffff4d, inset 0 1px 0 #ffffff70;
+  }
+  /* Animações da arte: tocam uma vez (no máximo 5 s) e não existem com "Reduzir movimento". */
+  .fe-frame[data-anim='DERIVA'] .fe-frame-paint {
+    inset: -12%;
+    animation: fe-deriva 4.8s ease-in-out 1 both;
+  }
+  .fe-frame-steam {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    background:
+      radial-gradient(18% 30% at 20% 80%, #ffffffaa, #0000 70%),
+      radial-gradient(14% 26% at 55% 85%, #ffffff99, #0000 70%),
+      radial-gradient(16% 28% at 82% 78%, #ffffffaa, #0000 70%);
+    animation: fe-fumegar 2.4s ease-out 2;
+  }
+  @keyframes fe-deriva {
+    from {
+      transform: translate(-6%, -6%);
+    }
+    to {
+      transform: translate(6%, 6%);
+    }
+  }
+  @keyframes fe-fumegar {
+    0% {
+      opacity: 0;
+      transform: translateY(25%);
+    }
+    35% {
+      opacity: 0.7;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-35%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fe-frame-paint,
+    .fe-frame-steam {
+      animation: none !important;
+    }
+    .fe-frame-steam {
+      display: none;
+    }
+  }
+
+  /* Abas (role="tablist"): a escolhida fica preenchida e com o texto em negrito. */
+  .fe-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1.5px solid var(--fe-color-border-strong);
+    border-radius: var(--fe-radius-md);
+    background: var(--fe-color-surface);
+  }
+  .fe-tab {
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--fe-radius-sm);
+    color: var(--fe-color-text);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .fe-tab:hover {
+    background: var(--fe-color-surface-sunken);
+  }
+  .fe-tab[aria-selected='true'] {
+    background: var(--fe-color-primary);
+    color: var(--fe-color-on-primary);
+    font-weight: 800;
+  }
+
+  /* Miniaturas do estúdio: a escolhida ganha contorno grosso e o ícone de confirmação (não só a cor). */
+  .fe-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .fe-swatch {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    width: 5.25rem;
+    padding: 0.25rem;
+    border: 2px solid transparent;
+    border-radius: var(--fe-radius-sm);
+    background: transparent;
+    color: var(--fe-color-text);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    cursor: pointer;
+  }
+  .fe-swatch:hover {
+    background: var(--fe-color-surface-sunken);
+  }
+  .fe-swatch[aria-pressed='true'] {
+    border-color: var(--fe-color-text);
+    background: var(--fe-color-surface-sunken);
+  }
+  .fe-swatch[disabled] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .fe-swatch-paint {
+    position: relative;
+    display: block;
+    width: 3.5rem;
+    height: 3.5rem;
+    overflow: hidden;
+    border: 1px solid var(--fe-color-border-strong);
+    border-radius: var(--fe-radius-sm);
+  }
+  .fe-swatch-check {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    display: none;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 999px;
+    background: var(--fe-color-primary);
+    color: var(--fe-color-on-primary);
+  }
+  .fe-swatch[aria-pressed='true'] .fe-swatch-check {
+    display: grid;
+  }
+  .fe-seg {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  .fe-seg > button {
+    min-height: 2.25rem;
+    padding: 0.25rem 0.75rem;
+    border: 1.5px solid var(--fe-color-border-strong);
+    border-radius: var(--fe-radius-pill);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .fe-seg > button[aria-pressed='true'] {
+    border-width: 3px;
+    background: var(--fe-color-surface-sunken);
+    font-weight: 800;
   }
 
   /* Texto corrido dos Termos. */

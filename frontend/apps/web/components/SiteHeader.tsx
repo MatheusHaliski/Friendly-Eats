@@ -6,16 +6,16 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { useSession } from '@/lib/queries';
-import { IconAccount, IconLogin, IconSearch, IconSettings } from './icons';
+import { IconAccount, IconFeed, IconLogin, IconPublish, IconSearch, IconSettings } from './icons';
 import { ThemeToggle } from './ThemeToggle';
 
 function HeaderSearch() {
   const pathname = usePathname();
   const params = useSearchParams();
-  // No Explorar a busca por nome fica no próprio formulário de filtros
-  if (pathname === '/') return null;
+  // No Explorar (e na aba Restaurantes do feed) a busca por nome fica no próprio formulário de filtros
+  if (pathname === '/' || (pathname === '/feed' && params.get('aba') === 'restaurantes')) return null;
   return (
-    <Form action="/" role="search" aria-label="Buscar lugares" className="flex min-w-0 flex-1 items-center gap-2 sm:max-w-md">
+    <Form action="/" role="search" aria-label="Buscar lugares" className="order-last flex min-w-0 basis-full items-center gap-2 sm:order-none sm:max-w-md sm:flex-1 sm:basis-0">
       <label htmlFor="busca-cabecalho" className="sr-only">
         Buscar lugares por nome
       </label>
@@ -49,6 +49,10 @@ function SessionLink() {
   }
   return (
     <>
+      <Link href="/publicar" className="fe-btn fe-btn-sm" data-testid="link-publicar" aria-current={pathname === '/publicar' ? 'page' : undefined}>
+        <IconPublish size={18} />
+        <span className="sr-only sm:not-sr-only">Publicar</span>
+      </Link>
       <Link
         href="/configuracoes"
         className="fe-btn fe-btn-sm"
@@ -69,6 +73,19 @@ function SessionLink() {
   );
 }
 
+/** Navegação principal: Explorar (lugares) e Feed (posts, alertas, perfis e restaurantes). */
+function MainNav() {
+  const pathname = usePathname();
+  return (
+    <nav aria-label="Principal" className="flex items-center gap-1">
+      <Link href="/feed" className="fe-btn fe-btn-sm" aria-current={pathname === '/feed' ? 'page' : undefined} data-testid="link-feed">
+        <IconFeed size={18} />
+        Feed
+      </Link>
+    </nav>
+  );
+}
+
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/85">
@@ -83,6 +100,7 @@ export function SiteHeader() {
             Friendly <span className="text-brand">Eats</span>
           </span>
         </Link>
+        <MainNav />
         <Suspense fallback={<div className="flex-1" />}>
           <HeaderSearch />
         </Suspense>

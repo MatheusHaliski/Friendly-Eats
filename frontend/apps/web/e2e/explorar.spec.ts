@@ -126,6 +126,27 @@ test.describe('Explorar (RF10)', () => {
     await expect(page.getByText('Nenhum lugar encontrado com esses filtros.')).toBeVisible();
   });
 
+  test('o cartão abre o modal explicativo (teclado), a página fica no botão e no link direto', async ({ page }) => {
+    await page.goto('/?minRating=4');
+    const link = page.getByTestId('lista-lugares').getByRole('link', { name: 'Sabor Mineiro' });
+    await expect(link).toHaveAttribute('href', '/lugares/1');
+    await link.focus();
+    await page.keyboard.press('Enter');
+    const modal = page.getByRole('dialog', { name: 'Sabor Mineiro' });
+    await expect(modal).toBeVisible();
+    await expect(page).toHaveURL(/\/\?minRating=4$/);
+    await expect(modal.getByRole('button', { name: 'Fechar' }).first()).toBeFocused();
+    await expect(modal.getByTestId('motivos')).toContainText('Nota 4 ou mais.');
+    await expect(modal).toContainText('Média de 6 avaliações');
+    await expectAccessibleInBothThemes(page, 'Explorar com o modal do lugar');
+    await page.keyboard.press('Escape');
+    await expect(modal).toBeHidden();
+    await expect(link).toBeFocused();
+    await page.keyboard.press('Enter');
+    await page.getByRole('dialog').getByRole('link', { name: 'Ver página do lugar' }).click();
+    await expect(page).toHaveURL(/\/lugares\/1$/);
+  });
+
   test('sem violações graves de acessibilidade', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('lista-lugares')).toBeVisible();
