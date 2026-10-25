@@ -44,6 +44,16 @@ existem na 0.460.
 | Token | Escuro | Claro |
 |---|---|---|
 | Fundo | `#17120D` (carvão quente) | `#FFFFFF` |
+| Superfície rebaixada (`surface-sunken`) | `#2A2119` (texto 13,81:1) | `#F2ECE5` (texto 15,86:1) |
+| Marca (`brand`, o "Eats" do logo e links de destaque) | `#FF9F5A` (9,18:1) | `#A34A00` (5,94:1) |
+| Erro de formulário (`feedback.error`) | `#FFB86B` (10,92:1) | `#8A3C00` (7,70:1) |
+| Sucesso (`feedback.success`) | `#6FE699` (11,92:1) | `#08693A` (6,79:1) |
+
+- **Erro de formulário não é vermelho:** o vermelho fica reservado ao alerta sanitário (seção 7). O erro usa o tom
+  âmbar/cobre acima **com o ícone `circle-alert` e o texto do erro ao lado do campo**: a cor nunca é o único sinal.
+- Os tokens vivem em DTCG (`frontend/packages/tokens/tokens/*.json`) e o Style Dictionary 5 gera `tokens.css`
+  (claro padrão, escuro por `prefers-color-scheme` e por `data-theme`) e `tokens.ts`. O teste
+  `frontend/packages/tokens/test/contraste.test.ts` confere 4,5:1 para texto e 3:1 para ícone e contorno.
 
 Toda cor desta página foi medida contra o fundo do seu tema. Uma cor do tema escuro nunca é usada no claro, e vice-versa.
 
@@ -178,6 +188,7 @@ informado pelo estabelecimento" (ou "segundo 23 avaliações").
 ```bash
 python3 scripts/wcag_contrast.py                       # tabela dos tipos de conta, nos dois temas
 python3 scripts/wcag_contrast.py "#DDAE14" "#17120D"   # qualquer par de cores
+cd frontend && npm test -w @friendly-eats/tokens       # contraste de todos os tokens do app web
 ```
 
 Por enquanto, a tabela do script cobre **só os tipos de conta** (e o anel da conta Oficial). As cores de chip, preço,

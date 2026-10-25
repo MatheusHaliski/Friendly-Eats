@@ -5,6 +5,12 @@ status: parcial
 cards: [FE-16]
 paths:
   - src/main/java/com/friendlyeats/application/establishment/EstablishmentSearch.java
+  - frontend/apps/web/app/page.tsx
+  - frontend/apps/web/components/explore/ExploreView.tsx
+  - frontend/apps/web/components/explore/FiltersPanel.tsx
+  - frontend/apps/web/components/EstablishmentCard.tsx
+  - frontend/apps/web/components/Pagination.tsx
+  - frontend/apps/web/lib/explore-params.ts
 ---
 
 # RF10 · Buscar e filtrar estabelecimentos
@@ -28,6 +34,7 @@ paths:
    | Parâmetro | Regra |
    |---|---|
    | `q` | nome, sem diferenciar acento nem maiúscula (`sao min` acha "São Mineiro"); até 80 caracteres |
+   | `chip` | repetível; o **chip do card** com a mesma derivação do `CuisineChip` (RF7): `VEGETAL` = vegano ou vegetariano `EXCLUSIVO`; os outros pela macro da culinária principal ou, sem culinária, pela família do formato |
    | `cuisine` | repetível; inclui as **descendentes** (`BRASILEIRA` traz `MINEIRA`, `BAIANA`…; `NORDESTINA` traz `BAIANA`) |
    | `format` · `type` · `group` | repetíveis; `type` vale para o tipo principal ou um secundário |
    | `price` | repetível, `PRICE_1`…`PRICE_4`, `PRICE_NA`, `PRICE_UNKNOWN`: o **nível exibido** (mediana de 5+ relatos ou o declarado, RF6) |
@@ -70,6 +77,7 @@ paths:
 | Aplicação | `EstablishmentSearch` (filtros, SQL com PostGIS e as fórmulas de nota e preço, cards); `EstablishmentService.price`, `rating`, `location` e `classification` reaproveitados ([RF6](../RF6/README.md)); `ReviewRepository.findCountingIn` ([RF8](../RF8/README.md)) | ✅ |
 | Persistência | índices da V2: GiST em `establishment.point`, GIN `jsonb_path_ops` em `cuisines_all` e `formats_all`, trigram no nome | ✅ |
 | API | `GET /api/v1/establishments` em `EstablishmentController`; GET público no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
+| Tela | app web: Explorar em `/` (busca por nome, chips, culinária específica, tipo de comida, preço com o rótulo em reais, nota mínima, estilos, "perto de mim" com raio e aviso de que a localização não é guardada, ordem e paginação). Os filtros ficam na URL; a coordenada só na memória da página, arredondada a ~110 m; e2e `explorar.spec.ts` com axe | ✅ |
 | Dados de exemplo | `config/DevSeed` (perfil `dev`, banco vazio): 10 lugares em SP, BH e Recife com avaliações | ✅ |
-| Testes | `SearchApiIT.searchShowsOnlyPublicPlacesAndCuisineIncludesItsDescendants`, `SearchApiIT.radiusSearchMeasuresTheHomeKitchenFromItsPublicPointAndSortsByDistance` | ✅ |
+| Testes | `SearchApiIT.searchShowsOnlyPublicPlacesAndCuisineIncludesItsDescendants` (inclui `chip`), `SearchApiIT.radiusSearchMeasuresTheHomeKitchenFromItsPublicPointAndSortsByDistance` | ✅ |
 | Pendências | sugestões e autocompletar; cache dos agregados no Valkey; C por categoria e município (job); mapa com pins; busca por bairro; facetas operacionais como filtro; histórico de buscas só com consentimento | ⏳ |

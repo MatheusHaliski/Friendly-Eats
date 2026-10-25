@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    APP["App web / mobile"] --> F1["AbsoluteSessionTimeoutFilter<br/>24 h de vida"]
+    WEB["App web Next.js<br/>/entrar · /conta · SiteHeader"] --> NX["next.config rewrites e cabeçalhos<br/>nosniff · no-referrer · frame-ancestors none"] --> APP["Cliente da API<br/>same-origin · X-XSRF-TOKEN do cookie"] --> F1["AbsoluteSessionTimeoutFilter<br/>24 h de vida"]
     F1 --> SEC["SecurityFilterChain<br/>CSRF SPA · regras · CSP"]
     SEC --> RULES{"Regras de rota"}
     RULES -- "GET público: /legal/** · /taxonomy ·<br/>/establishments/* · /establishments/*/reviews" --> PUB["LegalController · TaxonomyController ·<br/>EstablishmentController<br/>18+ decidido no EstablishmentService · RF6"]

@@ -1,0 +1,39 @@
+{
+  "name": "friendly-eats-frontend",
+  "private": true,
+  "description": "Frontend web do Friendly Eats (npm workspaces)",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "workspaces": [
+    "packages/tokens",
+    "packages/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "tokens": "npm run build -w @friendly-eats/tokens",
+    "prepare": "npm run tokens",
+    "dev": "npm run tokens && npm run dev -w @friendly-eats/web",
+    "lint": "npm run tokens && eslint .",
+    "typecheck": "npm run tokens && npm run typecheck --workspaces --if-present",
+    "test": "npm run tokens && vitest run",
+    "build": "npm run tokens && npm run build -w @friendly-eats/web",
+    "start": "npm run start -w @friendly-eats/web",
+    "e2e": "npm run e2e -w @friendly-eats/web"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^6.10.0",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.4.3",
+    "jsdom": "^30.1.3",
+    "typescript": "5.9.3",
+    "vitest": "^4.1.12"
+  },
+  "type": "module",
+  "overrides": {
+    "playwright-core": "1.56.1"
+  }
+}

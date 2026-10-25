@@ -1,0 +1,246 @@
+[
+  {
+    "id": 1,
+    "name": "Sabor Mineiro",
+    "description": "Comida mineira de fogão a lenha: tutu, feijão tropeiro e pão de queijo saindo do forno.",
+    "primaryType": {
+      "code": "RESTAURANTE_A_LA_CARTE",
+      "label": "Restaurante (à la carte)",
+      "group": "RESTAURANTE"
+    },
+    "secondaryTypes": [
+      {
+        "code": "RESTAURANTE_QUILO",
+        "label": "Self-service / por quilo",
+        "group": "RESTAURANTE"
+      }
+    ],
+    "group": {
+      "code": "RESTAURANTE",
+      "label": "Restaurantes",
+      "group": null
+    },
+    "classification": {
+      "primaryCuisine": {
+        "code": "MINEIRA",
+        "label": "Mineira",
+        "group": "BRASIL"
+      },
+      "secondaryCuisines": [],
+      "primaryFormat": {
+        "code": "PRATO_FEITO",
+        "label": "Prato feito / marmita / executivo",
+        "group": "REFEICOES"
+      },
+      "secondaryFormats": [
+        {
+          "code": "SALGADOS",
+          "label": "Salgados (coxinha, empada, risole, kibe frito, acarajé, pão de queijo)",
+          "group": "SALGADOS_E_PETISCOS"
+        }
+      ],
+      "approach": {
+        "code": "CASEIRA",
+        "label": "Comida caseira",
+        "group": null
+      },
+      "dietaryOffers": [
+        {
+          "code": "VEGETARIANO",
+          "label": "Vegetariano",
+          "level": "OFERECE"
+        },
+        {
+          "code": "SEM_GLUTEN",
+          "label": "Sem glúten",
+          "level": "OFERECE"
+        }
+      ],
+      "chip": {
+        "code": "BRASILEIRA",
+        "label": "Brasileira",
+        "lucideIcon": "cooking-pot",
+        "darkHex": "#DDAE14",
+        "lightHex": "#6B5300"
+      }
+    },
+    "price": {
+      "level": "PRICE_2",
+      "glyph": "$$",
+      "label": "Moderado",
+      "rangeLabel": "R$ 40 a R$ 80 por pessoa",
+      "source": "PRICE_SRC_DECLARED",
+      "reportCount": 0,
+      "declaredMinCents": 4500,
+      "declaredMaxCents": 6500,
+      "accessibleLabel": "Faixa de preço: moderado, R$ 40 a R$ 80 por pessoa, informado pelo estabelecimento"
+    },
+    "location": {
+      "country": "BR",
+      "uf": "MG",
+      "municipalityIbge": "3106200",
+      "city": "Belo Horizonte",
+      "neighborhood": "Savassi",
+      "street": "Rua Pernambuco",
+      "streetNumber": "1000",
+      "complement": null,
+      "cep": "30130151",
+      "latitude": -19.936,
+      "longitude": -43.934,
+      "geoPrecision": "GEO_PIN_CONFIRMED",
+      "addressVisibility": "ADDR_PUBLIC_FULL",
+      "approximate": false
+    },
+    "rating": {
+      "state": "RATED",
+      "average": 4.3,
+      "averageLabel": "4,3",
+      "count": 6,
+      "histogram": {
+        "5": 3,
+        "4": 2,
+        "3": 1,
+        "2": 0,
+        "1": 0
+      },
+      "dimensions": {
+        "COMIDA": 4.6,
+        "ATENDIMENTO": 4.1,
+        "CUSTO_BENEFICIO": 4.4
+      },
+      "accessibleLabel": "Nota 4,3 de 5, com base em 6 avaliações"
+    },
+    "owner": {
+      "id": 900,
+      "name": "Sabor Mineiro Ltda",
+      "handle": "sabormineiro",
+      "category": {
+        "code": "ESTABELECIMENTO",
+        "label": "Estabelecimento",
+        "color": "#E88F12"
+      },
+      "verified": true
+    },
+    "adultsOnly": false,
+    "status": "ACTIVE",
+    "published": true,
+    "publishBlockers": [],
+    "createdAt": "2026-09-02T14:10:00Z",
+    "updatedAt": "2026-10-20T18:30:00Z"
+  },
+  {
+    "id": 7,
+    "name": "Sabor Mineiro – Pampulha",
+    "description": null,
+    "primaryType": {
+      "code": "RESTAURANTE_A_LA_CARTE",
+      "label": "Restaurante (à la carte)",
+      "group": "RESTAURANTE"
+    },
+    "secondaryTypes": [],
+    "group": {
+      "code": "RESTAURANTE",
+      "label": "Restaurantes",
+      "group": null
+    },
+    "classification": {
+      "primaryCuisine": {
+        "code": "MINEIRA",
+        "label": "Mineira",
+        "group": "BRASIL"
+      },
+      "secondaryCuisines": [],
+      "primaryFormat": {
+        "code": "PRATO_FEITO",
+        "label": "Prato feito / marmita / executivo",
+        "group": "REFEICOES"
+      },
+      "secondaryFormats": [
+        {
+          "code": "SALGADOS",
+          "label": "Salgados (coxinha, empada, risole, kibe frito, acarajé, pão de queijo)",
+          "group": "SALGADOS_E_PETISCOS"
+        }
+      ],
+      "approach": {
+        "code": "CASEIRA",
+        "label": "Comida caseira",
+        "group": null
+      },
+      "dietaryOffers": [
+        {
+          "code": "VEGETARIANO",
+          "label": "Vegetariano",
+          "level": "OFERECE"
+        },
+        {
+          "code": "SEM_GLUTEN",
+          "label": "Sem glúten",
+          "level": "OFERECE"
+        }
+      ],
+      "chip": {
+        "code": "BRASILEIRA",
+        "label": "Brasileira",
+        "lucideIcon": "cooking-pot",
+        "darkHex": "#DDAE14",
+        "lightHex": "#6B5300"
+      }
+    },
+    "price": {
+      "level": "PRICE_2",
+      "glyph": "$$",
+      "label": "Moderado",
+      "rangeLabel": "R$ 40 a R$ 80 por pessoa",
+      "source": "PRICE_SRC_DECLARED",
+      "reportCount": 0,
+      "declaredMinCents": 4500,
+      "declaredMaxCents": 6500,
+      "accessibleLabel": "Faixa de preço: moderado, R$ 40 a R$ 80 por pessoa, informado pelo estabelecimento"
+    },
+    "location": {
+      "country": "BR",
+      "uf": "MG",
+      "municipalityIbge": "3106200",
+      "city": "Belo Horizonte",
+      "neighborhood": "Savassi",
+      "street": "Rua Pernambuco",
+      "streetNumber": "1000",
+      "complement": null,
+      "cep": "30130151",
+      "latitude": -19.936,
+      "longitude": -43.934,
+      "geoPrecision": "GEO_PIN_CONFIRMED",
+      "addressVisibility": "ADDR_PUBLIC_FULL",
+      "approximate": false
+    },
+    "rating": {
+      "state": "RATING_NONE",
+      "average": null,
+      "averageLabel": null,
+      "count": 0,
+      "histogram": {},
+      "dimensions": {},
+      "accessibleLabel": "Sem avaliações ainda"
+    },
+    "owner": {
+      "id": 900,
+      "name": "Sabor Mineiro Ltda",
+      "handle": "sabormineiro",
+      "category": {
+        "code": "ESTABELECIMENTO",
+        "label": "Estabelecimento",
+        "color": "#E88F12"
+      },
+      "verified": true
+    },
+    "adultsOnly": false,
+    "status": "ACTIVE",
+    "published": false,
+    "publishBlockers": [
+      "Aguardando a conferência do selo da conta (CNPJ ou CPF e documentos)."
+    ],
+    "createdAt": "2026-09-02T14:10:00Z",
+    "updatedAt": "2026-10-20T18:30:00Z"
+  }
+]

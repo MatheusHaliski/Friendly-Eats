@@ -1,0 +1,107 @@
+import { fixture, problem, SENHA_CERTA } from './support/mock-api';
+import { expect, expectAccessibleInBothThemes, test } from './support/test';
+
+test.describe('Entrar (RF4)', () => {
+  test('e-mail e senha: busca o CSRF antes da primeira escrita e volta para a página pedida', async ({ page, api }) => {
+    await page.goto('/entrar?voltar=%2Flugares%2F1');
+    await page.getByLabel('E-mail').fill('julia@example.com');
+    await page.getByLabel('Senha', { exact: true }).fill(SENHA_CERTA);
+    await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+    await expect(page).toHaveURL(/\/lugares\/1$/);
+    await expect(page.getByTestId('link-conta')).toBeVisible();
+    const order = api.requests.filter((r) => r.method !== 'GET' || r.path.endsWith('/csrf')).map((r) => `${r.method} ${r.path}`);
+    expect(order.slice(0, 2)).toEqual(['GET /api/v1/auth/csrf', 'POST /api/v1/auth/login']);
+    const login = api.last('POST', /\/auth\/login$/)!;
+    expect(login.headers['x-xsrf-token']).toMatch(/^csrf-/);
+    expect(login.body).toEqual({ email: 'julia@example.com', password: SENHA_CERTA });
+  });
+
+  test('senha errada mostra a mensagem neutra da API', async ({ page }) => {
+    await page.goto('/entrar');
+    await page.getByLabel('E-mail').fill('julia@example.com');
+    await page.getByLabel('Senha', { exact: true }).fill('errada');
+    await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText('E-mail ou senha incorretos.');
+  });
+
+  test('MFA_REQUIRED pede o código de 6 dígitos', async ({ page, api }) => {
+    api.on('POST', /\/auth\/login$/, { status: 200, body: { status: 'MFA_REQUIRED', user: null, deletionScheduledFor: null, message: null } });
+    api.on('POST', /\/auth\/login\/2fa$/, (req, mock) => {
+      if ((req.body as { code: string }).code !== '246810') return problem(401, 'Código incorreto.');
+      const user = mock.login();
+      return { status: 200, body: { status: 'AUTHENTICATED', user, deletionScheduledFor: null, message: null } };
+    });
+    await page.goto('/entrar');
+    await page.getByLabel('E-mail').fill('julia@example.com');
+    await page.getByLabel('Senha', { exact: true }).fill(SENHA_CERTA);
+    await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Verificação em duas etapas' })).toBeFocused();
+    await page.getByLabel('Código de 6 dígitos').fill('12ab3');
+    await expect(page.getByLabel('Código de 6 dígitos')).toHaveValue('123');
+    await page.getByRole('button', { name: 'Confirmar e entrar' }).click();
+    await expect(page.getByText('O código tem 6 números.')).toBeVisible();
+    await page.getByLabel('Código de 6 dígitos').fill('111111');
+    await page.getByRole('button', { name: 'Confirmar e entrar' }).click();
+    await expect(page.getByRole('main').getByRole('alert')).toHaveText('Código incorreto.');
+    await page.getByLabel('Código de 6 dígitos').fill('246810');
+    await page.getByRole('button', { name: 'Confirmar e entrar' }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByTestId('link-conta')).toBeVisible();
+  });
+
+  test('REACTIVATION_AVAILABLE oferece reativar a conta', async ({ page, api }) => {
+    api.on('POST', /\/auth\/login$/, {
+      status: 200,
+      body: { status: 'REACTIVATION_AVAILABLE', user: null, deletionScheduledFor: '2026-11-20T03:15:00Z', message: 'Sua conta está marcada para exclusão. Quer reativá-la?' },
+    });
+    api.on('POST', /\/auth\/reactivate$/, (_req, mock) => ({
+      status: 200,
+      body: { status: 'AUTHENTICATED', user: mock.login(), deletionScheduledFor: null, message: null },
+    }));
+    await page.goto('/entrar?voltar=/conta');
+    await page.getByLabel('E-mail').fill('julia@example.com');
+    await page.getByLabel('Senha', { exact: true }).fill(SENHA_CERTA);
+    await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+    await expect(page.getByText('Sua conta está marcada para exclusão. Quer reativá-la?')).toBeVisible();
+    await expect(page.getByText('20 de novembro de 2026')).toBeVisible();
+    await page.getByRole('button', { name: 'Reativar minha conta' }).click();
+    await expect(page).toHaveURL(/\/conta$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Minha conta' })).toBeVisible();
+  });
+
+  test('429 bloqueia pelo Retry-After e libera depois', async ({ page, api }) => {
+    api.on('POST', /\/auth\/login$/, {
+      ...problem(429, 'Muitas tentativas. Tente de novo em 2 segundos ou redefina sua senha.'),
+      headers: { 'Retry-After': '2' },
+    });
+    await page.goto('/entrar');
+    await page.getByLabel('E-mail').fill('julia@example.com');
+    await page.getByLabel('Senha', { exact: true }).fill('qualquer');
+    await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+    await expect(page.getByRole('main').getByRole('alert')).toContainText('Muitas tentativas.');
+    await expect(page.getByRole('button', { name: /Aguarde \d segundos?/ })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Entrar', exact: true })).toBeEnabled({ timeout: 5_000 });
+  });
+
+  test('voltar externo é ignorado (sem redirecionamento aberto)', async ({ page }) => {
+    await page.goto('/entrar?voltar=%2F%2Fexemplo.com');
+    await page.getByLabel('E-mail').fill('julia@example.com');
+    await page.getByLabel('Senha', { exact: true }).fill(SENHA_CERTA);
+    await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+    await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
+  });
+
+  test('sem violações graves de acessibilidade', async ({ page }) => {
+    await page.goto('/entrar');
+    await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+    await expect(page.getByText('Informe o seu e-mail.')).toBeVisible();
+    await expectAccessibleInBothThemes(page, 'Entrar');
+  });
+});
+
+test('fixture de sessão segue o SessionUserView', () => {
+  const s = fixture<Record<string, unknown>>('sessao-comensal');
+  expect(Object.keys(s).sort()).toEqual(
+    ['accountStatus', 'category', 'categoryVerification', 'email', 'emailVerified', 'handle', 'id', 'mfaEnabled', 'minor', 'name', 'termsUpToDate'].sort(),
+  );
+});

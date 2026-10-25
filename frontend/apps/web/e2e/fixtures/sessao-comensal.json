@@ -1,0 +1,17 @@
+{
+  "id": 42,
+  "name": "Júlia Andrade",
+  "handle": "juliandrade",
+  "email": "julia@example.com",
+  "category": {
+    "code": "COMENSAL",
+    "label": "Comensal",
+    "color": "#48A8FF"
+  },
+  "categoryVerification": "NOT_REQUIRED",
+  "accountStatus": "ACTIVE",
+  "emailVerified": true,
+  "mfaEnabled": false,
+  "minor": false,
+  "termsUpToDate": true
+}

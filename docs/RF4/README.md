@@ -20,6 +20,17 @@ paths:
   - src/main/java/com/friendlyeats/api/MeController.java
   - src/main/java/com/friendlyeats/api/ViewerResolver.java
   - src/main/java/com/friendlyeats/api/ApiExceptionHandler.java
+  - frontend/apps/web/app/entrar/page.tsx
+  - frontend/apps/web/app/conta/page.tsx
+  - frontend/apps/web/components/auth/LoginView.tsx
+  - frontend/apps/web/components/account/AccountView.tsx
+  - frontend/apps/web/components/SiteHeader.tsx
+  - frontend/apps/web/components/Providers.tsx
+  - frontend/apps/web/lib/queries.ts
+  - frontend/apps/web/lib/safe-redirect.ts
+  - frontend/apps/web/lib/use-countdown.ts
+  - frontend/apps/web/next.config.ts
+  - frontend/packages/api/src/client.ts
 ---
 
 # RF4 · Login, sessão, controle de acesso e 2FA
@@ -90,4 +101,5 @@ paths:
 | Persistência | `user_mfa`, `user_recovery_code` (V1); sessões no Valkey `fe:session` | ✅ |
 | API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}`; `ApiExceptionHandler` em Problem Details pt-BR, com `409` (nunca `500`) quando dois pedidos correm para a mesma chave única ou a mesma versão (`DataIntegrityViolationException` com SQLState 23505, `ObjectOptimisticLockingFailureException`) | ✅ |
 | Testes | `EstablishmentApiIT.establishmentPageIsPublicOnlyWithTheOwnerSealAndHidesTheHomeKitchenStreet` (GET público sem sessão), `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults` (401 do serviço para o visitante em lugar 18+), `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice` (6 envios simultâneos da mesma avaliação: só 200, 201 ou 409); `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões; `secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor`: 8 logins simultâneos com o mesmo código e duas configurações concorrentes) | ✅ |
+| Tela | app web: `/entrar` (senha, passo do código 2FA, reativação, 429 com contagem regressiva), `/conta` (sessão, sair, "Meus lugares" com `publishBlockers`); cliente da API com `credentials: same-origin`, `X-XSRF-TOKEN` a partir do cookie e nova tentativa se o token estiver velho; `next.config.ts` repassa `/api` ao backend (mesma origem) e manda `X-Content-Type-Options`, `Referrer-Policy: no-referrer` e `frame-ancestors 'none'`; nada de token no `localStorage`; e2e `entrar.spec.ts` e `conta.spec.ts` | ✅ |
 | Pendências | passkeys/WebAuthn; e-mail transacional; CAPTCHA depois de muitas falhas | ⏳ |

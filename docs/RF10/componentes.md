@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    APP["App web · Explorar"] --> SEC["SecurityFilterChain<br/>GET /api/v1/establishments público"]
+    WEB["App web Next.js · Explorar /<br/>FiltersPanel · EstablishmentCard<br/>filtros na URL · coordenada só em memória"] --> APP["Cliente da API<br/>packages/api"] --> SEC["SecurityFilterChain<br/>GET /api/v1/establishments público"]
     SEC --> EC["EstablishmentController<br/>GET /establishments"]
     EC --> ES["EstablishmentSearch<br/>validação · SQL · cards"]
     ES --> NJ["NamedParameterJdbcTemplate"]

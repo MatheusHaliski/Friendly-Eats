@@ -49,6 +49,7 @@ public class EstablishmentController {
     /** Busca e filtros (RF10). Parâmetros repetíveis aceitam também lista separada por vírgula. */
     @GetMapping("/establishments")
     public EstablishmentSearch.Page search(@RequestParam(required = false) String q,
+                                           @RequestParam(required = false) List<String> chip,
                                            @RequestParam(required = false) List<String> cuisine,
                                            @RequestParam(required = false) List<String> format,
                                            @RequestParam(required = false) List<String> type,
@@ -63,7 +64,7 @@ public class EstablishmentController {
                                            @RequestParam(required = false) String sort,
                                            @RequestParam(required = false) Integer page,
                                            @RequestParam(required = false) Integer size) {
-        return search.search(viewer.viewerId(), new EstablishmentSearch.Query(q, cuisine, format, type, group, price,
+        return search.search(viewer.viewerId(), new EstablishmentSearch.Query(q, chip, cuisine, format, type, group, price,
                 minRating, dietary, lat, lng, radiusKm, municipality, sort, page, size));
     }
 

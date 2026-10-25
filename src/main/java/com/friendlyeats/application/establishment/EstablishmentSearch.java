@@ -55,7 +55,8 @@ public class EstablishmentSearch {
 
     public enum Sort { RELEVANCE, DISTANCE, RATING }
 
-    public record Query(String q, List<String> cuisines, List<String> formats, List<String> types, List<String> groups,
+    public record Query(String q, List<String> chips, List<String> cuisines, List<String> formats, List<String> types,
+                        List<String> groups,
                         List<String> prices, Double minRating, List<String> dietary, Double lat, Double lng,
                         Double radiusKm, String municipality, String sort, Integer page, Integer size) {
     }
@@ -120,6 +121,8 @@ public class EstablishmentSearch {
     @Transactional(readOnly = true)
     public Page search(Optional<Long> viewerId, Query q) {
         List<String> errors = new ArrayList<>();
+        Set<String> chips = codes(q.chips(), c -> Arrays.stream(CuisineChip.values())
+                .filter(x -> x.name().equals(c)).findFirst(), "chip", errors);
         Set<String> cuisines = expandCuisines(codes(q.cuisines(), Cuisine::fromCode, "cuisine", errors));
         Set<String> formats = codes(q.formats(), FoodFormat::fromCode, "format", errors);
         Set<String> types = codes(q.types(), EstablishmentType::fromCode, "type", errors);
@@ -182,6 +185,7 @@ public class EstablishmentSearch {
             where.append(" AND lower(f_unaccent(e.name)) LIKE '%' || lower(f_unaccent(:q)) || '%'");
             p.addValue("q", text.replace("\\", "").replace("%", "").replace("_", ""));
         }
+        chips(where, p, chips);
         anyOf(where, p, "e.cuisines_all", "c", cuisines);
         anyOf(where, p, "e.formats_all", "f", formats);
         if (!types.isEmpty()) {
@@ -303,6 +307,37 @@ public class EstablishmentSearch {
                     ? "score - " + DISTANCE_PENALTY + " * ln(1 + distance_m / 1000.0) DESC, id ASC"
                     : "score DESC, id ASC";
         };
+    }
+
+    /**
+     * Chip do card (RF7): a mesma derivação do {@link CuisineChip#of} — casa só vegana/vegetariana é VEGETAL; senão vale
+     * a macro da culinária principal; sem culinária, a família do formato principal. Vários chips = um deles.
+     */
+    private static void chips(StringBuilder where, MapSqlParameterSource p, Set<String> chips) {
+        if (chips.isEmpty()) {
+            return;
+        }
+        // COALESCE: sem a chave, ->> dá NULL, e NOT (NULL) também é NULL (falso no WHERE)
+        String vegetal = "(COALESCE(e.dietary_offers->>'VEGANO', '') = 'EXCLUSIVO'"
+                + " OR COALESCE(e.dietary_offers->>'VEGETARIANO', '') = 'EXCLUSIVO')";
+        List<String> any = new ArrayList<>();
+        for (String code : chips) {
+            CuisineChip chip = CuisineChip.valueOf(code);
+            if (chip == CuisineChip.VEGETAL) {
+                any.add(vegetal);
+                continue;
+            }
+            List<String> cuisines = Arrays.stream(Cuisine.values())
+                    .filter(c -> CuisineChip.of(c, null, Map.of()) == chip).map(Enum::name).toList();
+            List<String> formats = Arrays.stream(FoodFormat.values())
+                    .filter(f -> CuisineChip.of(null, f, Map.of()) == chip).map(Enum::name).toList();
+            String byCuisine = cuisines.isEmpty() ? "FALSE" : "e.primary_cuisine IN (:chipC_" + code + ")";
+            String byFormat = formats.isEmpty() ? "FALSE"
+                    : "(e.primary_cuisine IS NULL AND e.primary_format IN (:chipF_" + code + "))";
+            p.addValue("chipC_" + code, cuisines).addValue("chipF_" + code, formats);
+            any.add("(NOT " + vegetal + " AND (" + byCuisine + " OR " + byFormat + "))");
+        }
+        where.append(" AND (").append(String.join(" OR ", any)).append(")");
     }
 
     /** Uma das culinárias/um dos formatos: OR de {@code @>} para o índice GIN jsonb_path_ops servir. */

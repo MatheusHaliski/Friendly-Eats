@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    APP["App web / mobile"] --> SEC["SecurityFilterChain<br/>CSRF SPA · sessão"]
+    WEB["App web Next.js<br/>/cadastro · /confirmar-email · /termos<br/>RegisterView · VerifyEmailView"] --> NX["next.config rewrites<br/>/api mesma origem"] --> APP["Cliente da API<br/>packages/api · CSRF"] --> SEC["SecurityFilterChain<br/>CSRF SPA · sessão"]
     SEC --> AC["AuthController<br/>POST /api/v1/auth/register"]
     SEC --> LC["LegalController<br/>GET /api/v1/legal/terms"]
     SEC --> MC["MeController<br/>POST /api/v1/me/verify-email"]

@@ -13,6 +13,9 @@ paths:
   - src/main/java/com/friendlyeats/domain/taxonomy/CuisineChip.java
   - src/main/java/com/friendlyeats/application/establishment/TaxonomyCatalog.java
   - src/main/java/com/friendlyeats/api/TaxonomyController.java
+  - frontend/apps/web/components/CuisineChip.tsx
+  - frontend/apps/web/components/icons.tsx
+  - frontend/apps/web/lib/dietary.ts
 ---
 
 # RF7 · Classificar estabelecimento: culinária, formato, abordagem e estilos
@@ -80,4 +83,4 @@ paths:
 | API | `PUT /api/v1/establishments/{id}/classification`; `classification` no `POST` e no `PATCH`; `GET /api/v1/taxonomy` (`TaxonomyController`, `TaxonomyCatalog`), público no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Testes | `TaxonomyRulesTest.vocabulariesHaveTheResearchedSizeAndEveryCuisineDescendsFromItsMacroGeneric`, `TaxonomyRulesTest.classificationRejectsAncestorsAndChecksTheApproach`; `EstablishmentApiIT.establishmentPageIsPublicOnlyWithTheOwnerSealAndHidesTheHomeKitchenStreet` (cadastro com classificação) | ✅ |
 | Pendências | filtro por culinária com as descendentes, por região IBGE, formato e estilo (RF10); cardápio e alergênicos por item, com `CONTEM` e `PODE_CONTER` (RF9); tags de prato; moderação do uso de `VARIADA` com culinária dominante (RF13); aviso de contaminação cruzada em sem glúten e sem lactose (tela) | ⏳ |
-| Tela | seletor com a hierarquia, sugestão de culinária pelo formato e chip no card | ⏳ |
+| Tela | app web: chip no card e na página (`CuisineChip`, ícone Lucide + rótulo + cor), seção Classificação com estilos e o aviso de contaminação cruzada; seletor com a hierarquia no cadastro do lugar | ✅ chip · ⏳ seletor |

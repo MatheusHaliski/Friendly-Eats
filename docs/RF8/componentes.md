@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    APP["App web / mobile"] --> SEC["SecurityFilterChain<br/>GET /establishments/*/reviews público<br/>reviews/me com sessão · escrita com X-XSRF-TOKEN"]
+    WEB["App web Next.js<br/>ReviewForm · StarRatingInput · RatingSummary<br/>ReviewList · MyReviewArea"] --> APP["Cliente da API<br/>packages/api"] --> SEC["SecurityFilterChain<br/>GET /establishments/*/reviews público<br/>reviews/me com sessão · escrita com X-XSRF-TOKEN"]
     SEC --> EC["EstablishmentController<br/>PUT · GET · DELETE /reviews/me<br/>GET /reviews?page&size"]
     EC --> RS["ReviewService<br/>organização · dono · conta ativa"]
     RS --> ES["EstablishmentService · RF6<br/>requireVisible · selo · 18+"]

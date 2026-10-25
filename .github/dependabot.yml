@@ -37,3 +37,24 @@ updates:
       time: "06:00"
       timezone: America/Sao_Paulo
     labels: ["dependencies", "infra"]
+
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 10
+    groups:
+      next-react:
+        patterns: ["next", "eslint-config-next", "react", "react-dom", "@types/react", "@types/react-dom"]
+      testes:
+        patterns: ["vitest", "@testing-library/*", "jsdom", "@axe-core/playwright"]
+    ignore:
+      # o Chromium do ambiente de desenvolvimento está fixado nesta versão do Playwright
+      - dependency-name: "@playwright/test"
+      - dependency-name: "playwright-core"
+      # docs/DESIGN_SYSTEM.md fixa o Lucide na 0.460 ("um ícone, um significado")
+      - dependency-name: "lucide-react"
+    labels: ["dependencies", "frontend"]

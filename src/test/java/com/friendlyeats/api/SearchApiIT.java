@@ -140,6 +140,12 @@ class SearchApiIT {
         assertThat(names(visitor.get("/api/v1/establishments?format=PIZZA&format=PRATO_FEITO").getBody()))
                 .containsExactlyInAnyOrder("Cantina Nonna", "São Mineiro", "Marmitas da Lu");
         assertThat(names(visitor.get("/api/v1/establishments?dietary=VEGANO").getBody())).containsExactly("Dendê Vegano");
+        // chip do card: o baiano vegano é Vegetal (não Brasileira); a marmitaria sem culinária é Brasileira pelo formato
+        assertThat(names(visitor.get("/api/v1/establishments?chip=VEGETAL").getBody())).containsExactly("Dendê Vegano");
+        assertThat(names(visitor.get("/api/v1/establishments?chip=BRASILEIRA").getBody()))
+                .containsExactlyInAnyOrder("São Mineiro", "Marmitas da Lu");
+        assertThat(names(visitor.get("/api/v1/establishments?chip=EUROPEIA,ASIATICA").getBody()))
+                .containsExactlyInAnyOrder("Cantina Nonna", "Cozinha Fantasma");
         assertThat(names(visitor.get("/api/v1/establishments?q=sao min").getBody())).containsExactly("São Mineiro");
         assertThat(names(visitor.get("/api/v1/establishments?type=MARMITARIA,DARK_KITCHEN").getBody()))
                 .containsExactlyInAnyOrder("Marmitas da Lu", "Cozinha Fantasma");

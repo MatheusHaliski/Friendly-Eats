@@ -13,6 +13,14 @@ paths:
   - src/main/java/com/friendlyeats/application/establishment/RatingCalculator.java
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/ReviewRepository.java
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/ReviewRevisionRepository.java
+  - frontend/apps/web/components/place/MyReviewArea.tsx
+  - frontend/apps/web/components/place/ReviewForm.tsx
+  - frontend/apps/web/components/place/ReviewList.tsx
+  - frontend/apps/web/components/StarRatingInput.tsx
+  - frontend/apps/web/components/Stars.tsx
+  - frontend/apps/web/components/RatingSummary.tsx
+  - frontend/apps/web/lib/review.ts
+  - frontend/apps/web/lib/format.ts
 ---
 
 # RF8 · Avaliar com estrelas (1 a 5) e nota agregada
@@ -98,4 +106,4 @@ paths:
 | Configuração | `friendly-eats.rating.min-display` (5), `prior-weight` (10), `prior-mean` (4.2), `half-life-days` (365), `recency-floor` (0.25) | ✅ |
 | Testes | `TaxonomyRulesTest.starsAreIntegersAndDimensionsOnlyWhereTheyWereLived`, `TaxonomyRulesTest.ratingIsNoneThenFewThenAWeightedAverageAndRankingIsBayesian`; `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice`, `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults`, `EstablishmentApiIT.accountEliminationRemovesReviewsAndOwnedEstablishments` | ✅ |
 | Pendências | avaliação verificada por check-in, nota fiscal (NFC-e) ou pedido, com confiança 1,0; resposta pública do dono (`RULE_OWNER_REPLY`, RF12); moderação, `UNDER_REVIEW` e `REMOVED`, denúncia e regras `RULE_*` (RF13); C por categoria e município calculado em job diário; página "Como calculamos as notas" | ⏳ |
-| Tela | formulário com estrelas, modo e dimensões do modo; histograma e texto "4,3 de 5 · 128 avaliações" | ⏳ |
+| Tela | app web: formulário Avaliar (rádio de 5 estrelas rotulado, modo, dimensões do modo, gasto em reais, texto), editar e apagar a própria, histograma e "4,3 de 5 · 6 avaliações", lista paginada; e2e `lugar.spec.ts` com axe | ✅ |

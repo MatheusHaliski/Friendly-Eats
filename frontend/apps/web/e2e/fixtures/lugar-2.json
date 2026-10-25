@@ -1,0 +1,96 @@
+{
+  "id": 2,
+  "name": "Cantina Nonna Rosa",
+  "description": null,
+  "primaryType": {
+    "code": "RESTAURANTE_A_LA_CARTE",
+    "label": "Restaurante (à la carte)",
+    "group": "RESTAURANTE"
+  },
+  "secondaryTypes": [],
+  "group": {
+    "code": "RESTAURANTE",
+    "label": "Restaurantes",
+    "group": null
+  },
+  "classification": {
+    "primaryCuisine": {
+      "code": "ITALIANA",
+      "label": "Italiana",
+      "group": "EUROPA"
+    },
+    "secondaryCuisines": [],
+    "primaryFormat": {
+      "code": "MASSAS",
+      "label": "Massas",
+      "group": "REFEICOES"
+    },
+    "secondaryFormats": [],
+    "approach": {
+      "code": "TRADICIONAL",
+      "label": "Tradicional",
+      "group": null
+    },
+    "dietaryOffers": [],
+    "chip": {
+      "code": "EUROPEIA",
+      "label": "Europeia",
+      "lucideIcon": "wine",
+      "darkHex": "#8DBAFF",
+      "lightHex": "#0B57B8"
+    }
+  },
+  "price": {
+    "level": "PRICE_3",
+    "glyph": "$$$",
+    "label": "Caro",
+    "rangeLabel": "R$ 80 a R$ 160 por pessoa",
+    "source": "PRICE_SRC_REVIEWS",
+    "reportCount": 5,
+    "declaredMinCents": null,
+    "declaredMaxCents": null,
+    "accessibleLabel": "Faixa de preço: caro, R$ 80 a R$ 160 por pessoa, segundo 5 avaliações"
+  },
+  "location": {
+    "country": "BR",
+    "uf": "SP",
+    "municipalityIbge": "3550308",
+    "city": "São Paulo",
+    "neighborhood": "Bixiga",
+    "street": "Rua Treze de Maio",
+    "streetNumber": "200",
+    "complement": null,
+    "cep": null,
+    "latitude": null,
+    "longitude": null,
+    "geoPrecision": "GEO_MUNICIPIO_CENTROID",
+    "addressVisibility": "ADDR_PUBLIC_FULL",
+    "approximate": false
+  },
+  "rating": {
+    "state": "RATING_FEW",
+    "average": null,
+    "averageLabel": null,
+    "count": 3,
+    "histogram": {},
+    "dimensions": {},
+    "accessibleLabel": "3 avaliações, ainda sem nota média"
+  },
+  "owner": {
+    "id": 901,
+    "name": "Cantina Nonna Rosa",
+    "handle": "nonnarosa",
+    "category": {
+      "code": "ESTABELECIMENTO",
+      "label": "Estabelecimento",
+      "color": "#E88F12"
+    },
+    "verified": true
+  },
+  "adultsOnly": false,
+  "status": "ACTIVE",
+  "published": null,
+  "publishBlockers": null,
+  "createdAt": "2026-09-02T14:10:00Z",
+  "updatedAt": "2026-10-20T18:30:00Z"
+}

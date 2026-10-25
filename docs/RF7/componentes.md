@@ -2,7 +2,7 @@
 
 ```mermaid
 flowchart LR
-    APP["App web / mobile"] --> SEC["SecurityFilterChain<br/>GET /api/v1/taxonomy público<br/>PUT com sessão e X-XSRF-TOKEN"]
+    WEB["App web Next.js<br/>CuisineChip · classificação na página<br/>filtros do Explorar pela taxonomia"] --> APP["Cliente da API<br/>packages/api"] --> SEC["SecurityFilterChain<br/>GET /api/v1/taxonomy público<br/>PUT com sessão e X-XSRF-TOKEN"]
     SEC --> TC["TaxonomyController<br/>GET /api/v1/taxonomy<br/>Cache-Control 1 h, public"]
     SEC --> EC["EstablishmentController<br/>PUT /establishments/id/classification<br/>POST e PATCH com classification"]
     TC --> CAT["TaxonomyCatalog"]
