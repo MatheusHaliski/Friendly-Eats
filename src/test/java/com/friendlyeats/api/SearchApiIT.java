@@ -200,6 +200,9 @@ class SearchApiIT {
         assertThat(bad.getStatusCode().value()).isEqualTo(422);
         assertThat((List<String>) bad.getBody().get("errors")).hasSize(3);    // lat sem lng, raio e culinária desconhecida
         assertThat(visitor.get("/api/v1/establishments?lat=38.7&lng=-9.1").getStatusCode().value()).isEqualTo(422);
+        // NaN falha em toda comparação: a validação na forma positiva também o recusa
+        assertThat(visitor.get(near + "&radiusKm=NaN").getStatusCode().value()).isEqualTo(422);
+        assertThat(visitor.get("/api/v1/establishments?minRating=NaN").getStatusCode().value()).isEqualTo(422);
 
         Map<String, Object> paged = visitor.get("/api/v1/establishments?size=2&page=1").getBody();
         assertThat(paged).containsEntry("total", 5).containsEntry("page", 1);

@@ -131,7 +131,8 @@ public class EstablishmentSearch {
         Set<String> priceLevels = codes(q.prices(), c -> Arrays.stream(PriceLevel.values())
                 .filter(p -> p.name().equals(c)).findFirst(), "price", errors);
         Set<String> dietary = codes(q.dietary(), DietaryStyle::fromCode, "dietary", errors);
-        if (q.minRating() != null && (q.minRating() < 1 || q.minRating() > 5)) {
+        // na forma positiva: NaN falha em toda comparação e cairia fora de um "< 1 || > 5"
+        if (q.minRating() != null && !(q.minRating() >= 1 && q.minRating() <= 5)) {
             errors.add("Nota mínima entre 1 e 5.");
         }
         boolean geo = q.lat() != null || q.lng() != null;
@@ -141,7 +142,7 @@ public class EstablishmentSearch {
             errors.add("A busca por raio é só dentro do Brasil.");
         }
         double radius = q.radiusKm() == null ? DEFAULT_RADIUS_KM : q.radiusKm();
-        if (radius <= 0 || radius > MAX_RADIUS_KM) {
+        if (!(radius > 0 && radius <= MAX_RADIUS_KM)) {
             errors.add("Raio entre 0 e 50 km; para mais longe, busque pelo município.");
         }
         if (q.municipality() != null && !q.municipality().matches("^\\d{7}$")) {
@@ -216,8 +217,10 @@ public class EstablishmentSearch {
                      AND e.address_visibility <> 'ADDR_HIDDEN' AND e.point IS NOT NULL
                      AND ST_DWithin(e.point, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography, :prefilter)
                     """);
+            // o raio já passou pela validação (0 < raio ≤ 50 km); o limite fica explícito também na conta
+            long radiusM = radius > 0 && radius <= MAX_RADIUS_KM ? Math.round(radius * 1000) : 0;
             p.addValue("lat", q.lat()).addValue("lng", q.lng())
-                    .addValue("prefilter", radius * 1000 + PREFILTER_SLACK_M).addValue("radiusM", radius * 1000);
+                    .addValue("prefilter", radiusM + PREFILTER_SLACK_M).addValue("radiusM", radiusM);
         }
 
         // ponto público: arredondado na grade de 0,005° quando o endereço é aproximado (igual a publicCoordinate)
