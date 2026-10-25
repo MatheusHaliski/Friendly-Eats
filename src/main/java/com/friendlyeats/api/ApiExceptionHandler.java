@@ -3,10 +3,12 @@ package com.friendlyeats.api;
 import com.friendlyeats.application.account.AccountExceptions;
 import com.friendlyeats.application.media.MediaExceptions;
 import com.friendlyeats.application.common.CommonExceptions;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -17,6 +19,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  */
 @RestControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ApiExceptionHandler.class);
 
     @ExceptionHandler(CommonExceptions.NotFound.class)
     ProblemDetail notFound(CommonExceptions.NotFound e) {
@@ -89,6 +93,30 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail p = problem(HttpStatus.UNPROCESSABLE_CONTENT, "Revise os dados", e.getMessage());
         p.setProperty("errors", e.errors());
         return p;
+    }
+
+    /**
+     * Corrida entre dois pedidos (ex.: a mesma avaliação enviada duas vezes ao mesmo tempo bate na chave única, ou
+     * duas edições do mesmo lugar): o banco garante a regra e o segundo recebe 409, nunca 500.
+     */
+    @ExceptionHandler({DataIntegrityViolationException.class, ObjectOptimisticLockingFailureException.class})
+    ProblemDetail race(RuntimeException e) {
+        if (e instanceof DataIntegrityViolationException && !uniqueViolation(e)) {
+            // CHECK ou FK violado é bug de validação, não corrida: continua 500 (e vai para o log)
+            log.error("Violação de integridade não esperada", e);
+            return problem(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno", "Algo deu errado. Tente de novo mais tarde.");
+        }
+        return problem(HttpStatus.CONFLICT, "Ação não disponível agora",
+                "Outra alteração chegou antes desta. Recarregue e tente de novo.");
+    }
+
+    private static boolean uniqueViolation(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof java.sql.SQLException sql && "23505".equals(sql.getSQLState())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Cursor inválido, comentário vazio após remover espaços, etc. */

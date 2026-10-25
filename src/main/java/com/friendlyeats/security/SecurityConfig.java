@@ -30,8 +30,8 @@ import java.util.Map;
  *   <li>Login, 2FA, reativação e logout são endpoints próprios em {@code /api/v1/auth}; não há form login,
  *       HTTP Basic nem "lembrar de mim".</li>
  *   <li>CSRF no padrão SPA: cookie {@code XSRF-TOKEN} + cabeçalho {@code X-XSRF-TOKEN} em toda escrita.</li>
- *   <li>Leitura pública dos documentos legais; o resto exige sessão. Regras por estado da conta
- *       (ativa, pendente, suspensa) ficam nos serviços.</li>
+ *   <li>Leitura pública dos documentos legais, da taxonomia e das páginas de estabelecimento com as avaliações;
+ *       o resto exige sessão. Regras por estado da conta (ativa, pendente, suspensa) e a de 18+ ficam nos serviços.</li>
  * </ul>
  */
 @Configuration
@@ -46,7 +46,10 @@ public class SecurityConfig {
                 .securityContext(c -> c.securityContextRepository(securityContextRepository()))
                 .sessionManagement(s -> s.sessionFixation(f -> f.changeSessionId()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/v1/legal/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/legal/**", "/api/v1/taxonomy").permitAll()
+                        // páginas e avaliações de estabelecimentos são públicas; a regra de 18+ fica no serviço
+                        .requestMatchers(HttpMethod.GET, "/api/v1/establishments/*", "/api/v1/establishments/*/reviews")
+                        .permitAll()
                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e

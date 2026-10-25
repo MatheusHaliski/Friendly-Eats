@@ -18,7 +18,11 @@ public final class CommonExceptions {
     /** 401: ação exige usuário identificado. */
     public static class Unauthenticated extends RuntimeException {
         public Unauthenticated() {
-            super("Entre na sua conta para continuar.");
+            this("Entre na sua conta para continuar.");
+        }
+
+        public Unauthenticated(String message) {
+            super(message);
         }
     }
 

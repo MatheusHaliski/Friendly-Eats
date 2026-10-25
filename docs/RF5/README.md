@@ -2,7 +2,7 @@
 rf: RF5
 titulo: Direitos do titular · excluir conta com 30 dias para reativar e eliminação
 status: parcial
-cards: [FE-12, FE-13]
+cards: [FE-05]
 paths:
   - src/main/java/com/friendlyeats/domain/model/AccountStatus.java
   - src/main/java/com/friendlyeats/domain/model/UserAccount.java
@@ -23,16 +23,23 @@ paths:
 |---|---|
 | **Base legal (LGPD)** | Art. 18, VI (eliminação) · Art. 16 (conservação permitida) · Art. 37 (registro das operações) |
 | **Retenção legal** | Registros de acesso: 6 meses (Marco Civil, art. 15) |
-| **Status** | 🟡 Parcial: carência de 30 dias com reativação, job de eliminação (2FA, preferências, anonimização, foto de perfil no S3) e `user_key` (DEK) prontos; exportação, avaliações e fotos dos posts (chegam com RF8/RF9), Cassandra e destruição da DEK ainda não |
+| **Status** | 🟡 Parcial: carência de 30 dias com reativação, job de eliminação (avaliações escritas, estabelecimentos da conta, 2FA, preferências, anonimização, foto de perfil no S3) e `user_key` (DEK) prontos; exportação, posts e fotos dos posts (RF9), Cassandra e destruição da DEK ainda não |
 
 ## Critérios de aceite
 
 1. `POST /api/v1/me/deletion {password, code, confirm: true}` exige o **modo sudo** (senha + código do 2FA, se ativo).
 2. A conta vai para `PENDING_DELETION` com `deletion_scheduled_for = agora + 30 dias`; **todas** as sessões são
    encerradas, inclusive a atual. A resposta é `202 {deletionScheduledFor, graceDays: 30}`.
+   - Durante a carência, as avaliações da pessoa saem da nota agregada e da lista ([RF8](../RF8/README.md)) e as
+     páginas dos estabelecimentos dela saem do ar (`404`, [RF6](../RF6/README.md)). Nada é apagado: tudo volta se ela
+     reativar.
 3. Entrar de novo dentro do prazo oferece **reativar** ([RF4](../RF4/README.md)); reativar volta ao status anterior e
    limpa as datas.
 4. Vencido o prazo, o job diário (03:15, `friendly-eats.account.deletion-cron`) elimina uma conta por transação:
+   - apaga as **avaliações escritas** pela conta ([RF8](../RF8/README.md)), com as versões anteriores
+     (`review_revision`, `ON DELETE CASCADE`);
+   - apaga os **estabelecimentos** de que a conta é dona ([RF6](../RF6/README.md)), e as avaliações desses lugares,
+     de qualquer autor, saem junto por `ON DELETE CASCADE`;
    - apaga 2FA, códigos de recuperação e preferências;
    - anonimiza a conta (`ANONYMOUS_LGPD_DELETED`, terminal): nome "Usuário removido", e-mail técnico, sem foto, sem
      gosto (culinárias e estilos alimentares), sem localização, sem campos do tipo;
@@ -50,9 +57,9 @@ paths:
 | Camada | Artefato | Situação |
 |---|---|---|
 | Domínio | `UserAccount.requestDeletion/canReactivate/reactivate/anonymizeForLgpdDeletion`, `AccountStatus` (terminal) | ✅ |
-| Aplicação | `AccountService.requestDeletion/eliminate`, `AccountDeletionJob`, `MediaJanitor` | ✅ |
+| Aplicação | `AccountService.requestDeletion/eliminate` (avaliações, estabelecimentos, 2FA, preferências, anonimização, sessões e foto), `AccountDeletionJob`, `MediaJanitor` | ✅ |
 | API | `POST /api/v1/me/deletion`, `POST /api/v1/auth/reactivate` | ✅ |
-| Persistência | colunas de exclusão em `user_account`, índice das contas vencidas, `user_key` (DEK) | ✅ |
-| Testes | `AccountRulesTest.deletionGraceAllowsReactivationOnlyWithinTheWindow`, `DomainModelTest.lgpdDeletionIsTerminalAndErasesPersonalData`, `AuthApiIT.deletionHidesAccountAllowsReactivationWithin30DaysAndEliminatesAfter`, `ProfilePhotoApiIT.accountEliminationDeletesTheProfilePhotoFromTheBucket` | ✅ |
-| Pendências | exportar dados (Art. 18, V) por URL pré-assinada; apagar avaliações, posts e fotos (RF8, RF9); Cassandra; destruir a DEK (crypto-shredding); reconciliação diária | ⏳ |
+| Persistência | colunas de exclusão em `user_account`, índice das contas vencidas, `user_key` (DEK); `ReviewRepository.deleteAllWrittenBy` e `EstablishmentRepository.deleteAllOwnedBy`, com `ON DELETE CASCADE` de `establishment` para `review` e de `review` para `review_revision` (V2) | ✅ |
+| Testes | `AccountRulesTest.deletionGraceAllowsReactivationOnlyWithinTheWindow`, `DomainModelTest.lgpdDeletionIsTerminalAndErasesPersonalData`, `AuthApiIT.deletionHidesAccountAllowsReactivationWithin30DaysAndEliminatesAfter`, `ProfilePhotoApiIT.accountEliminationDeletesTheProfilePhotoFromTheBucket`, `EstablishmentApiIT.accountEliminationRemovesReviewsAndOwnedEstablishments` | ✅ |
+| Pendências | exportar dados (Art. 18, V) por URL pré-assinada; apagar posts e fotos dos posts (RF9); Cassandra; destruir a DEK (crypto-shredding); reconciliação diária | ⏳ |
 | Tela | modal de exclusão (`alertdialog` com consequências, data final, "Baixar uma cópia", caixa "Entendo" + senha + código) e oferta de reativação no login | ⏳ |

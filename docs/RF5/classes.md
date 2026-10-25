@@ -36,9 +36,19 @@ classDiagram
     class SessionService {
         +revokeAll(long, keepSessionId) int
     }
+    class ReviewRepository {
+        <<repository>>
+        +deleteAllWrittenBy(Long) int
+    }
+    class EstablishmentRepository {
+        <<repository>>
+        +deleteAllOwnedBy(Long) int
+    }
     AccountDeletionJob --> AccountService
     AccountService --> MediaJanitor
     AccountService --> SessionService
+    AccountService --> ReviewRepository : avaliações escritas · RF8
+    AccountService --> EstablishmentRepository : estabelecimentos da conta · RF6
     AccountService ..> UserAccount
     UserAccount --> AccountStatus
 ```

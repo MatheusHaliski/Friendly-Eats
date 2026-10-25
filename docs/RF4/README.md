@@ -2,7 +2,7 @@
 rf: RF4
 titulo: Login, sessão, controle de acesso e verificação em duas etapas (2FA)
 status: parcial
-cards: [FE-09, FE-10, FE-11]
+cards: [FE-04]
 paths:
   - src/main/java/com/friendlyeats/security/**
   - src/main/java/com/friendlyeats/application/account/AuthService.java
@@ -51,8 +51,12 @@ paths:
      com várias requisições ao mesmo tempo, só uma entra.
    - **Nunca sobrescreve o fator ativo:** confirmar uma configuração quando o 2FA já foi ligado em outra sessão dá
      `409` (`INSERT … ON CONFLICT DO NOTHING`).
-8. **Controle de acesso:** os Termos são públicos; todo o resto exige sessão; escrita exige `X-XSRF-TOKEN`; interagir
-   e enviar foto exigem conta `ACTIVE`; conta suspensa não entra.
+8. **Controle de acesso:** são `GET` públicos os Termos (`/api/v1/legal/**`), a taxonomia (`/api/v1/taxonomy`), a
+   página do estabelecimento (`/api/v1/establishments/*`) e a lista de avaliações dele
+   (`/api/v1/establishments/*/reviews`); todo o resto exige sessão; escrita exige `X-XSRF-TOKEN`; interagir e enviar
+   foto exigem conta `ACTIVE`; conta suspensa não entra. A regra de 18+ dos lugares de bebida alcoólica **não** está no
+   filtro, e sim no serviço ([RF6](../RF6/README.md)): o filtro deixa o `GET` passar e o serviço responde `401` com
+   mensagem própria ao visitante e `404` ao menor.
 9. **Sessões ativas:** lista com navegador/sistema, criação, último acesso e "esta sessão", **sem expor o id real**;
    encerrar uma ou todas as outras; trocar a senha encerra as outras.
 
@@ -61,6 +65,10 @@ paths:
 | Rota | Visitante | Sessão (conta pendente) | Sessão (conta ativa) |
 |---|---|---|---|
 | `GET /api/v1/legal/**` | ✅ | ✅ | ✅ |
+| `GET /api/v1/taxonomy` | ✅ | ✅ | ✅ |
+| `GET /api/v1/establishments/{id}` e `GET /api/v1/establishments/{id}/reviews` | ✅ página no ar (lugar 18+: 401 do serviço) | ✅ (menor de 18 em lugar 18+: 404) | ✅ (menor de 18 em lugar 18+: 404) |
+| `POST /api/v1/establishments`, `PATCH /api/v1/establishments/{id}`, `PUT …/classification` | 401 | 403 | ✅ só conta de estabelecimento ou varejo (senão 403), e o dono (senão 404) |
+| `…/reviews/me` (`GET`, `PUT`, `DELETE`) | 401 | ✅ `GET`/`DELETE` · 403 no `PUT` | ✅ (organização e dono: 403 no `PUT`) |
 | `/api/v1/auth/**` (cadastro, login, 2FA, reativar, sair) | ✅ | ✅ | ✅ |
 | `/api/v1/me/**` (perfil, preferências, sessões, 2FA, excluir) | 401 | ✅ | ✅ |
 | `POST /api/v1/media/uploads` (URL pré-assinada da foto) | 401 | 403 | ✅ |
@@ -76,9 +84,9 @@ paths:
 
 | Camada | Artefato | Situação |
 |---|---|---|
-| Segurança | `SecurityConfig` (CSRF SPA, regras, cabeçalhos), `SessionService`, `AbsoluteSessionTimeoutFilter`, `LoginThrottle`, `PendingLogin`, `FriendlyPrincipal`, `ClientInfo`, `AppSecrets`, `SecretCipher`, `Totp`, `ProblemResponses` | ✅ |
-| Aplicação | `AuthService` (login em etapas), `MfaService`, `StepUp` (modo sudo), `AccountNotifier` | ✅ |
+| Segurança | `SecurityConfig` (CSRF SPA, regras, cabeçalhos; `GET` público de `/api/v1/legal/**`, `/api/v1/taxonomy`, `/api/v1/establishments/*` e `/api/v1/establishments/*/reviews`, com a regra de 18+ no serviço), `SessionService`, `AbsoluteSessionTimeoutFilter`, `LoginThrottle`, `PendingLogin`, `FriendlyPrincipal`, `ClientInfo`, `AppSecrets`, `SecretCipher`, `Totp`, `ProblemResponses` | ✅ |
+| Aplicação | `AuthService` (login em etapas), `MfaService`, `StepUp` (modo sudo), `AccountNotifier`; `CommonExceptions.Unauthenticated(String)` para o `401` com mensagem própria (lugar 18+, RF6) | ✅ |
 | Persistência | `user_mfa`, `user_recovery_code` (V1); sessões no Valkey `fe:session` | ✅ |
-| API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}` | ✅ |
-| Testes | `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões; `secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor`: 8 logins simultâneos com o mesmo código e duas configurações concorrentes) | ✅ |
+| API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}`; `ApiExceptionHandler` em Problem Details pt-BR, com `409` (nunca `500`) quando dois pedidos correm para a mesma chave única ou a mesma versão (`DataIntegrityViolationException` com SQLState 23505, `ObjectOptimisticLockingFailureException`) | ✅ |
+| Testes | `EstablishmentApiIT.establishmentPageIsPublicOnlyWithTheOwnerSealAndHidesTheHomeKitchenStreet` (GET público sem sessão), `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults` (401 do serviço para o visitante em lugar 18+), `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice` (6 envios simultâneos da mesma avaliação: só 200, 201 ou 409); `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões; `secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor`: 8 logins simultâneos com o mesmo código e duas configurações concorrentes) | ✅ |
 | Pendências | passkeys/WebAuthn; e-mail transacional; CAPTCHA depois de muitas falhas | ⏳ |
