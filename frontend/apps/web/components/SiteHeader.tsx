@@ -77,7 +77,7 @@ function SessionLink() {
 function MainNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Principal" className="flex items-center gap-1">
+    <nav aria-label="Principal" className="flex flex-wrap items-center gap-1">
       <Link href="/feed" className="fe-btn fe-btn-sm" aria-current={pathname === '/feed' ? 'page' : undefined} data-testid="link-feed">
         <IconFeed size={18} />
         Feed
@@ -104,7 +104,7 @@ export function SiteHeader() {
         <Suspense fallback={<div className="flex-1" />}>
           <HeaderSearch />
         </Suspense>
-        <nav aria-label="Conta e preferências" className="ml-auto flex items-center gap-2">
+        <nav aria-label="Conta e preferências" className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
           <ThemeToggle />
           <SessionLink />
         </nav>
