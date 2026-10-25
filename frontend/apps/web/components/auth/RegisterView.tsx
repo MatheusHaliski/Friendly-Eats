@@ -300,7 +300,7 @@ export function RegisterView() {
   );
 }
 
-function DetailInput({
+export function DetailInput({
   field,
   id,
   value,

@@ -297,6 +297,112 @@
     box-shadow: inset 0 0 0 1px var(--chip);
   }
 
+  /* Interruptor (role="switch"): a posição do botão e o texto "Ligado/Desligado" dizem o estado, não só a cor. */
+  .fe-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.25rem;
+    border-radius: var(--fe-radius-pill);
+    background: transparent;
+    color: var(--fe-color-text);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex: none;
+  }
+
+  .fe-switch[disabled] {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .fe-switch-track {
+    position: relative;
+    display: inline-block;
+    width: 2.75rem;
+    height: 1.625rem;
+    border: 2px solid var(--fe-color-border-strong);
+    border-radius: var(--fe-radius-pill);
+    background: var(--fe-color-surface);
+    transition: background-color 120ms ease;
+  }
+
+  .fe-switch-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 999px;
+    background: var(--fe-color-border-strong);
+    transition: transform 120ms ease;
+  }
+
+  .fe-switch[aria-checked='true'] .fe-switch-track {
+    border-color: var(--fe-color-primary);
+    background: var(--fe-color-primary);
+  }
+
+  .fe-switch[aria-checked='true'] .fe-switch-track::after {
+    background: var(--fe-color-on-primary);
+    transform: translateX(1.125rem);
+  }
+
+  .fe-switch-state {
+    min-width: 4.75rem;
+    text-align: left;
+  }
+
+  /* Diálogo modal: fundo escurecido; o conteúdo atrás fica inerte enquanto ele está aberto. */
+  .fe-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    overflow-y: auto;
+    background: var(--fe-color-scrim);
+  }
+
+  .fe-dialog {
+    width: 100%;
+    max-width: 36rem;
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    border: 1px solid var(--fe-color-border-strong);
+    border-radius: var(--fe-radius-md);
+    background: var(--fe-color-bg);
+    color: var(--fe-color-text);
+  }
+
+  /* Rótulo do tipo de dado ou base legal ("Art. 7º, I"): contorno ≥ 3:1 e texto na cor normal. */
+  .fe-law {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0 0.5rem;
+    border: 1.5px solid var(--fe-color-border-strong);
+    border-radius: var(--fe-radius-sm);
+    font-family: var(--fe-font-family-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  /* QR code: sempre escuro sobre claro, nos dois temas, para o leitor do app autenticador. */
+  .fe-qr {
+    display: block;
+    width: 12rem;
+    height: 12rem;
+    padding: 0;
+    border-radius: var(--fe-radius-sm);
+    background: var(--fe-color-qr-light);
+    color: var(--fe-color-qr-dark);
+  }
+
   /* Texto corrido dos Termos. */
   .fe-prose {
     max-width: 72ch;

@@ -62,11 +62,28 @@ test.describe('Entrar (RF4)', () => {
     await page.getByLabel('E-mail').fill('julia@example.com');
     await page.getByLabel('Senha', { exact: true }).fill(SENHA_CERTA);
     await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-    await expect(page.getByText('Sua conta está marcada para exclusão. Quer reativá-la?')).toBeVisible();
-    await expect(page.getByText('20 de novembro de 2026')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Sua conta está em exclusão' })).toBeFocused();
+    await expect(page.getByText('Ela será excluída em 20 de novembro de 2026. Até lá você pode desistir: tudo volta como estava.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Manter a exclusão e sair' })).toBeVisible();
+    await expectAccessibleInBothThemes(page, 'Reativar conta');
     await page.getByRole('button', { name: 'Reativar minha conta' }).click();
     await expect(page).toHaveURL(/\/conta$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Minha conta' })).toBeVisible();
+  });
+
+  test('REACTIVATION_AVAILABLE: manter a exclusão volta ao início sem entrar', async ({ page, api }) => {
+    api.on('POST', /\/auth\/login$/, {
+      status: 200,
+      body: { status: 'REACTIVATION_AVAILABLE', user: null, deletionScheduledFor: '2026-11-20T03:15:00Z', message: 'Sua conta está marcada para exclusão. Quer reativá-la?' },
+    });
+    await page.goto('/entrar');
+    await page.getByLabel('E-mail').fill('julia@example.com');
+    await page.getByLabel('Senha', { exact: true }).fill(SENHA_CERTA);
+    await page.getByRole('button', { name: 'Entrar', exact: true }).click();
+    await page.getByRole('button', { name: 'Manter a exclusão e sair' }).click();
+    await expect(page).toHaveURL(/127\.0\.0\.1:\d+\/$/);
+    await expect(page.getByRole('link', { name: 'Entrar' })).toBeVisible();
+    expect(api.find('POST', /\/auth\/reactivate$/)).toHaveLength(0);
   });
 
   test('429 bloqueia pelo Retry-After e libera depois', async ({ page, api }) => {

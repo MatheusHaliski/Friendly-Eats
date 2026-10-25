@@ -11,6 +11,11 @@ paths:
   - src/main/java/com/friendlyeats/application/account/ProfileService.java
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/UserAccountRepository.java
   - src/main/resources/db/migration/V1__baseline.sql
+  - frontend/apps/web/app/configuracoes/privacidade/page.tsx
+  - frontend/apps/web/components/settings/PrivacySection.tsx
+  - frontend/apps/web/components/settings/ConsentSwitch.tsx
+  - frontend/apps/web/components/settings/TasteFields.tsx
+  - frontend/apps/web/components/Switch.tsx
 ---
 
 # RF3 · Consentimentos e privacidade
@@ -74,3 +79,4 @@ pontual, não como o perfil inteiro.
 | Perfil | estilos alimentares exigem o consentimento sensível; trava `UserAccountRepository.lockById` contra corrida | ✅ |
 | Reconsentimento | nova `privacy-version` pede reconfirmação das finalidades ligadas | ⏳ |
 | Consumidores | feed personalizado e marketing conferem `ConsentService.granted` quando existirem | ⏳ |
+| Telas | app web `/configuracoes/privacidade`: preferências de privacidade e uma chave por finalidade (`ConsentSwitch`, `role=switch`, estado escrito "Ligado/Desligado"), base legal e selo "Dado sensível"; chave travada pelo `lockedForMinor` com "Disponível a partir dos 16/18 anos"; o cartão "Seu gosto" do perfil bloqueia os estilos alimentares sem o consentimento e recarrega o perfil depois de cada mudança; e2e `configuracoes.spec.ts` (ligar o sensível e salvar estilos) | ✅ |

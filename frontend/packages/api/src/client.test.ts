@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 type FetchArgs = [url: string, init: RequestInit & { headers: Record<string, string> }];
 const mockFetch = (impl: (...args: FetchArgs) => Promise<Response>) => vi.fn<(...args: FetchArgs) => Promise<Response>>(impl);
 const asFetch = (f: unknown) => f as typeof fetch;
-import { ApiError, createClient, readCookie, toQuery } from './client.ts';
+import { ApiError, createClient, readCookie, toQuery, uploadToBucket } from './client.ts';
 import { createApi } from './endpoints.ts';
 
 function json(status: number, body: unknown, headers: Record<string, string> = {}): Response {
@@ -112,5 +112,46 @@ describe('createClient', () => {
     const draft = { rating: 4, visitMode: 'DINE_IN' as const, dimensions: {}, spentPerPersonCents: null, body: null };
     await expect(api.establishments.saveMyReview(1, draft)).resolves.toMatchObject({ created: true });
     await expect(api.establishments.saveMyReview(1, draft)).resolves.toMatchObject({ created: false });
+  });
+
+  it('202 com corpo devolve o corpo (pedido de exclusão) e 202 vazio devolve undefined', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(json(202, { accountStatus: 'PENDING_DELETION', deletionScheduledFor: '2026-11-24T12:00:00Z', graceDays: 30 }))
+      .mockResolvedValueOnce(new Response(null, { status: 202 }));
+    const api = createApi(createClient({ fetch, cookies: () => 'XSRF-TOKEN=t' }));
+    await expect(api.me.requestDeletion({ password: 'x', code: null, confirm: true })).resolves.toMatchObject({ graceDays: 30 });
+    await expect(api.me.resendVerification()).resolves.toBeUndefined();
+  });
+
+  it('PATCH e DELETE com corpo mandam o CSRF e leem a resposta', async () => {
+    const fetch = vi.fn().mockResolvedValueOnce(json(200, { fontScale: 120 })).mockResolvedValueOnce(json(200, { closed: 2 }));
+    const api = createApi(createClient({ fetch, cookies: () => 'XSRF-TOKEN=t' }));
+    await expect(api.me.updatePreferences({ fontScale: 120 })).resolves.toEqual({ fontScale: 120 });
+    expect(fetch.mock.calls[0]![1].method).toBe('PATCH');
+    expect(fetch.mock.calls[0]![1].headers['X-XSRF-TOKEN']).toBe('t');
+    await expect(api.me.endOtherSessions()).resolves.toEqual({ closed: 2 });
+    expect(fetch.mock.calls[1]![0]).toBe('/api/v1/me/sessions');
+    expect(fetch.mock.calls[1]![1].method).toBe('DELETE');
+  });
+});
+
+describe('uploadToBucket', () => {
+  const ticket = { uploadUrl: 'https://bucket.exemplo/uploads/42/a.jpg?X-Amz-Signature=abc', method: 'PUT', headers: { 'Content-Type': 'image/jpeg' } };
+
+  it('PUT direto, sem cookie nem CSRF, só com os cabeçalhos assinados', async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 200 }));
+    const file = new Blob(['x'], { type: 'image/jpeg' });
+    await uploadToBucket(ticket, file, fetch);
+    const [url, init] = fetch.mock.calls[0]!;
+    expect(url).toBe(ticket.uploadUrl);
+    expect(init).toMatchObject({ method: 'PUT', credentials: 'omit', headers: { 'Content-Type': 'image/jpeg' }, body: file });
+  });
+
+  it('403 do bucket vira mensagem em pt-BR', async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response('<Error/>', { status: 403 }));
+    const err = (await uploadToBucket(ticket, new Blob(['x']), fetch).catch((e: unknown) => e)) as ApiError;
+    expect(err).toBeInstanceOf(ApiError);
+    expect(err.detail).toMatch(/Escolha a foto de novo/);
   });
 });

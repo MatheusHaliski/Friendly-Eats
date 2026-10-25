@@ -73,6 +73,10 @@ describe('temas', () => {
     expect(tokens.light['color-bg']).toBe('#FFFFFF');
   });
 
+  it('o QR code do 2FA é escuro sobre claro nos dois temas (21:1)', () => {
+    expect(contraste(tokens.base['color-qr-dark'], tokens.base['color-qr-light'])).toBeGreaterThanOrEqual(21);
+  });
+
   it('a conta Oficial tem anel no tema escuro (o preto sozinho dá 1,06:1)', () => {
     expect(contraste(tokens.dark['color-account-oficial-fill'], tokens.dark['color-bg'])).toBeLessThan(1.1);
     expect(contraste(tokens.dark['color-account-oficial-ring'], tokens.dark['color-bg'])).toBeGreaterThan(12);

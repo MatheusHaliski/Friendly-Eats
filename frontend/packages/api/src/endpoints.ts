@@ -1,9 +1,22 @@
 // Um método por rota da API usada pelo web (controllers em src/main/java/com/friendlyeats/api/).
 import { createClient, type ApiClient, type ClientOptions } from './client.ts';
 import type {
+  ConsentList,
+  ConsentPurpose,
+  ConsentView,
+  DeletionRequest,
+  DeletionView,
   EstablishmentView,
   LoginRequest,
   LoginResult,
+  MfaSetupView,
+  MfaStatusView,
+  PasswordChange,
+  PreferencesPatch,
+  PreferencesView,
+  ProfilePatch,
+  ProfileView,
+  RecoveryCodesView,
   RegisterRequest,
   ReviewDraft,
   ReviewPage,
@@ -11,8 +24,12 @@ import type {
   SearchPage,
   SearchParams,
   SessionUserView,
+  SessionView,
+  SudoRequest,
   TaxonomyCatalog,
   TermsView,
+  UploadRequest,
+  UploadTicket,
 } from './types.ts';
 
 export function createApi(client: ApiClient = createClient()) {
@@ -40,6 +57,45 @@ export function createApi(client: ApiClient = createClient()) {
       verifyEmail: (code: string) => client.post<SessionUserView>('/api/v1/me/verify-email', { code }),
       resendVerification: () => client.post<void>('/api/v1/me/verify-email/resend'),
       establishments: () => client.get<EstablishmentView[]>('/api/v1/me/establishments'),
+
+      // perfil e foto (RF2)
+      profile: () => client.get<ProfileView>('/api/v1/me/profile'),
+      updateProfile: (patch: ProfilePatch) => client.patch<ProfileView>('/api/v1/me/profile', patch),
+      /** objectKey do POST /api/v1/media/uploads, depois do PUT no bucket. */
+      setPhoto: (objectKey: string) => client.put<ProfileView>('/api/v1/me/photo', { objectKey }).then((r) => r.data),
+      removePhoto: () => client.delJson<ProfileView>('/api/v1/me/photo'),
+
+      // preferências (RF2, RF3)
+      preferences: () => client.get<PreferencesView>('/api/v1/me/preferences'),
+      updatePreferences: (patch: PreferencesPatch) => client.patch<PreferencesView>('/api/v1/me/preferences', patch),
+
+      // consentimentos (RF3)
+      consents: () => client.get<ConsentList>('/api/v1/me/consents'),
+      setConsent: (purpose: ConsentPurpose, granted: boolean) =>
+        client.put<ConsentView>(`/api/v1/me/consents/${encodeURIComponent(purpose)}`, { granted }).then((r) => r.data),
+
+      // senha, sessões e 2FA (RF4)
+      changePassword: (body: PasswordChange) => client.post<{ otherSessionsClosed: number }>('/api/v1/me/password', body),
+      sessions: () => client.get<SessionView[]>('/api/v1/me/sessions'),
+      endSession: (id: string) => client.del(`/api/v1/me/sessions/${encodeURIComponent(id)}`),
+      endOtherSessions: () => client.delJson<{ closed: number }>('/api/v1/me/sessions'),
+      mfa: {
+        status: () => client.get<MfaStatusView>('/api/v1/me/mfa'),
+        /** Passo 1: senha (modo sudo); devolve a chave e a otpauth:// do QR code. */
+        start: (body: SudoRequest) => client.post<MfaSetupView>('/api/v1/me/mfa/totp', body),
+        /** Passo 2: o código do app liga o 2FA e devolve os 10 códigos de recuperação. */
+        confirm: (code: string) => client.post<RecoveryCodesView>('/api/v1/me/mfa/totp/confirm', { code }),
+        regenerateCodes: (body: SudoRequest) => client.post<RecoveryCodesView>('/api/v1/me/mfa/recovery-codes', body),
+        disable: (body: SudoRequest) => client.post<MfaStatusView>('/api/v1/me/mfa/disable', body),
+      },
+
+      // excluir conta (RF5): encerra todas as sessões, inclusive esta
+      requestDeletion: (body: DeletionRequest) => client.post<DeletionView>('/api/v1/me/deletion', body),
+    },
+
+    media: {
+      /** URL pré-assinada para enviar a foto direto ao bucket (RF2). */
+      requestUpload: (body: UploadRequest) => client.post<UploadTicket>('/api/v1/media/uploads', body),
     },
 
     establishments: {

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { useSession } from '@/lib/queries';
-import { IconAccount, IconLogin, IconSearch } from './icons';
+import { IconAccount, IconLogin, IconSearch, IconSettings } from './icons';
 import { ThemeToggle } from './ThemeToggle';
 
 function HeaderSearch() {
@@ -37,6 +37,7 @@ function HeaderSearch() {
 
 function SessionLink() {
   const { data: user, isPending } = useSession();
+  const pathname = usePathname();
   if (isPending) return <span className="inline-block h-11 w-24" aria-hidden="true" />;
   if (!user) {
     return (
@@ -47,13 +48,24 @@ function SessionLink() {
     );
   }
   return (
-    <Link href="/conta" className="fe-btn fe-btn-sm" data-testid="link-conta">
-      <IconAccount size={18} />
-      <span>
-        Conta<span className="sr-only"> de</span> <span className="hidden md:inline">@{user.handle}</span>
-        <span className="sr-only md:hidden">@{user.handle}</span>
-      </span>
-    </Link>
+    <>
+      <Link
+        href="/configuracoes"
+        className="fe-btn fe-btn-sm"
+        data-testid="link-configuracoes"
+        aria-current={pathname.startsWith('/configuracoes') ? 'page' : undefined}
+      >
+        <IconSettings size={18} />
+        <span className="sr-only md:not-sr-only">Configurações</span>
+      </Link>
+      <Link href="/conta" className="fe-btn fe-btn-sm" data-testid="link-conta">
+        <IconAccount size={18} />
+        <span>
+          Conta<span className="sr-only"> de</span> <span className="hidden md:inline">@{user.handle}</span>
+          <span className="sr-only md:hidden">@{user.handle}</span>
+        </span>
+      </Link>
+    </>
   );
 }
 

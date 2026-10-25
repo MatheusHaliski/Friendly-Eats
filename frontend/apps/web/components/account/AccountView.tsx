@@ -1,18 +1,17 @@
 'use client';
 
 import type { EstablishmentView, SessionUserView } from '@friendly-eats/api';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { AccountBadge, VerifiedSeal, verificationText } from '@/components/AccountBadge';
 import { Notice } from '@/components/Form';
-import { IconInfo, IconLogout, IconSuccess } from '@/components/icons';
-import { broadcastLogout } from '@/components/Providers';
+import { IconInfo, IconLogout, IconSettings, IconSuccess } from '@/components/icons';
 import { ownsPlaces } from '@/lib/account-types';
 import { api } from '@/lib/api';
-import { SESSION_KEY, useSession } from '@/lib/queries';
-import { loginHref } from '@/lib/safe-redirect';
+import { useRequireSession } from '@/lib/queries';
+import { SETTINGS_SECTIONS } from '@/lib/settings-sections';
+import { useLeaveAccount } from '@/lib/use-leave';
 
 const STATUS_TEXT: Record<string, string> = {
   PENDING_VERIFICATION: 'E-mail não confirmado',
@@ -24,27 +23,14 @@ const STATUS_TEXT: Record<string, string> = {
 
 /** Minha conta (RF4): dados da sessão, sair e "Meus lugares" (RF6) para Estabelecimento e Varejo. */
 export function AccountView() {
-  const session = useSession();
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const session = useRequireSession('/conta');
+  const leave = useLeaveAccount();
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const user = session.data;
-  // ao sair, a sessão vira null antes de a navegação para / terminar: não mandar para o login nesse meio-tempo
-  const leaving = useRef(false);
-
-  useEffect(() => {
-    if (session.isSuccess && !user && !leaving.current) router.replace(loginHref('/conta'));
-  }, [session.isSuccess, user, router]);
 
   const logout = useMutation({
     mutationFn: () => api.auth.logout(),
-    onSuccess: () => {
-      leaving.current = true;
-      router.push('/');
-      queryClient.setQueryData(SESSION_KEY, null);
-      queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== SESSION_KEY[0] });
-      broadcastLogout();
-    },
+    onSuccess: () => leave('/'),
     onError: () => setLogoutError('Não foi possível sair agora. Tente de novo.'),
   });
 
@@ -65,6 +51,7 @@ export function AccountView() {
         </Notice>
       )}
       <AccountDetails user={user} />
+      <SettingsLinks />
       {ownsPlaces(user.category.code) && <MyPlaces />}
     </div>
   );
@@ -117,6 +104,28 @@ function AccountDetails({ user }: { user: SessionUserView }) {
         </Notice>
       )}
       {user.minor && <p className="text-sm text-muted">Conta de menor de 16 anos: as proteções ficam ligadas e só o responsável altera.</p>}
+    </section>
+  );
+}
+
+/** Atalhos para /configuracoes: perfil, exibição, privacidade, segurança e excluir conta. */
+function SettingsLinks() {
+  return (
+    <section aria-labelledby="titulo-configuracoes" className="grid gap-3">
+      <h2 id="titulo-configuracoes" className="flex items-center gap-2 text-xl font-bold">
+        <IconSettings size={20} />
+        Configurações
+      </h2>
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {SETTINGS_SECTIONS.map((s) => (
+          <li key={s.slug}>
+            <Link href={s.href} className="fe-card flex h-full flex-col gap-0.5 p-4 no-underline hover:bg-sunken">
+              <span className="font-bold underline">{s.title}</span>
+              <span className="text-sm text-muted">{s.description}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

@@ -6,6 +6,10 @@
 //   erro de formulário → circle-alert (triangle-alert e shield-alert são do alerta sanitário)
 // Os demais (search, map-pin, locate-fixed, sun, moon, log-in, log-out, circle-user, circle-check, info, pencil,
 // trash-2, chevron-left, chevron-right, mail, x) têm um sentido só cada um na interface.
+// Configurações: settings (Configurações), user-pen (editar perfil), palette (exibição), shield (privacidade),
+//   shield-check (2FA ativada), key-round (senha e segurança), lock (bloqueado até consentir), clock (prazo),
+//   copy (copiar), download (baixar), image-up (enviar foto; camera é da conta Criador), monitor e smartphone
+//   (aparelho da sessão).
 import {
   BadgeCheck,
   Bean,
@@ -19,8 +23,21 @@ import {
   CircleUser,
   Coffee,
   CookingPot,
+  Clock,
+  Copy,
+  Download,
+  ImageUp,
   Info,
+  KeyRound,
   Landmark,
+  Lock,
+  Monitor,
+  Palette,
+  Settings,
+  Shield,
+  ShieldCheck,
+  Smartphone,
+  UserPen,
   LocateFixed,
   LogIn,
   LogOut,
@@ -78,6 +95,19 @@ export const IconEmail = decorative(Mail);
 export const IconClose = decorative(X);
 export const IconGlutenFree = decorative(WheatOff);
 export const IconLactoseFree = decorative(MilkOff);
+export const IconSettings = decorative(Settings);
+export const IconProfileEdit = decorative(UserPen);
+export const IconDisplay = decorative(Palette);
+export const IconPrivacy = decorative(Shield);
+export const IconMfaOn = decorative(ShieldCheck);
+export const IconSecurity = decorative(KeyRound);
+export const IconLocked = decorative(Lock);
+export const IconDeadline = decorative(Clock);
+export const IconCopy = decorative(Copy);
+export const IconDownload = decorative(Download);
+export const IconPhotoUpload = decorative(ImageUp);
+export const IconDesktop = decorative(Monitor);
+export const IconPhone = decorative(Smartphone);
 
 /** Pictogramas dos 8 chips de culinária, pelo nome que a API manda em ChipView.lucideIcon. */
 export const CHIP_ICONS: Record<string, ReturnType<typeof decorative>> = {

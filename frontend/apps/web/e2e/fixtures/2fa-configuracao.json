@@ -1,0 +1,7 @@
+{
+  "secret": "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP",
+  "otpauthUri": "otpauth://totp/Friendly%20Eats:julia%40example.com?secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP&issuer=Friendly%20Eats&algorithm=SHA1&digits=6&period=30",
+  "issuer": "Friendly Eats",
+  "account": "julia@example.com",
+  "expiresAt": "2026-10-25T14:10:00Z"
+}

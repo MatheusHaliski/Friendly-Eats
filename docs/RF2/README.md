@@ -18,6 +18,26 @@ paths:
   - src/main/java/com/friendlyeats/api/MeController.java
   - src/main/java/com/friendlyeats/api/MediaUploadController.java
   - infra/garage/**
+  - frontend/apps/web/app/configuracoes/layout.tsx
+  - frontend/apps/web/app/configuracoes/page.tsx
+  - frontend/apps/web/app/configuracoes/perfil/page.tsx
+  - frontend/apps/web/app/configuracoes/exibicao/page.tsx
+  - frontend/apps/web/components/settings/SettingsShell.tsx
+  - frontend/apps/web/components/settings/SettingsNav.tsx
+  - frontend/apps/web/components/settings/SettingsIndex.tsx
+  - frontend/apps/web/components/settings/SectionHeading.tsx
+  - frontend/apps/web/components/settings/ProfileSection.tsx
+  - frontend/apps/web/components/settings/PhotoField.tsx
+  - frontend/apps/web/components/settings/TasteFields.tsx
+  - frontend/apps/web/components/settings/DisplaySection.tsx
+  - frontend/apps/web/components/settings/PreferenceControls.tsx
+  - frontend/apps/web/components/ThemeToggle.tsx
+  - frontend/apps/web/lib/photo.ts
+  - frontend/apps/web/lib/settings-sections.ts
+  - frontend/apps/web/lib/theme.ts
+  - frontend/apps/web/lib/field-errors.ts
+  - frontend/packages/api/src/endpoints.ts
+  - frontend/packages/api/src/types.ts
 ---
 
 # RF2 · Perfil, preferências e foto
@@ -73,3 +93,4 @@ paths:
 | Gosto | `ProfilePatch`/`ProfileView` com `favoriteCuisines` e `dietaryStyles`; estilos conferem `ConsentService.granted` com a conta travada (`UserAccountRepository.lockById`); `ConsentApiIT` | ✅ |
 | Testes | `AuthApiIT.preferencesIncludingAppBackgroundAndProfileEditing`, `AuthApiIT.minorsKeepProtectiveDefaults`, `ImageSanitizerTest` (EXIF/GPS some, 8 orientações, recorte de avatar, bomba de descompressão), `ProfilePhotoApiIT` (Garage real: envio pré-assinado, chave alheia, tamanho fora da assinatura, arquivo que não é foto, troca e remoção), `UserAccountRepositoryIT` | ✅ |
 | Pendências | troca de e-mail; auditoria | ⏳ |
+| Telas | app web `/configuracoes` (lista no celular, menu lateral no computador), **Perfil** (nome, @, bio, pronomes, links, local, contato, campos do tipo, foto com envio direto ao bucket e o cartão "Seu gosto" com até 5 culinárias e os estilos alimentares) e **Exibição** (tema aplicado ao app inteiro, fundo, fonte, movimento, aba inicial e lembrete de uso travado para menor de 16); erros do 422 por campo (`mapProfileErrors`); e2e `configuracoes.spec.ts` (troca de foto, gosto, menor com proteções travadas) com axe nos dois temas | ✅ |

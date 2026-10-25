@@ -1,5 +1,22 @@
 {
   "$description": "Tokens que não mudam com o tema (docs/DESIGN_SYSTEM.md).",
+  "color": {
+    "qr-light": {
+      "$type": "color",
+      "$value": "#FFFFFF",
+      "$description": "Fundo do QR code do 2FA: sempre claro, nos dois temas, para o leitor do app autenticador."
+    },
+    "qr-dark": {
+      "$type": "color",
+      "$value": "#000000",
+      "$description": "Módulos do QR code (21:1 sobre o fundo dele)."
+    },
+    "scrim": {
+      "$type": "color",
+      "$value": "#000000A6",
+      "$description": "Véu atrás de um diálogo modal (65 % de preto)."
+    }
+  },
   "font": {
     "family": {
       "sans": {

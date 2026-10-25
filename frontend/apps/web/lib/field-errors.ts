@@ -76,3 +76,44 @@ export function mapReviewErrors(errors: string[], dimensionLabels: Record<string
   }
   return out;
 }
+
+const PROFILE_RULES: Rule[] = [
+  { test: /nome de exibição/i, field: 'name' },
+  { test: /@usuário/, field: 'handle' },
+  { test: /\bbio\b/i, field: 'bio' },
+  { test: /pronome/i, field: 'pronouns' },
+  { test: /^Até 5 links/, field: 'links' },
+  { test: /^País/, field: 'countryOfResidence' },
+  { test: /e-mail de recuperação/i, field: 'recoveryEmail' },
+  { test: /^Celular/, field: 'cellphoneNumber' },
+  { test: /culinária/i, field: 'favoriteCuisines' },
+  { test: /estilos? alimentar/i, field: 'dietaryStyles' },
+  { test: /^Sem CNPJ\?|CNPJ inválido/, field: 'cnpj' },
+  { test: /CPF inválido/, field: 'cpf' },
+  { test: /site completo/, field: 'website' },
+  { test: /CNAE/, field: 'cnae' },
+];
+
+/**
+ * Perfil (RF2): mensagens do ProfileService e do UserTypeDetailsValidator. {@code detailLabels} são os campos do
+ * tipo de conta visíveis, com o rótulo de cada um.
+ */
+export function mapProfileErrors(errors: string[], detailLabels: Record<string, string>): MappedErrors {
+  const out: MappedErrors = { fields: {}, general: [] };
+  for (const raw of errors) {
+    const quoted = /"(\w+)"/.exec(raw)?.[1];
+    if (quoted && detailLabels[quoted] && !/não se aplica/.test(raw)) {
+      add(out, quoted, humanize(raw, detailLabels));
+      continue;
+    }
+    const rule = PROFILE_RULES.find((r) => r.test.test(raw));
+    add(out, rule?.field ?? null, humanize(raw, detailLabels));
+  }
+  return out;
+}
+
+/** Modo sudo (StepUp): 403 "Senha incorreta." ou "Senha ou código do app autenticador incorretos.". */
+export function mapSudoError(detail: string, withCode: boolean): MappedErrors {
+  const field = withCode && /código/.test(detail) ? 'code' : 'password';
+  return { fields: { [field]: [detail] }, general: [] };
+}

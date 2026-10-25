@@ -85,6 +85,207 @@ export interface LoginRequest {
   password: string;
 }
 
+// ------------------------------------------------------------ Configurações (RF2 · RF3 · RF4 · RF5)
+
+/** AccountViews.ProfileView (GET/PATCH /api/v1/me/profile): o perfil completo, só para o titular. */
+export interface ProfileView {
+  id: number;
+  name: string;
+  handle: string;
+  email: string;
+  recoveryEmail: string | null;
+  cellphoneNumber: string | null;
+  /** AAAA-MM-DD; só muda pelo suporte. */
+  dateOfBirth: string | null;
+  bio: string | null;
+  pronouns: string[];
+  links: string[];
+  countryOfResidence: string | null;
+  stateOfResidence: string | null;
+  cityOfResidence: string | null;
+  category: CategoryView;
+  categoryVerification: CategoryVerification;
+  typeDetails: Record<string, unknown>;
+  avatarObjectKey: string | null;
+  avatarUrl: string | null;
+  /** Até 5 códigos de culinária da taxonomia. */
+  favoriteCuisines: string[];
+  /** Estilos alimentares (dado sensível, LGPD Art. 11): só com o consentimento SENSITIVE_PROFILE_DATA. */
+  dietaryStyles: string[];
+}
+
+/** ProfileService.ProfilePatch: campo ausente (ou null) fica como está. */
+export interface ProfilePatch {
+  name?: string;
+  handle?: string;
+  bio?: string;
+  pronouns?: string[];
+  links?: string[];
+  countryOfResidence?: string;
+  stateOfResidence?: string;
+  cityOfResidence?: string;
+  recoveryEmail?: string;
+  cellphoneNumber?: string;
+  typeDetails?: Record<string, string>;
+  favoriteCuisines?: string[];
+  dietaryStyles?: string[];
+}
+
+/** UserPreference.Theme, AppBackground, HomeTab, CommentAudience e SensitiveContent. */
+export type ThemePreference = 'SYSTEM' | 'DARK' | 'LIGHT';
+export type AppBackground = 'PLAIN' | 'PATTERN';
+export type HomeTab = 'FEED' | 'EXPLORE' | 'NEARBY' | 'SAVED';
+export type CommentAudience = 'EVERYONE' | 'FOLLOWERS' | 'NOBODY';
+export type SensitiveContent = 'LIMIT' | 'ALLOW';
+/** Chaves de PreferencesService.NOTIFICATION_KEYS. */
+export type NotificationKey = 'likes' | 'comments' | 'shares' | 'foodAlerts';
+
+/** AccountViews.PreferencesView (GET/PATCH /api/v1/me/preferences). */
+export interface PreferencesView {
+  theme: ThemePreference;
+  appBackground: AppBackground;
+  language: string;
+  /** 85 a 150 (%). */
+  fontScale: number;
+  reduceMotion: boolean;
+  profilePrivate: boolean;
+  whoCanComment: CommentAudience;
+  showBirthYear: boolean;
+  homeTab: HomeTab;
+  sensitiveContent: SensitiveContent;
+  /** 10 a 600; null = sem lembrete. */
+  usageReminderMinutes: number | null;
+  notifications: Partial<Record<NotificationKey, boolean>>;
+  loginAlerts: boolean;
+  /** Menor de 16 (ECA Digital): afrouxar uma proteção dá 403; só o responsável altera. */
+  minorProtectionsLocked: boolean;
+}
+
+/** PreferencesService.PreferencesPatch: campo ausente fica como está. */
+export interface PreferencesPatch {
+  theme?: ThemePreference;
+  appBackground?: AppBackground;
+  language?: string;
+  fontScale?: number;
+  reduceMotion?: boolean;
+  profilePrivate?: boolean;
+  whoCanComment?: CommentAudience;
+  showBirthYear?: boolean;
+  homeTab?: HomeTab;
+  sensitiveContent?: SensitiveContent;
+  usageReminderMinutes?: number;
+  clearUsageReminder?: boolean;
+  notifications?: Partial<Record<NotificationKey, boolean>>;
+  loginAlerts?: boolean;
+}
+
+/** Finalidades opcionais do tratamento (RF3), todas desligadas por padrão. */
+export type ConsentPurpose =
+  | 'MARKETING'
+  | 'LOCATION_TRACKING'
+  | 'PERSONALIZED_FEED'
+  | 'SENSITIVE_PROFILE_DATA'
+  | 'THIRD_PARTY_SHARING';
+
+/** Um consentimento (GET /api/v1/me/consents, PUT /api/v1/me/consents/{purpose}). */
+export interface ConsentView {
+  purpose: ConsentPurpose;
+  label: string;
+  description: string;
+  legalBasis: string;
+  sensitive: boolean;
+  granted: boolean;
+  /** Instant em ISO-8601; null se nunca mudou. */
+  updatedAt: string | null;
+  /** Menor de 16: o PUT dá 403. */
+  lockedForMinor: boolean;
+}
+
+export interface ConsentList {
+  items: ConsentView[];
+}
+
+/** MeController.SudoRequest (modo sudo, StepUp): senha atual e, com 2FA ativo, o código. */
+export interface SudoRequest {
+  password: string;
+  code: string | null;
+}
+
+/** MeController.PasswordChange. */
+export interface PasswordChange {
+  currentPassword: string;
+  code: string | null;
+  newPassword: string;
+}
+
+/** SessionService.SessionView: uma sessão ativa, com um identificador que não é o id real. */
+export interface SessionView {
+  id: string;
+  /** "Chrome no Windows"; pode faltar. */
+  device: string | null;
+  /** WEB, ANDROID, IOS… */
+  channel: string | null;
+  createdAt: string;
+  lastAccessAt: string;
+  current: boolean;
+}
+
+/** AccountViews.MfaStatusView. */
+export interface MfaStatusView {
+  enabled: boolean;
+  enabledAt: string | null;
+  recoveryCodesLeft: number;
+}
+
+/** AccountViews.MfaSetupView: some ao confirmar ou depois de expiresAt. */
+export interface MfaSetupView {
+  secret: string;
+  otpauthUri: string;
+  issuer: string;
+  account: string;
+  expiresAt: string;
+}
+
+/** AccountViews.RecoveryCodesView: mostrados uma única vez. */
+export interface RecoveryCodesView {
+  codes: string[];
+  generatedAt: string;
+}
+
+/** MeController.DeletionRequest (POST /api/v1/me/deletion). */
+export interface DeletionRequest {
+  password: string;
+  code: string | null;
+  confirm: boolean;
+}
+
+/** AccountViews.DeletionView (202). */
+export interface DeletionView {
+  accountStatus: AccountStatus;
+  deletionScheduledFor: string;
+  graceDays: number;
+}
+
+/** MediaType. */
+export type MediaKind = 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO';
+
+/** MediaUploadController.UploadRequest. */
+export interface UploadRequest {
+  kind: MediaKind;
+  contentType: string;
+  sizeBytes: number;
+}
+
+/** MediaUploads.UploadTicket: URL pré-assinada para o PUT direto ao bucket. */
+export interface UploadTicket {
+  objectKey: string;
+  uploadUrl: string;
+  method: string;
+  headers: Record<string, string>;
+  expiresAt: string;
+  maxBytes: number;
+}
+
 // ------------------------------------------------------------ estabelecimento (application/establishment/EstablishmentViews.java)
 
 /** Código estável + rótulo; {@code group} é a macro da culinária, a família do formato ou o grupo do tipo. */

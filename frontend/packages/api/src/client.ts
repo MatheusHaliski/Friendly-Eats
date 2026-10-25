@@ -164,9 +164,10 @@ export function createClient(options: ClientOptions = {}) {
       signal: opts.signal,
     });
     if (res.ok) {
-      if (res.status === 204 || res.status === 202 || res.headers.get('Content-Length') === '0') {
+      if (res.status === 204 || res.headers.get('Content-Length') === '0') {
         return { status: res.status, data: undefined as T };
       }
+      // 202 pode vir com corpo (pedido de exclusão, RF5) ou sem (reenvio do código, RF1)
       const text = await res.text();
       return { status: res.status, data: (text ? JSON.parse(text) : undefined) as T };
     }
@@ -185,8 +186,43 @@ export function createClient(options: ClientOptions = {}) {
     get: <T>(path: string, opts?: RequestOptions) => request<T>('GET', path, opts).then((r) => r.data),
     post: <T>(path: string, body?: unknown) => request<T>('POST', path, { body }).then((r) => r.data),
     put: <T>(path: string, body?: unknown) => request<T>('PUT', path, { body }),
+    patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, { body }).then((r) => r.data),
     del: (path: string) => request<void>('DELETE', path).then(() => undefined),
+    /** DELETE que devolve corpo (ex.: remover a foto devolve o perfil). */
+    delJson: <T>(path: string) => request<T>('DELETE', path).then((r) => r.data),
   };
+}
+
+/** O que {@link uploadToBucket} precisa do UploadTicket. */
+export interface PresignedPut {
+  uploadUrl: string;
+  method: string;
+  headers: Record<string, string>;
+}
+
+/**
+ * Envia o arquivo direto ao bucket pela URL pré-assinada (RF2): sem cookie nem CSRF (outra origem), com
+ * exatamente os cabeçalhos assinados. O erro do S3 vem em XML, então vira uma mensagem em pt-BR.
+ */
+export async function uploadToBucket(ticket: PresignedPut, file: Blob, doFetch: typeof fetch = (...a) => globalThis.fetch(...a)): Promise<void> {
+  let res: Response;
+  try {
+    res = await doFetch(ticket.uploadUrl, {
+      method: ticket.method || 'PUT',
+      headers: ticket.headers,
+      body: file,
+      credentials: 'omit',
+    });
+  } catch {
+    throw new ApiError(0, { status: 0, detail: 'Não foi possível enviar a foto. Verifique a conexão e tente de novo.' }, null);
+  }
+  if (!res.ok) {
+    const detail =
+      res.status === 403
+        ? 'O envio expirou ou não confere com a foto escolhida. Escolha a foto de novo.'
+        : 'Não foi possível enviar a foto agora. Tente de novo.';
+    throw new ApiError(res.status, { status: res.status, detail }, null);
+  }
 }
 
 export type ApiClient = ReturnType<typeof createClient>;

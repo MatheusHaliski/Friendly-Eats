@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useId, useRef, useState, type FormEvent } from 'react';
 import { describedBy, FieldErrors, Notice } from '@/components/Form';
-import { IconLogin } from '@/components/icons';
+import { IconDeadline, IconLogin } from '@/components/icons';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import { SESSION_KEY } from '@/lib/queries';
@@ -96,7 +96,7 @@ export function LoginView() {
     secondFactor.mutate();
   }
 
-  const title = step === 'codigo' ? 'Verificação em duas etapas' : step === 'reativar' ? 'Reativar a sua conta' : 'Entrar';
+  const title = step === 'codigo' ? 'Verificação em duas etapas' : step === 'reativar' ? 'Sua conta está em exclusão' : 'Entrar';
   const errorBox = error && (
     <div ref={alertRef} tabIndex={-1} className="outline-none">
       <Notice tone="error" live>
@@ -220,15 +220,14 @@ export function LoginView() {
 
       {step === 'reativar' && (
         <div className="grid gap-4">
-          <Notice>
-            <p>{result?.message ?? 'Esta conta está em exclusão.'}</p>
-            {result?.deletionScheduledFor && (
-              <p>
-                Se você não reativar, ela será eliminada em <strong>{formatDate(result.deletionScheduledFor)}</strong>.
-              </p>
-            )}
-          </Notice>
-          <div className="flex flex-wrap gap-2">
+          {result?.deletionScheduledFor ? (
+            <p>
+              Ela será excluída em <strong>{formatDate(result.deletionScheduledFor)}</strong>. Até lá você pode desistir: tudo volta como estava.
+            </p>
+          ) : (
+            <p>{result?.message ?? 'Esta conta está marcada para exclusão. Até a data final, você pode desistir: tudo volta como estava.'}</p>
+          )}
+          <div className="grid gap-2 sm:flex sm:flex-wrap">
             <button type="button" className="fe-btn fe-btn-primary" onClick={() => reactivate.mutate()} disabled={busy}>
               {reactivate.isPending ? 'Reativando…' : 'Reativar minha conta'}
             </button>
@@ -239,11 +238,16 @@ export function LoginView() {
                 setStep('senha');
                 setPassword('');
                 setError(null);
+                router.push('/');
               }}
             >
-              Agora não
+              Manter a exclusão e sair
             </button>
           </div>
+          <p className="flex items-start gap-1.5 text-sm text-muted">
+            <IconDeadline size={16} className="mt-0.5 flex-none" />
+            Depois dessa data, o perfil, a foto, as avaliações e os estabelecimentos da conta são apagados de vez.
+          </p>
         </div>
       )}
     </div>

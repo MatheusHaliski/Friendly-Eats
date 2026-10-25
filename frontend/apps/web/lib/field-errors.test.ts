@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mapRegisterErrors, mapReviewErrors } from './field-errors';
+import { mapProfileErrors, mapRegisterErrors, mapReviewErrors, mapSudoError } from './field-errors';
 
 describe('erros do 422 por campo', () => {
   it('cadastro: frases do RegistrationService e do UserTypeDetailsValidator', () => {
@@ -47,5 +47,30 @@ describe('erros do 422 por campo', () => {
     expect(out.fields.spent).toHaveLength(1);
     expect(out.fields.body).toEqual(['“Texto da avaliação” passa de 2000 caracteres.']);
     expect(out.general).toEqual(['Dimensão desconhecida: "SABOR".']);
+  });
+});
+
+describe('mapProfileErrors', () => {
+  it('cada frase do ProfileService vai para o seu campo', () => {
+    const out = mapProfileErrors(
+      [
+        'A bio tem no máximo 150 caracteres.',
+        'Até 5 links, cada um começando com https://',
+        'Celular no formato internacional, ex.: +5541999990000.',
+        'País no formato ISO de 2 letras, ex.: BR.',
+        'Preencha o campo "website" da categoria Criador.',
+        'Escolha até 5 culinárias favoritas.',
+        'Algo novo que a tela não conhece.',
+      ],
+      { website: 'Site ou perfil do canal' },
+    );
+    expect(Object.keys(out.fields).sort()).toEqual(['bio', 'cellphoneNumber', 'countryOfResidence', 'favoriteCuisines', 'links', 'website'].sort());
+    expect(out.fields.website).toEqual(['Preencha o campo “Site ou perfil do canal” da categoria Criador.']);
+    expect(out.general).toEqual(['Algo novo que a tela não conhece.']);
+  });
+
+  it('modo sudo: o código só vai para o campo do código quando há 2FA', () => {
+    expect(mapSudoError('Senha incorreta.', false).fields).toEqual({ password: ['Senha incorreta.'] });
+    expect(mapSudoError('Senha ou código do app autenticador incorretos.', true).fields).toHaveProperty('code');
   });
 });
