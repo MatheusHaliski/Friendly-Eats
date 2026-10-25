@@ -981,6 +981,7 @@ Exemplos: pizzaria com `ITALIANA` principal → `EUROPEIA` (a culinária vem ant
 | RF11 | Página do estabelecimento | ⏳ facetas (8), histograma, origem do preço | ⏳ planejado |
 | RF12 | Interações | ⏳ resposta do dono (`RULE_OWNER_REPLY`), seguir, salvar | ⏳ planejado |
 | RF13 | Moderação e avaliações falsas | ⏳ `MODERADOR`, `UNDER_REVIEW` / `REMOVED`, regras `RULE_*`, R8 e R10 | ⏳ planejado |
+| RF16 | Moldura do post | cartelas da época com a cozinha de cada estação, padrões de mesa, layout Cardápio; tipo de conta (2) na direção recomendada | 🟡 parcial |
 
 Ao criar ou mudar um desses RFs, atualize esta taxonomia no mesmo commit sempre que surgir um ator, atributo, categoria
 ou card novo (`CLAUDE.md`).
