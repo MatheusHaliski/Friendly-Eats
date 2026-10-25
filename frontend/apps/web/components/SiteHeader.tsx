@@ -1,6 +1,7 @@
 'use client';
 
 import Form from 'next/form';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -60,8 +61,15 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/85">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-        <Link href="/" className="mr-auto text-xl font-extrabold tracking-tight no-underline sm:mr-0">
-          Friendly <span className="text-brand">Eats</span>
+        <Link
+          href="/"
+          className="mr-auto flex items-center gap-2 text-xl font-extrabold tracking-tight no-underline sm:mr-0"
+        >
+          {/* logo oficial; decorativo porque o nome vem escrito ao lado */}
+          <Image src="/brand/logo-96.webp" alt="" width={40} height={40} unoptimized priority className="h-10 w-10" />
+          <span>
+            Friendly <span className="text-brand">Eats</span>
+          </span>
         </Link>
         <Suspense fallback={<div className="flex-1" />}>
           <HeaderSearch />

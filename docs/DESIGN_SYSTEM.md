@@ -39,6 +39,25 @@ ou de uma decisão pendente.
 Não há ícone de sushi, hashi, taco ou kebab no Lucide, e `hamburger`, `shrimp`, `avocado`, `cupcake` e `groceries` não
 existem na 0.460.
 
+### Logo oficial
+
+Xícara amarela fumegante em relevo de massinha, sobre um disco com faixas vermelha, verde e azul e borda branca.
+
+| Arquivo | Uso |
+|---|---|
+| `brand/logo/logo-friendly-eats-original.jpg` | original recebido (1200 × 896, fundo xadrez de "transparência" falsa) |
+| `brand/logo/logo-friendly-eats.png` | mestre recortado: círculo de 696 px com fundo transparente e borda branca com contorno `#E2D6C8` |
+| `brand/logo/logo-friendly-eats-512.png` | 512 px para lojas, redes e apresentações |
+| `frontend/apps/web/public/brand/logo-{96,192,512}.webp` | cabeçalho do app web (40 px na tela, 96 px para telas 2×) e usos maiores |
+| `frontend/apps/web/app/icon.png` · `app/apple-icon.png` | favicon (64 px) e ícone da tela inicial do iOS (180 px, sobre o carvão `#17120D`) |
+
+- No cabeçalho, o logo é **decorativo** (`alt=""`) porque o nome "Friendly Eats" vem escrito ao lado. Sozinho (sem
+  o nome), use `alt="Friendly Eats"`.
+- A borda branca garante o recorte no tema escuro; no claro, o contorno `#E2D6C8` fecha o círculo. Tamanho mínimo:
+  16 px (favicon). Não distorcer, não recolorir, não pôr texto sobre o disco.
+- As cores do logo são da ilustração, **não** são tokens: o vermelho do disco não vira cor de interface (o vermelho
+  da interface é só do alerta sanitário, seção 7) e o amarelo não substitui a estrela (seção 6).
+
 ## 2. Tema
 
 | Token | Escuro | Claro |
