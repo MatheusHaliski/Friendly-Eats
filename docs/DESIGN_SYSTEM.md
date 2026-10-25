@@ -39,11 +39,40 @@ ou de uma decisão pendente.
 Não há ícone de sushi, hashi, taco ou kebab no Lucide, e `hamburger`, `shrimp`, `avocado`, `cupcake` e `groceries` não
 existem na 0.460.
 
+### Logo oficial
+
+Xícara amarela fumegante em relevo de massinha, sobre um disco com faixas vermelha, verde e azul e borda branca.
+
+| Arquivo | Uso |
+|---|---|
+| `brand/logo/logo-friendly-eats-original.jpg` | original recebido (1200 × 896, fundo xadrez de "transparência" falsa) |
+| `brand/logo/logo-friendly-eats.png` | mestre recortado: círculo de 696 px com fundo transparente e borda branca com contorno `#E2D6C8` |
+| `brand/logo/logo-friendly-eats-512.png` | 512 px para lojas, redes e apresentações |
+| `frontend/apps/web/public/brand/logo-{96,192,512}.webp` | cabeçalho do app web (40 px na tela, 96 px para telas 2×) e usos maiores |
+| `frontend/apps/web/app/icon.png` · `app/apple-icon.png` | favicon (64 px) e ícone da tela inicial do iOS (180 px, sobre o carvão `#17120D`) |
+
+- No cabeçalho, o logo é **decorativo** (`alt=""`) porque o nome "Friendly Eats" vem escrito ao lado. Sozinho (sem
+  o nome), use `alt="Friendly Eats"`.
+- A borda branca garante o recorte no tema escuro; no claro, o contorno `#E2D6C8` fecha o círculo. Tamanho mínimo:
+  16 px (favicon). Não distorcer, não recolorir, não pôr texto sobre o disco.
+- As cores do logo são da ilustração, **não** são tokens: o vermelho do disco não vira cor de interface (o vermelho
+  da interface é só do alerta sanitário, seção 7) e o amarelo não substitui a estrela (seção 6).
+
 ## 2. Tema
 
 | Token | Escuro | Claro |
 |---|---|---|
 | Fundo | `#17120D` (carvão quente) | `#FFFFFF` |
+| Superfície rebaixada (`surface-sunken`) | `#2A2119` (texto 13,81:1) | `#F2ECE5` (texto 15,86:1) |
+| Marca (`brand`, o "Eats" do logo e links de destaque) | `#FF9F5A` (9,18:1) | `#A34A00` (5,94:1) |
+| Erro de formulário (`feedback.error`) | `#FFB86B` (10,92:1) | `#8A3C00` (7,70:1) |
+| Sucesso (`feedback.success`) | `#6FE699` (11,92:1) | `#08693A` (6,79:1) |
+
+- **Erro de formulário não é vermelho:** o vermelho fica reservado ao alerta sanitário (seção 7). O erro usa o tom
+  âmbar/cobre acima **com o ícone `circle-alert` e o texto do erro ao lado do campo**: a cor nunca é o único sinal.
+- Os tokens vivem em DTCG (`frontend/packages/tokens/tokens/*.json`) e o Style Dictionary 5 gera `tokens.css`
+  (claro padrão, escuro por `prefers-color-scheme` e por `data-theme`) e `tokens.ts`. O teste
+  `frontend/packages/tokens/test/contraste.test.ts` confere 4,5:1 para texto e 3:1 para ícone e contorno.
 
 Toda cor desta página foi medida contra o fundo do seu tema. Uma cor do tema escuro nunca é usada no claro, e vice-versa.
 
@@ -178,6 +207,7 @@ informado pelo estabelecimento" (ou "segundo 23 avaliações").
 ```bash
 python3 scripts/wcag_contrast.py                       # tabela dos tipos de conta, nos dois temas
 python3 scripts/wcag_contrast.py "#DDAE14" "#17120D"   # qualquer par de cores
+cd frontend && npm test -w @friendly-eats/tokens       # contraste de todos os tokens do app web
 ```
 
 Por enquanto, a tabela do script cobre **só os tipos de conta** (e o anel da conta Oficial). As cores de chip, preço,

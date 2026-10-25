@@ -1,0 +1,444 @@
+{
+  "kinds": [
+    {
+      "code": "FOTO_PRATO",
+      "label": "Foto de prato",
+      "lucideIcon": "clapperboard",
+      "border": "SEM_MOLDURA",
+      "feed": "POST",
+      "whoCanPublish": "Qualquer conta ativa (organizações depois do selo).",
+      "requiredFields": [
+        "title",
+        "mediaObjectKey",
+        "altText"
+      ],
+      "optionalFields": [
+        "body",
+        "establishmentId",
+        "cuisine",
+        "foodFormat",
+        "dietaryStyles",
+        "allergens",
+        "warnings",
+        "ageRating",
+        "advertising",
+        "city",
+        "background",
+        "priceCents"
+      ],
+      "photoRequired": true,
+      "expires": null
+    },
+    {
+      "code": "RECEITA",
+      "label": "Receita",
+      "lucideIcon": "book-open",
+      "border": "TRACEJADA",
+      "feed": "POST",
+      "whoCanPublish": "Qualquer conta ativa (organizações depois do selo).",
+      "requiredFields": [
+        "title",
+        "recipe.ingredients",
+        "recipe.steps"
+      ],
+      "optionalFields": [
+        "body",
+        "mediaObjectKey",
+        "altText",
+        "establishmentId",
+        "cuisine",
+        "foodFormat",
+        "dietaryStyles",
+        "allergens",
+        "warnings",
+        "ageRating",
+        "advertising",
+        "city",
+        "background",
+        "recipe.servings",
+        "recipe.prepMinutes"
+      ],
+      "photoRequired": false,
+      "expires": null
+    },
+    {
+      "code": "PERGUNTA",
+      "label": "Pergunta",
+      "lucideIcon": "message-circle-question",
+      "border": "BALAO",
+      "feed": "POST",
+      "whoCanPublish": "Qualquer conta ativa, exceto a Oficial.",
+      "requiredFields": [
+        "title"
+      ],
+      "optionalFields": [
+        "body",
+        "mediaObjectKey",
+        "altText",
+        "establishmentId",
+        "cuisine",
+        "foodFormat",
+        "dietaryStyles",
+        "allergens",
+        "warnings",
+        "ageRating",
+        "advertising",
+        "city",
+        "background"
+      ],
+      "photoRequired": false,
+      "expires": null
+    },
+    {
+      "code": "PRATO_DO_DIA",
+      "label": "Prato do dia",
+      "lucideIcon": "hand-platter",
+      "border": "DUPLA",
+      "feed": "POST",
+      "whoCanPublish": "Só conta de Estabelecimento verificada, sobre um lugar dela.",
+      "requiredFields": [
+        "title",
+        "establishmentId",
+        "priceCents"
+      ],
+      "optionalFields": [
+        "body",
+        "mediaObjectKey",
+        "altText",
+        "cuisine",
+        "foodFormat",
+        "dietaryStyles",
+        "allergens",
+        "warnings",
+        "ageRating",
+        "advertising",
+        "city",
+        "background"
+      ],
+      "photoRequired": false,
+      "expires": "Sai do feed às 23h59 (horário de Brasília) do dia da publicação."
+    },
+    {
+      "code": "PROMOCAO",
+      "label": "Promoção",
+      "lucideIcon": "badge-percent",
+      "border": "ETIQUETA",
+      "feed": "POST",
+      "whoCanPublish": "Estabelecimento ou Varejo & Marca verificados, sobre um lugar seu; Criador só com o chip Publicidade.",
+      "requiredFields": [
+        "title",
+        "startsAt",
+        "endsAt",
+        "priceFromCents+priceToCents | discountPercent",
+        "establishmentId (dono) | advertising: true (criador)"
+      ],
+      "optionalFields": [
+        "body",
+        "mediaObjectKey",
+        "altText",
+        "cuisine",
+        "foodFormat",
+        "dietaryStyles",
+        "allergens",
+        "warnings",
+        "ageRating",
+        "advertising",
+        "city",
+        "background"
+      ],
+      "photoRequired": false,
+      "expires": "Sai do feed depois de \"endsAt\"."
+    },
+    {
+      "code": "EVENTO",
+      "label": "Evento",
+      "lucideIcon": "calendar-days",
+      "border": "DATA",
+      "feed": "POST",
+      "whoCanPublish": "Estabelecimento, Varejo & Marca, Comunidade ou Chef.",
+      "requiredFields": [
+        "title",
+        "startsAt",
+        "endsAt",
+        "priceCents | free: true"
+      ],
+      "optionalFields": [
+        "body",
+        "mediaObjectKey",
+        "altText",
+        "establishmentId",
+        "cuisine",
+        "foodFormat",
+        "dietaryStyles",
+        "allergens",
+        "warnings",
+        "ageRating",
+        "advertising",
+        "city",
+        "background"
+      ],
+      "photoRequired": false,
+      "expires": "Sai do feed depois de \"endsAt\"."
+    },
+    {
+      "code": "ALERTA_SANITARIO",
+      "label": "Alerta sanitário",
+      "lucideIcon": "triangle-alert",
+      "border": "HAZARD",
+      "feed": "ALERT",
+      "whoCanPublish": "Só conta Oficial verificada (Anvisa, vigilância sanitária, Procon).",
+      "requiredFields": [
+        "title",
+        "alert.product",
+        "alert.brand",
+        "alert.lots",
+        "alert.reason",
+        "alert.sourceUrl (https)"
+      ],
+      "optionalFields": [
+        "body",
+        "mediaObjectKey",
+        "altText",
+        "establishmentId",
+        "cuisine",
+        "foodFormat",
+        "dietaryStyles",
+        "allergens",
+        "warnings",
+        "city"
+      ],
+      "photoRequired": false,
+      "expires": null
+    }
+  ],
+  "publishableKinds": [],
+  "allergens": [
+    {
+      "code": "TRIGO",
+      "label": "Trigo",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "CENTEIO",
+      "label": "Centeio",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "CEVADA",
+      "label": "Cevada",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "AVEIA",
+      "label": "Aveia",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "CRUSTACEOS",
+      "label": "Crustáceos",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "OVOS",
+      "label": "Ovos",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "PEIXES",
+      "label": "Peixes",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "AMENDOIM",
+      "label": "Amendoim",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "SOJA",
+      "label": "Soja",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "LEITE",
+      "label": "Leite (de todos os mamíferos)",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "AMENDOA",
+      "label": "Amêndoa",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "AVELA",
+      "label": "Avelã",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "CASTANHA_DE_CAJU",
+      "label": "Castanha-de-caju",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "CASTANHA_DO_PARA",
+      "label": "Castanha-do-pará / castanha-do-brasil",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "MACADAMIA",
+      "label": "Macadâmia",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "NOZES",
+      "label": "Nozes",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "NOZ_PECA",
+      "label": "Noz-pecã",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "PISTACHE",
+      "label": "Pistache",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "PINOLI",
+      "label": "Pinoli",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "CASTANHAS",
+      "label": "Castanhas (Castanea spp.)",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "LATEX_NATURAL",
+      "label": "Látex natural",
+      "kind": "ALERGENICO",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "GERGELIM",
+      "label": "Gergelim",
+      "kind": "ALERGENICO",
+      "status": "PROPOSTO"
+    },
+    {
+      "code": "TRIGO_SARRACENO",
+      "label": "Trigo-sarraceno",
+      "kind": "ALERGENICO",
+      "status": "PROPOSTO"
+    },
+    {
+      "code": "AIPO",
+      "label": "Aipo",
+      "kind": "ALERGENICO",
+      "status": "PROPOSTO"
+    },
+    {
+      "code": "TREMOCO",
+      "label": "Tremoço",
+      "kind": "ALERGENICO",
+      "status": "PROPOSTO"
+    },
+    {
+      "code": "MOSTARDA",
+      "label": "Mostarda",
+      "kind": "ALERGENICO",
+      "status": "PROPOSTO"
+    }
+  ],
+  "warnings": [
+    {
+      "code": "LACTOSE",
+      "label": "Contém lactose",
+      "kind": "ADVERTENCIA",
+      "status": "VIGENTE"
+    },
+    {
+      "code": "GLUTEN",
+      "label": "Contém glúten",
+      "kind": "ADVERTENCIA",
+      "status": "VIGENTE"
+    }
+  ],
+  "allergenLevels": [
+    {
+      "code": "CONTEM",
+      "label": "Contém",
+      "group": null
+    },
+    {
+      "code": "PODE_CONTER",
+      "label": "Pode conter",
+      "group": null
+    }
+  ],
+  "ageRatings": [
+    {
+      "code": "LIVRE",
+      "label": "Livre",
+      "group": null
+    },
+    {
+      "code": "AGE_18",
+      "label": "18+",
+      "group": null
+    }
+  ],
+  "shareChannels": [
+    {
+      "code": "COPY_LINK",
+      "label": "Copiar link",
+      "group": null
+    },
+    {
+      "code": "NATIVE",
+      "label": "Compartilhar pelo sistema",
+      "group": null
+    },
+    {
+      "code": "WHATSAPP",
+      "label": "WhatsApp",
+      "group": null
+    },
+    {
+      "code": "TELEGRAM",
+      "label": "Telegram",
+      "group": null
+    },
+    {
+      "code": "X",
+      "label": "X",
+      "group": null
+    },
+    {
+      "code": "EMAIL",
+      "label": "E-mail",
+      "group": null
+    }
+  ],
+  "allergenNotice": "Informação declarada por quem publicou, sem conferência da Anvisa nem do Friendly Eats. Confirme com o estabelecimento, inclusive sobre contaminação cruzada."
+}

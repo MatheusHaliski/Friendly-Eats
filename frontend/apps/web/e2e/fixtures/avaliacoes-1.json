@@ -1,0 +1,193 @@
+{
+  "items": [
+    {
+      "id": 11,
+      "rating": 5,
+      "ratingLabel": "Excelente",
+      "visitMode": {
+        "code": "DINE_IN",
+        "label": "No local",
+        "group": null
+      },
+      "dimensions": {
+        "COMIDA": 5,
+        "ATENDIMENTO": 5,
+        "AMBIENTE": 4
+      },
+      "spentPerPersonCents": 5200,
+      "body": "Tutu perfeito e o pão de queijo chega quentinho. Voltarei!",
+      "trust": "REVIEW_UNVERIFIED",
+      "edited": false,
+      "author": {
+        "name": "Ana Lima",
+        "handle": "analima",
+        "category": {
+          "code": "COMENSAL",
+          "label": "Comensal",
+          "color": "#48A8FF"
+        }
+      },
+      "createdAt": "2026-10-11T12:00:00Z",
+      "updatedAt": "2026-10-11T12:00:00Z"
+    },
+    {
+      "id": 12,
+      "rating": 4,
+      "ratingLabel": "Bom",
+      "visitMode": {
+        "code": "TAKEOUT",
+        "label": "Retirada",
+        "group": null
+      },
+      "dimensions": {
+        "COMIDA": 4
+      },
+      "spentPerPersonCents": 4800,
+      "body": "Marmita bem servida, embalagem caprichada.",
+      "trust": "REVIEW_UNVERIFIED",
+      "edited": true,
+      "author": {
+        "name": "Bruno Costa",
+        "handle": "brunocosta",
+        "category": {
+          "code": "CRIADOR",
+          "label": "Criador",
+          "color": "#F7C638"
+        }
+      },
+      "createdAt": "2026-10-12T12:00:00Z",
+      "updatedAt": "2026-10-12T12:00:00Z"
+    },
+    {
+      "id": 13,
+      "rating": 5,
+      "ratingLabel": "Excelente",
+      "visitMode": {
+        "code": "DINE_IN",
+        "label": "No local",
+        "group": null
+      },
+      "dimensions": {},
+      "spentPerPersonCents": null,
+      "body": "Melhor feijão tropeiro de BH.",
+      "trust": "REVIEW_UNVERIFIED",
+      "edited": false,
+      "author": {
+        "name": "Chef Marta",
+        "handle": "chefmarta",
+        "category": {
+          "code": "CHEF",
+          "label": "Chef",
+          "color": "#D6C5FF"
+        }
+      },
+      "createdAt": "2026-10-13T12:00:00Z",
+      "updatedAt": "2026-10-13T12:00:00Z"
+    },
+    {
+      "id": 14,
+      "rating": 3,
+      "ratingLabel": "Regular",
+      "visitMode": {
+        "code": "DELIVERY",
+        "label": "Entrega",
+        "group": null
+      },
+      "dimensions": {
+        "COMIDA": 4,
+        "ENTREGA": 2
+      },
+      "spentPerPersonCents": 6100,
+      "body": "Comida boa, mas chegou fria.",
+      "trust": "REVIEW_UNVERIFIED",
+      "edited": false,
+      "author": {
+        "name": "Confraria do Queijo",
+        "handle": "confrariaqueijo",
+        "category": {
+          "code": "COMUNIDADE",
+          "label": "Comunidade",
+          "color": "#08DABD"
+        }
+      },
+      "createdAt": "2026-10-14T12:00:00Z",
+      "updatedAt": "2026-10-14T12:00:00Z"
+    },
+    {
+      "id": 15,
+      "rating": 4,
+      "ratingLabel": "Bom",
+      "visitMode": {
+        "code": "DINE_IN",
+        "label": "No local",
+        "group": null
+      },
+      "dimensions": {
+        "CUSTO_BENEFICIO": 5
+      },
+      "spentPerPersonCents": 4500,
+      "body": null,
+      "trust": "REVIEW_UNVERIFIED",
+      "edited": false,
+      "author": {
+        "name": "Davi Rocha",
+        "handle": "davirocha",
+        "category": {
+          "code": "COMENSAL",
+          "label": "Comensal",
+          "color": "#48A8FF"
+        }
+      },
+      "createdAt": "2026-10-15T12:00:00Z",
+      "updatedAt": "2026-10-15T12:00:00Z"
+    },
+    {
+      "id": 16,
+      "rating": 5,
+      "ratingLabel": "Excelente",
+      "visitMode": {
+        "code": "DINE_IN",
+        "label": "No local",
+        "group": null
+      },
+      "dimensions": {},
+      "spentPerPersonCents": null,
+      "body": "Atendimento muito carinhoso.",
+      "trust": "REVIEW_UNVERIFIED",
+      "edited": false,
+      "author": {
+        "name": "Elisa Prado",
+        "handle": "elisaprado",
+        "category": {
+          "code": "COMENSAL",
+          "label": "Comensal",
+          "color": "#48A8FF"
+        }
+      },
+      "createdAt": "2026-10-16T12:00:00Z",
+      "updatedAt": "2026-10-16T12:00:00Z"
+    }
+  ],
+  "page": 0,
+  "size": 10,
+  "total": 6,
+  "rating": {
+    "state": "RATED",
+    "average": 4.3,
+    "averageLabel": "4,3",
+    "count": 6,
+    "histogram": {
+      "5": 3,
+      "4": 2,
+      "3": 1,
+      "2": 0,
+      "1": 0
+    },
+    "dimensions": {
+      "COMIDA": 4.6,
+      "ATENDIMENTO": 4.1,
+      "CUSTO_BENEFICIO": 4.4
+    },
+    "accessibleLabel": "Nota 4,3 de 5, com base em 6 avaliações"
+  }
+}

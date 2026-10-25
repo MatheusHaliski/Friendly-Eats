@@ -14,12 +14,14 @@ flowchart LR
     UC7(["Escolher notificações<br/>inclui alertas de comida"])
     UC8(["Revalidar selo do tipo"])
     UC9(["Manter proteções do ECA Digital"])
-    UC10(["Informar culinárias favoritas<br/>e estilos alimentares ⏳"]):::planned
+    UC10(["Informar culinárias favoritas<br/>até 5"])
+    UC11(["Informar estilos alimentares<br/>só com consentimento sensível · RF3"])
 
     S3["Bucket S3<br/>Garage em dev"]:::actor
     MOD["Moderação"]:::actor
+    CONS["ConsentService<br/>SENSITIVE_PROFILE_DATA"]:::actor
 
-    T --- UC1 & UC2 & UC5 & UC6 & UC7 & UC10
+    T --- UC1 & UC2 & UC5 & UC6 & UC7 & UC10 & UC11
     M --- UC6
     UC2 -. «include» .-> UC3
     UC2 -. «include» .-> UC4
@@ -27,6 +29,7 @@ flowchart LR
     UC9 -. «extend» menor de 16 .-> UC6
     UC3 --- S3
     UC8 --- MOD
+    UC11 --- CONS
 
     classDef actor fill:#FFF1E8,stroke:#E88F12,stroke-width:2px,color:#17120D,font-weight:bold
     classDef planned stroke-dasharray:5 4

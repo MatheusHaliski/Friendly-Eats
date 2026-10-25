@@ -1,0 +1,15 @@
+{
+  "items": [],
+  "page": 0,
+  "size": 10,
+  "total": 0,
+  "rating": {
+    "state": "RATING_NONE",
+    "average": null,
+    "averageLabel": null,
+    "count": 0,
+    "histogram": {},
+    "dimensions": {},
+    "accessibleLabel": "Sem avaliações ainda"
+  }
+}

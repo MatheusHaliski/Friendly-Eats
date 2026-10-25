@@ -1,0 +1,17 @@
+{
+  "id": 900,
+  "name": "Sabor Mineiro Ltda",
+  "handle": "sabormineiro",
+  "email": "contato@sabormineiro.com.br",
+  "category": {
+    "code": "ESTABELECIMENTO",
+    "label": "Estabelecimento",
+    "color": "#E88F12"
+  },
+  "categoryVerification": "PENDING",
+  "accountStatus": "ACTIVE",
+  "emailVerified": true,
+  "mfaEnabled": false,
+  "minor": false,
+  "termsUpToDate": true
+}

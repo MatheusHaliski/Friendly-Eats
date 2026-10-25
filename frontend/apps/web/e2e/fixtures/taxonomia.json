@@ -1,0 +1,1453 @@
+{
+  "cuisineMacros": [
+    {
+      "code": "BRASIL",
+      "label": "Brasil",
+      "group": null
+    },
+    {
+      "code": "AMERICA_LATINA",
+      "label": "América Latina e Caribe",
+      "group": null
+    },
+    {
+      "code": "AMERICA_NORTE",
+      "label": "América do Norte",
+      "group": null
+    },
+    {
+      "code": "EUROPA",
+      "label": "Europa",
+      "group": null
+    },
+    {
+      "code": "ORIENTE_MEDIO_NORTE_AFRICA",
+      "label": "Oriente Médio e Norte da África",
+      "group": null
+    },
+    {
+      "code": "AFRICA",
+      "label": "África Subsaariana",
+      "group": null
+    },
+    {
+      "code": "ASIA",
+      "label": "Ásia",
+      "group": null
+    }
+  ],
+  "cuisines": [
+    {
+      "code": "BRASILEIRA",
+      "label": "Brasileira",
+      "macro": "BRASIL",
+      "parent": null,
+      "ibgeRegion": null
+    },
+    {
+      "code": "MINEIRA",
+      "label": "Mineira",
+      "macro": "BRASIL",
+      "parent": "BRASILEIRA",
+      "ibgeRegion": "SE"
+    },
+    {
+      "code": "PAULISTANA",
+      "label": "Paulista / paulistana",
+      "macro": "BRASIL",
+      "parent": "BRASILEIRA",
+      "ibgeRegion": "SE"
+    },
+    {
+      "code": "CAPIXABA",
+      "label": "Capixaba",
+      "macro": "BRASIL",
+      "parent": "BRASILEIRA",
+      "ibgeRegion": "SE"
+    },
+    {
+      "code": "CAICARA",
+      "label": "Caiçara",
+      "macro": "BRASIL",
+      "parent": "BRASILEIRA",
+      "ibgeRegion": "SE"
+    },
+    {
+      "code": "NORDESTINA",
+      "label": "Nordestina",
+      "macro": "BRASIL",
+      "parent": "BRASILEIRA",
+      "ibgeRegion": "NE"
+    },
+    {
+      "code": "BAIANA",
+      "label": "Baiana",
+      "macro": "BRASIL",
+      "parent": "NORDESTINA",
+      "ibgeRegion": "NE"
+    },
+    {
+      "code": "AMAZONICA",
+      "label": "Amazônica / nortista",
+      "macro": "BRASIL",
+      "parent": "BRASILEIRA",
+      "ibgeRegion": "N"
+    },
+    {
+      "code": "PARAENSE",
+      "label": "Paraense",
+      "macro": "BRASIL",
+      "parent": "AMAZONICA",
+      "ibgeRegion": "N"
+    },
+    {
+      "code": "GOIANA",
+      "label": "Goiana",
+      "macro": "BRASIL",
+      "parent": "BRASILEIRA",
+      "ibgeRegion": "CO"
+    },
+    {
+      "code": "PANTANEIRA",
+      "label": "Pantaneira",
+      "macro": "BRASIL",
+      "parent": "BRASILEIRA",
+      "ibgeRegion": "CO"
+    },
+    {
+      "code": "GAUCHA",
+      "label": "Gaúcha",
+      "macro": "BRASIL",
+      "parent": "BRASILEIRA",
+      "ibgeRegion": "S"
+    },
+    {
+      "code": "LATINO_AMERICANA",
+      "label": "Latino-americana",
+      "macro": "AMERICA_LATINA",
+      "parent": null,
+      "ibgeRegion": null
+    },
+    {
+      "code": "ARGENTINA",
+      "label": "Argentina",
+      "macro": "AMERICA_LATINA",
+      "parent": "LATINO_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "URUGUAIA",
+      "label": "Uruguaia",
+      "macro": "AMERICA_LATINA",
+      "parent": "LATINO_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "PERUANA",
+      "label": "Peruana",
+      "macro": "AMERICA_LATINA",
+      "parent": "LATINO_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "NIKKEI",
+      "label": "Nikkei",
+      "macro": "AMERICA_LATINA",
+      "parent": "LATINO_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "MEXICANA",
+      "label": "Mexicana",
+      "macro": "AMERICA_LATINA",
+      "parent": "LATINO_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "COLOMBIANA",
+      "label": "Colombiana",
+      "macro": "AMERICA_LATINA",
+      "parent": "LATINO_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "VENEZUELANA",
+      "label": "Venezuelana",
+      "macro": "AMERICA_LATINA",
+      "parent": "LATINO_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "BOLIVIANA",
+      "label": "Boliviana",
+      "macro": "AMERICA_LATINA",
+      "parent": "LATINO_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "CHILENA",
+      "label": "Chilena",
+      "macro": "AMERICA_LATINA",
+      "parent": "LATINO_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "CARIBENHA",
+      "label": "Caribenha",
+      "macro": "AMERICA_LATINA",
+      "parent": "LATINO_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "NORTE_AMERICANA",
+      "label": "Norte-americana",
+      "macro": "AMERICA_NORTE",
+      "parent": null,
+      "ibgeRegion": null
+    },
+    {
+      "code": "TEX_MEX",
+      "label": "Tex-Mex",
+      "macro": "AMERICA_NORTE",
+      "parent": "NORTE_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "SUL_DOS_EUA",
+      "label": "Sul dos EUA",
+      "macro": "AMERICA_NORTE",
+      "parent": "NORTE_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "HAVAIANA",
+      "label": "Havaiana",
+      "macro": "AMERICA_NORTE",
+      "parent": "NORTE_AMERICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "EUROPEIA",
+      "label": "Europeia",
+      "macro": "EUROPA",
+      "parent": null,
+      "ibgeRegion": null
+    },
+    {
+      "code": "ITALIANA",
+      "label": "Italiana",
+      "macro": "EUROPA",
+      "parent": "EUROPEIA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "PORTUGUESA",
+      "label": "Portuguesa",
+      "macro": "EUROPA",
+      "parent": "EUROPEIA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "FRANCESA",
+      "label": "Francesa",
+      "macro": "EUROPA",
+      "parent": "EUROPEIA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "ESPANHOLA",
+      "label": "Espanhola",
+      "macro": "EUROPA",
+      "parent": "EUROPEIA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "ALEMA",
+      "label": "Alemã",
+      "macro": "EUROPA",
+      "parent": "EUROPEIA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "GREGA",
+      "label": "Grega",
+      "macro": "EUROPA",
+      "parent": "EUROPEIA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "MEDITERRANEA",
+      "label": "Mediterrânea",
+      "macro": "EUROPA",
+      "parent": "EUROPEIA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "BRITANICA_IRLANDESA",
+      "label": "Britânica e irlandesa",
+      "macro": "EUROPA",
+      "parent": "EUROPEIA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "LESTE_EUROPEIA",
+      "label": "Leste europeu",
+      "macro": "EUROPA",
+      "parent": "EUROPEIA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "ORIENTE_MEDIO",
+      "label": "Médio-oriental",
+      "macro": "ORIENTE_MEDIO_NORTE_AFRICA",
+      "parent": null,
+      "ibgeRegion": null
+    },
+    {
+      "code": "ARABE",
+      "label": "Árabe",
+      "macro": "ORIENTE_MEDIO_NORTE_AFRICA",
+      "parent": "ORIENTE_MEDIO",
+      "ibgeRegion": null
+    },
+    {
+      "code": "TURCA",
+      "label": "Turca",
+      "macro": "ORIENTE_MEDIO_NORTE_AFRICA",
+      "parent": "ORIENTE_MEDIO",
+      "ibgeRegion": null
+    },
+    {
+      "code": "PERSA",
+      "label": "Persa / iraniana",
+      "macro": "ORIENTE_MEDIO_NORTE_AFRICA",
+      "parent": "ORIENTE_MEDIO",
+      "ibgeRegion": null
+    },
+    {
+      "code": "JUDAICA_ISRAELENSE",
+      "label": "Judaica e israelense",
+      "macro": "ORIENTE_MEDIO_NORTE_AFRICA",
+      "parent": "ORIENTE_MEDIO",
+      "ibgeRegion": null
+    },
+    {
+      "code": "MARROQUINA",
+      "label": "Marroquina / magrebina",
+      "macro": "ORIENTE_MEDIO_NORTE_AFRICA",
+      "parent": "ORIENTE_MEDIO",
+      "ibgeRegion": null
+    },
+    {
+      "code": "ARMENIA",
+      "label": "Armênia",
+      "macro": "ORIENTE_MEDIO_NORTE_AFRICA",
+      "parent": "ORIENTE_MEDIO",
+      "ibgeRegion": null
+    },
+    {
+      "code": "AFRICANA",
+      "label": "Africana",
+      "macro": "AFRICA",
+      "parent": null,
+      "ibgeRegion": null
+    },
+    {
+      "code": "ANGOLANA",
+      "label": "Angolana",
+      "macro": "AFRICA",
+      "parent": "AFRICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "ETIOPE",
+      "label": "Etíope",
+      "macro": "AFRICA",
+      "parent": "AFRICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "SENEGALESA",
+      "label": "Senegalesa",
+      "macro": "AFRICA",
+      "parent": "AFRICANA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "ASIATICA",
+      "label": "Asiática",
+      "macro": "ASIA",
+      "parent": null,
+      "ibgeRegion": null
+    },
+    {
+      "code": "JAPONESA",
+      "label": "Japonesa",
+      "macro": "ASIA",
+      "parent": "ASIATICA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "CHINESA",
+      "label": "Chinesa",
+      "macro": "ASIA",
+      "parent": "ASIATICA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "TAIWANESA",
+      "label": "Taiwanesa",
+      "macro": "ASIA",
+      "parent": "ASIATICA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "COREANA",
+      "label": "Coreana",
+      "macro": "ASIA",
+      "parent": "ASIATICA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "TAILANDESA",
+      "label": "Tailandesa",
+      "macro": "ASIA",
+      "parent": "ASIATICA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "VIETNAMITA",
+      "label": "Vietnamita",
+      "macro": "ASIA",
+      "parent": "ASIATICA",
+      "ibgeRegion": null
+    },
+    {
+      "code": "INDIANA",
+      "label": "Indiana",
+      "macro": "ASIA",
+      "parent": "ASIATICA",
+      "ibgeRegion": null
+    }
+  ],
+  "foodFamilies": [
+    {
+      "code": "REFEICOES",
+      "label": "Refeições",
+      "group": null
+    },
+    {
+      "code": "CARNES_PESCADOS",
+      "label": "Carnes e pescados",
+      "group": null
+    },
+    {
+      "code": "LANCHES",
+      "label": "Lanches",
+      "group": null
+    },
+    {
+      "code": "SALGADOS_E_PETISCOS",
+      "label": "Salgados e petiscos",
+      "group": null
+    },
+    {
+      "code": "ORIENTAIS_E_ETNICOS",
+      "label": "Orientais e étnicos",
+      "group": null
+    },
+    {
+      "code": "DOCES_E_GELADOS",
+      "label": "Doces e gelados",
+      "group": null
+    },
+    {
+      "code": "PADARIA_E_CAFE",
+      "label": "Padaria e café",
+      "group": null
+    },
+    {
+      "code": "BEBIDAS",
+      "label": "Bebidas",
+      "group": null
+    }
+  ],
+  "formats": [
+    {
+      "code": "PRATO_FEITO",
+      "label": "Prato feito / marmita / executivo",
+      "family": "REFEICOES",
+      "suggestedCuisine": "BRASILEIRA",
+      "alcoholic": false
+    },
+    {
+      "code": "MASSAS",
+      "label": "Massas",
+      "family": "REFEICOES",
+      "suggestedCuisine": "ITALIANA",
+      "alcoholic": false
+    },
+    {
+      "code": "SALADAS_BOWLS",
+      "label": "Saladas e bowls",
+      "family": "REFEICOES",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "SOPAS_CALDOS",
+      "label": "Sopas e caldos",
+      "family": "REFEICOES",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "CHURRASCO",
+      "label": "Churrasco e carnes na brasa",
+      "family": "CARNES_PESCADOS",
+      "suggestedCuisine": "GAUCHA",
+      "alcoholic": false
+    },
+    {
+      "code": "ESPETINHO",
+      "label": "Espetinho / churrasquinho",
+      "family": "CARNES_PESCADOS",
+      "suggestedCuisine": "BRASILEIRA",
+      "alcoholic": false
+    },
+    {
+      "code": "FRANGO",
+      "label": "Frango",
+      "family": "CARNES_PESCADOS",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "FRUTOS_DO_MAR",
+      "label": "Peixes e frutos do mar",
+      "family": "CARNES_PESCADOS",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "PIZZA",
+      "label": "Pizza",
+      "family": "LANCHES",
+      "suggestedCuisine": "ITALIANA",
+      "alcoholic": false
+    },
+    {
+      "code": "HAMBURGUER",
+      "label": "Hambúrguer",
+      "family": "LANCHES",
+      "suggestedCuisine": "NORTE_AMERICANA",
+      "alcoholic": false
+    },
+    {
+      "code": "SANDUICHE",
+      "label": "Sanduíches e lanches",
+      "family": "LANCHES",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "CACHORRO_QUENTE",
+      "label": "Cachorro-quente",
+      "family": "LANCHES",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "TACOS_BURRITOS",
+      "label": "Tacos, burritos e tortilhas",
+      "family": "LANCHES",
+      "suggestedCuisine": "MEXICANA",
+      "alcoholic": false
+    },
+    {
+      "code": "KEBAB_SHAWARMA",
+      "label": "Kebab e shawarma",
+      "family": "LANCHES",
+      "suggestedCuisine": "ARABE",
+      "alcoholic": false
+    },
+    {
+      "code": "SALGADOS",
+      "label": "Salgados",
+      "family": "SALGADOS_E_PETISCOS",
+      "suggestedCuisine": "BRASILEIRA",
+      "alcoholic": false
+    },
+    {
+      "code": "PASTEL",
+      "label": "Pastel",
+      "family": "SALGADOS_E_PETISCOS",
+      "suggestedCuisine": "BRASILEIRA",
+      "alcoholic": false
+    },
+    {
+      "code": "ESFIHA",
+      "label": "Esfiha",
+      "family": "SALGADOS_E_PETISCOS",
+      "suggestedCuisine": "ARABE",
+      "alcoholic": false
+    },
+    {
+      "code": "TAPIOCA",
+      "label": "Tapioca",
+      "family": "SALGADOS_E_PETISCOS",
+      "suggestedCuisine": "NORDESTINA",
+      "alcoholic": false
+    },
+    {
+      "code": "PETISCOS_BOTECO",
+      "label": "Petiscos e porções de boteco",
+      "family": "SALGADOS_E_PETISCOS",
+      "suggestedCuisine": "BRASILEIRA",
+      "alcoholic": false
+    },
+    {
+      "code": "SUSHI",
+      "label": "Sushi, sashimi e temaki",
+      "family": "ORIENTAIS_E_ETNICOS",
+      "suggestedCuisine": "JAPONESA",
+      "alcoholic": false
+    },
+    {
+      "code": "POKE",
+      "label": "Poke",
+      "family": "ORIENTAIS_E_ETNICOS",
+      "suggestedCuisine": "HAVAIANA",
+      "alcoholic": false
+    },
+    {
+      "code": "LAMEN_NOODLES",
+      "label": "Lámen e macarrões orientais",
+      "family": "ORIENTAIS_E_ETNICOS",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "ACAI",
+      "label": "Açaí",
+      "family": "DOCES_E_GELADOS",
+      "suggestedCuisine": "AMAZONICA",
+      "alcoholic": false
+    },
+    {
+      "code": "SORVETE",
+      "label": "Sorvete, gelato e picolé",
+      "family": "DOCES_E_GELADOS",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "DOCES_CONFEITARIA",
+      "label": "Doces, bolos e confeitaria",
+      "family": "DOCES_E_GELADOS",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "CREPE_PANQUECA",
+      "label": "Crepes, panquecas e waffles",
+      "family": "DOCES_E_GELADOS",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "PAES",
+      "label": "Pães e padaria",
+      "family": "PADARIA_E_CAFE",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "CAFE",
+      "label": "Café",
+      "family": "PADARIA_E_CAFE",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "CHA",
+      "label": "Chás e bubble tea",
+      "family": "BEBIDAS",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "SUCOS_SMOOTHIES",
+      "label": "Sucos, vitaminas e smoothies",
+      "family": "BEBIDAS",
+      "suggestedCuisine": null,
+      "alcoholic": false
+    },
+    {
+      "code": "CERVEJA",
+      "label": "Cerveja e chope",
+      "family": "BEBIDAS",
+      "suggestedCuisine": null,
+      "alcoholic": true
+    },
+    {
+      "code": "VINHO",
+      "label": "Vinho",
+      "family": "BEBIDAS",
+      "suggestedCuisine": null,
+      "alcoholic": true
+    },
+    {
+      "code": "COQUETEIS_DESTILADOS",
+      "label": "Drinques e destilados",
+      "family": "BEBIDAS",
+      "suggestedCuisine": null,
+      "alcoholic": true
+    }
+  ],
+  "approaches": [
+    {
+      "code": "TRADICIONAL",
+      "label": "Tradicional",
+      "group": null
+    },
+    {
+      "code": "CASEIRA",
+      "label": "Comida caseira",
+      "group": null
+    },
+    {
+      "code": "CONTEMPORANEA",
+      "label": "Contemporânea / autoral",
+      "group": null
+    },
+    {
+      "code": "FUSION",
+      "label": "Fusion",
+      "group": null
+    },
+    {
+      "code": "VARIADA",
+      "label": "Variada / internacional",
+      "group": null
+    }
+  ],
+  "dietaryStyles": [
+    {
+      "code": "VEGANO",
+      "label": "Vegano",
+      "group": null
+    },
+    {
+      "code": "VEGETARIANO",
+      "label": "Vegetariano",
+      "group": null
+    },
+    {
+      "code": "SEM_GLUTEN",
+      "label": "Sem glúten",
+      "group": null
+    },
+    {
+      "code": "SEM_LACTOSE",
+      "label": "Sem lactose",
+      "group": null
+    },
+    {
+      "code": "LOW_CARB",
+      "label": "Low carb",
+      "group": null
+    },
+    {
+      "code": "HALAL",
+      "label": "Halal",
+      "group": null
+    },
+    {
+      "code": "KOSHER",
+      "label": "Kosher",
+      "group": null
+    },
+    {
+      "code": "ORGANICO",
+      "label": "Orgânico",
+      "group": null
+    },
+    {
+      "code": "PESCETARIANO",
+      "label": "Pescetariano",
+      "group": null
+    },
+    {
+      "code": "SEM_ACUCAR",
+      "label": "Sem açúcar",
+      "group": null
+    },
+    {
+      "code": "CRUDIVORO",
+      "label": "Crudívoro",
+      "group": null
+    }
+  ],
+  "dietaryLevels": [
+    "OFERECE",
+    "EXCLUSIVO"
+  ],
+  "establishmentGroups": [
+    {
+      "code": "RESTAURANTE",
+      "label": "Restaurantes",
+      "group": null
+    },
+    {
+      "code": "RAPIDO",
+      "label": "Lanche e comida rápida",
+      "group": null
+    },
+    {
+      "code": "BAR",
+      "label": "Bares e bebidas",
+      "group": null
+    },
+    {
+      "code": "CAFE_DOCE",
+      "label": "Cafés, padarias e doces",
+      "group": null
+    },
+    {
+      "code": "PRODUCAO",
+      "label": "Cozinhas, encomendas e produção",
+      "group": null
+    },
+    {
+      "code": "VAREJO",
+      "label": "Varejo de alimentos e bebidas",
+      "group": null
+    },
+    {
+      "code": "POLO",
+      "label": "Mercados, feiras e polos",
+      "group": null
+    }
+  ],
+  "establishmentTypes": [
+    {
+      "code": "RESTAURANTE_A_LA_CARTE",
+      "label": "Restaurante (à la carte)",
+      "group": "RESTAURANTE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/01"
+      ]
+    },
+    {
+      "code": "RESTAURANTE_QUILO",
+      "label": "Self-service / por quilo",
+      "group": "RESTAURANTE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/01"
+      ]
+    },
+    {
+      "code": "RESTAURANTE_BUFFET",
+      "label": "Buffet de preço fixo",
+      "group": "RESTAURANTE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/01"
+      ]
+    },
+    {
+      "code": "RESTAURANTE_RODIZIO",
+      "label": "Rodízio",
+      "group": "RESTAURANTE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/01"
+      ]
+    },
+    {
+      "code": "RESTAURANTE_PF",
+      "label": "Comida caseira / PF / executivo",
+      "group": "RESTAURANTE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/01"
+      ]
+    },
+    {
+      "code": "RESTAURANTE_ALTA_GASTRONOMIA",
+      "label": "Alta gastronomia",
+      "group": "RESTAURANTE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/01"
+      ]
+    },
+    {
+      "code": "BISTRO",
+      "label": "Bistrô",
+      "group": "RESTAURANTE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/01"
+      ]
+    },
+    {
+      "code": "FAST_FOOD",
+      "label": "Fast food",
+      "group": "RAPIDO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/03"
+      ]
+    },
+    {
+      "code": "FAST_CASUAL",
+      "label": "Fast casual",
+      "group": "RAPIDO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/01",
+        "5611-2/03"
+      ]
+    },
+    {
+      "code": "LANCHONETE",
+      "label": "Lanchonete / pastelaria",
+      "group": "RAPIDO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/03"
+      ]
+    },
+    {
+      "code": "QUIOSQUE",
+      "label": "Quiosque",
+      "group": "RAPIDO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/03"
+      ]
+    },
+    {
+      "code": "FOOD_TRUCK",
+      "label": "Food truck / trailer",
+      "group": "RAPIDO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5612-1/00"
+      ]
+    },
+    {
+      "code": "AMBULANTE",
+      "label": "Comida de rua",
+      "group": "RAPIDO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5612-1/00"
+      ]
+    },
+    {
+      "code": "BAR",
+      "label": "Bar",
+      "group": "BAR",
+      "adultsOnly": true,
+      "typicalCnae": [
+        "5611-2/04",
+        "5611-2/05"
+      ]
+    },
+    {
+      "code": "BOTECO",
+      "label": "Boteco",
+      "group": "BAR",
+      "adultsOnly": true,
+      "typicalCnae": [
+        "5611-2/04"
+      ]
+    },
+    {
+      "code": "GASTROBAR",
+      "label": "Gastrobar / pub",
+      "group": "BAR",
+      "adultsOnly": true,
+      "typicalCnae": [
+        "5611-2/01",
+        "5611-2/04"
+      ]
+    },
+    {
+      "code": "BAR_COQUETELARIA",
+      "label": "Coquetelaria",
+      "group": "BAR",
+      "adultsOnly": true,
+      "typicalCnae": [
+        "5611-2/04"
+      ]
+    },
+    {
+      "code": "BAR_VINHOS",
+      "label": "Bar de vinhos",
+      "group": "BAR",
+      "adultsOnly": true,
+      "typicalCnae": [
+        "5611-2/04"
+      ]
+    },
+    {
+      "code": "CERVEJARIA",
+      "label": "Cervejaria / choperia",
+      "group": "BAR",
+      "adultsOnly": true,
+      "typicalCnae": [
+        "1113-5/02",
+        "5611-2/04"
+      ]
+    },
+    {
+      "code": "CAFETERIA",
+      "label": "Cafeteria",
+      "group": "CAFE_DOCE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/03"
+      ]
+    },
+    {
+      "code": "PADARIA",
+      "label": "Padaria",
+      "group": "CAFE_DOCE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "1091-1/02",
+        "4721-1/02",
+        "5611-2/03"
+      ]
+    },
+    {
+      "code": "CONFEITARIA",
+      "label": "Confeitaria / doceria",
+      "group": "CAFE_DOCE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "1091-1/02",
+        "4721-1/04"
+      ]
+    },
+    {
+      "code": "SORVETERIA",
+      "label": "Sorveteria / gelateria",
+      "group": "CAFE_DOCE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/03",
+        "1053-8/00"
+      ]
+    },
+    {
+      "code": "ACAITERIA_SUCOS",
+      "label": "Açaiteria / casa de sucos",
+      "group": "CAFE_DOCE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/03"
+      ]
+    },
+    {
+      "code": "CASA_CHA",
+      "label": "Casa de chá",
+      "group": "CAFE_DOCE",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5611-2/03"
+      ]
+    },
+    {
+      "code": "DARK_KITCHEN",
+      "label": "Dark kitchen (só delivery)",
+      "group": "PRODUCAO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5620-1/04",
+        "5611-2/01"
+      ]
+    },
+    {
+      "code": "MARMITARIA",
+      "label": "Marmitaria",
+      "group": "PRODUCAO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5620-1/04"
+      ]
+    },
+    {
+      "code": "BUFE_EVENTOS",
+      "label": "Bufê para eventos",
+      "group": "PRODUCAO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "5620-1/02"
+      ]
+    },
+    {
+      "code": "COZINHA_ARTESANAL",
+      "label": "Produção artesanal / por encomenda",
+      "group": "PRODUCAO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "1091-1/02"
+      ]
+    },
+    {
+      "code": "VINICOLA_DESTILARIA",
+      "label": "Vinícola / destilaria",
+      "group": "PRODUCAO",
+      "adultsOnly": true,
+      "typicalCnae": [
+        "1112-7/00",
+        "1111-9/01"
+      ]
+    },
+    {
+      "code": "SUPERMERCADO",
+      "label": "Supermercado",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4711-3/01",
+        "4711-3/02"
+      ]
+    },
+    {
+      "code": "ATACAREJO",
+      "label": "Atacarejo",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4711-3/01",
+        "4639-7/01"
+      ]
+    },
+    {
+      "code": "MERCEARIA",
+      "label": "Mercearia / minimercado",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4712-1/00"
+      ]
+    },
+    {
+      "code": "LOJA_CONVENIENCIA",
+      "label": "Loja de conveniência",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4729-6/02"
+      ]
+    },
+    {
+      "code": "EMPORIO",
+      "label": "Empório / delicatessen",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4729-6/99",
+        "4721-1/03"
+      ]
+    },
+    {
+      "code": "ACOUGUE",
+      "label": "Açougue",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4722-9/01"
+      ]
+    },
+    {
+      "code": "PEIXARIA",
+      "label": "Peixaria",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4722-9/02"
+      ]
+    },
+    {
+      "code": "HORTIFRUTI",
+      "label": "Hortifrúti / sacolão",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4724-5/00"
+      ]
+    },
+    {
+      "code": "QUEIJARIA_FRIOS",
+      "label": "Queijaria / frios",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4721-1/03"
+      ]
+    },
+    {
+      "code": "DOCES_BALAS",
+      "label": "Bomboniere / chocolateria",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4721-1/04"
+      ]
+    },
+    {
+      "code": "ADEGA",
+      "label": "Adega / loja de bebidas",
+      "group": "VAREJO",
+      "adultsOnly": true,
+      "typicalCnae": [
+        "4723-7/00"
+      ]
+    },
+    {
+      "code": "LOJA_NATURAL",
+      "label": "Produtos naturais / granel",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "4729-6/99"
+      ]
+    },
+    {
+      "code": "CAFE_TORREFACAO",
+      "label": "Torrefação / café em grão",
+      "group": "VAREJO",
+      "adultsOnly": false,
+      "typicalCnae": [
+        "1081-3/02",
+        "4729-6/99"
+      ]
+    },
+    {
+      "code": "MERCADO_MUNICIPAL",
+      "label": "Mercado municipal",
+      "group": "POLO",
+      "adultsOnly": false,
+      "typicalCnae": []
+    },
+    {
+      "code": "FEIRA_LIVRE",
+      "label": "Feira livre",
+      "group": "POLO",
+      "adultsOnly": false,
+      "typicalCnae": []
+    },
+    {
+      "code": "PRACA_ALIMENTACAO",
+      "label": "Praça de alimentação",
+      "group": "POLO",
+      "adultsOnly": false,
+      "typicalCnae": []
+    },
+    {
+      "code": "FOOD_PARK",
+      "label": "Food park / polo gastronômico",
+      "group": "POLO",
+      "adultsOnly": false,
+      "typicalCnae": []
+    },
+    {
+      "code": "VENDA_PRODUTOR",
+      "label": "Venda direta do produtor",
+      "group": "POLO",
+      "adultsOnly": false,
+      "typicalCnae": []
+    }
+  ],
+  "priceLevels": [
+    {
+      "code": "PRICE_UNKNOWN",
+      "glyph": null,
+      "label": "Preço não informado",
+      "rangeLabel": null
+    },
+    {
+      "code": "PRICE_1",
+      "glyph": "$",
+      "label": "Econômico",
+      "rangeLabel": "até R$ 40"
+    },
+    {
+      "code": "PRICE_2",
+      "glyph": "$$",
+      "label": "Moderado",
+      "rangeLabel": "R$ 40 a R$ 80"
+    },
+    {
+      "code": "PRICE_3",
+      "glyph": "$$$",
+      "label": "Caro",
+      "rangeLabel": "R$ 80 a R$ 160"
+    },
+    {
+      "code": "PRICE_4",
+      "glyph": "$$$$",
+      "label": "Muito caro",
+      "rangeLabel": "acima de R$ 160"
+    },
+    {
+      "code": "PRICE_NA",
+      "glyph": null,
+      "label": "Não se aplica",
+      "rangeLabel": null
+    }
+  ],
+  "stars": [
+    {
+      "code": "STAR_1",
+      "value": 1,
+      "label": "Péssimo"
+    },
+    {
+      "code": "STAR_2",
+      "value": 2,
+      "label": "Ruim"
+    },
+    {
+      "code": "STAR_3",
+      "value": 3,
+      "label": "Regular"
+    },
+    {
+      "code": "STAR_4",
+      "value": 4,
+      "label": "Bom"
+    },
+    {
+      "code": "STAR_5",
+      "value": 5,
+      "label": "Excelente"
+    }
+  ],
+  "visitModes": [
+    {
+      "code": "DINE_IN",
+      "label": "No local",
+      "group": null
+    },
+    {
+      "code": "TAKEOUT",
+      "label": "Retirada",
+      "group": null
+    },
+    {
+      "code": "DELIVERY",
+      "label": "Entrega",
+      "group": null
+    }
+  ],
+  "reviewDimensions": [
+    {
+      "code": "COMIDA",
+      "label": "Comida",
+      "visitModes": [
+        "DINE_IN",
+        "TAKEOUT",
+        "DELIVERY"
+      ]
+    },
+    {
+      "code": "ATENDIMENTO",
+      "label": "Atendimento",
+      "visitModes": [
+        "DINE_IN",
+        "TAKEOUT"
+      ]
+    },
+    {
+      "code": "AMBIENTE",
+      "label": "Ambiente",
+      "visitModes": [
+        "DINE_IN"
+      ]
+    },
+    {
+      "code": "CUSTO_BENEFICIO",
+      "label": "Custo-benefício",
+      "visitModes": [
+        "DINE_IN",
+        "TAKEOUT",
+        "DELIVERY"
+      ]
+    },
+    {
+      "code": "ENTREGA",
+      "label": "Entrega",
+      "visitModes": [
+        "DELIVERY"
+      ]
+    }
+  ],
+  "cuisineChips": [
+    {
+      "code": "BRASILEIRA",
+      "label": "Brasileira",
+      "lucideIcon": "cooking-pot",
+      "darkHex": "#DDAE14",
+      "lightHex": "#6B5300"
+    },
+    {
+      "code": "EUROPEIA",
+      "label": "Europeia",
+      "lucideIcon": "wine",
+      "darkHex": "#8DBAFF",
+      "lightHex": "#0B57B8"
+    },
+    {
+      "code": "ASIATICA",
+      "label": "Asiática",
+      "lucideIcon": "soup",
+      "darkHex": "#FF8C7E",
+      "lightHex": "#B3141B"
+    },
+    {
+      "code": "AMERICAS",
+      "label": "Américas",
+      "lucideIcon": "beef",
+      "darkHex": "#12AAAA",
+      "lightHex": "#017C7C"
+    },
+    {
+      "code": "ORIENTE_MEDIO_AFRICA",
+      "label": "Oriente Médio & África",
+      "lucideIcon": "bean",
+      "darkHex": "#AC8CE6",
+      "lightHex": "#5E3E92"
+    },
+    {
+      "code": "LANCHES_PIZZA",
+      "label": "Lanches & pizza",
+      "lucideIcon": "pizza",
+      "darkHex": "#E07C0A",
+      "lightHex": "#A65A06"
+    },
+    {
+      "code": "DOCES_CAFE",
+      "label": "Doces & café",
+      "lucideIcon": "coffee",
+      "darkHex": "#FFC1DB",
+      "lightHex": "#8E1A5D"
+    },
+    {
+      "code": "VEGETAL",
+      "label": "Vegetal",
+      "lucideIcon": "vegan",
+      "darkHex": "#6FE699",
+      "lightHex": "#08693A"
+    }
+  ]
+}

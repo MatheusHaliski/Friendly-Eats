@@ -1,0 +1,94 @@
+{
+  "id": 3,
+  "name": "Doce Sonho Confeitaria",
+  "description": "Bolos de vó e doces finos por encomenda.",
+  "primaryType": {
+    "code": "CONFEITARIA",
+    "label": "Confeitaria / doceria",
+    "group": "CAFE_DOCE"
+  },
+  "secondaryTypes": [],
+  "group": {
+    "code": "CAFE_DOCE",
+    "label": "Cafés, padarias e doces",
+    "group": null
+  },
+  "classification": {
+    "primaryCuisine": null,
+    "secondaryCuisines": [],
+    "primaryFormat": {
+      "code": "DOCES_CONFEITARIA",
+      "label": "Doces, bolos e confeitaria (inclui chocolate, donuts, churros)",
+      "group": "DOCES_E_GELADOS"
+    },
+    "secondaryFormats": [],
+    "approach": null,
+    "dietaryOffers": [
+      {
+        "code": "SEM_LACTOSE",
+        "label": "Sem lactose",
+        "level": "OFERECE"
+      }
+    ],
+    "chip": {
+      "code": "DOCES_CAFE",
+      "label": "Doces & café",
+      "lucideIcon": "coffee",
+      "darkHex": "#FFC1DB",
+      "lightHex": "#8E1A5D"
+    }
+  },
+  "price": {
+    "level": "PRICE_UNKNOWN",
+    "glyph": null,
+    "label": "Preço não informado",
+    "rangeLabel": null,
+    "source": null,
+    "reportCount": 0,
+    "declaredMinCents": null,
+    "declaredMaxCents": null,
+    "accessibleLabel": "Faixa de preço: preço não informado"
+  },
+  "location": {
+    "country": "BR",
+    "uf": "PR",
+    "municipalityIbge": "4106902",
+    "city": "Curitiba",
+    "neighborhood": "Batel",
+    "street": null,
+    "streetNumber": null,
+    "complement": null,
+    "cep": null,
+    "latitude": -25.44,
+    "longitude": -49.29,
+    "geoPrecision": "GEO_BAIRRO_CENTROID",
+    "addressVisibility": "ADDR_PUBLIC_BAIRRO",
+    "approximate": true
+  },
+  "rating": {
+    "state": "RATING_NONE",
+    "average": null,
+    "averageLabel": null,
+    "count": 0,
+    "histogram": {},
+    "dimensions": {},
+    "accessibleLabel": "Sem avaliações ainda"
+  },
+  "owner": {
+    "id": 902,
+    "name": "Doce Sonho",
+    "handle": "docesonho",
+    "category": {
+      "code": "ESTABELECIMENTO",
+      "label": "Estabelecimento",
+      "color": "#E88F12"
+    },
+    "verified": true
+  },
+  "adultsOnly": false,
+  "status": "ACTIVE",
+  "published": null,
+  "publishBlockers": null,
+  "createdAt": "2026-09-02T14:10:00Z",
+  "updatedAt": "2026-10-20T18:30:00Z"
+}

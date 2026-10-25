@@ -1,0 +1,22 @@
+{
+  "id": 42,
+  "name": "Júlia Andrade",
+  "handle": "juliandrade",
+  "email": "julia@example.com",
+  "recoveryEmail": null,
+  "cellphoneNumber": "+5541999990000",
+  "dateOfBirth": "1994-03-12",
+  "bio": "Caçadora de pão de queijo e de cafés de bairro.",
+  "pronouns": ["ela", "dela"],
+  "links": ["https://julia.exemplo.com.br"],
+  "countryOfResidence": "BR",
+  "stateOfResidence": "PR",
+  "cityOfResidence": "Curitiba",
+  "category": { "code": "COMENSAL", "label": "Comensal", "color": "#48A8FF" },
+  "categoryVerification": "NOT_REQUIRED",
+  "typeDetails": { "city": "Curitiba", "state": "PR" },
+  "avatarObjectKey": null,
+  "avatarUrl": null,
+  "favoriteCuisines": ["MINEIRA", "JAPONESA"],
+  "dietaryStyles": []
+}

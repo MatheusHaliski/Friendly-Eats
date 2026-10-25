@@ -6,8 +6,12 @@ import com.friendlyeats.application.media.ImageSanitizer;
 import com.friendlyeats.application.media.MediaExceptions;
 import com.friendlyeats.application.media.MediaUploads;
 import com.friendlyeats.application.common.PublicLinks;
+import com.friendlyeats.application.consent.ConsentService;
 import com.friendlyeats.domain.model.CategoryVerification;
+import com.friendlyeats.domain.model.ConsentPurpose;
 import com.friendlyeats.domain.model.UserAccount;
+import com.friendlyeats.domain.taxonomy.Cuisine;
+import com.friendlyeats.domain.taxonomy.DietaryStyle;
 import com.friendlyeats.infrastructure.persistence.postgres.UserAccountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +26,8 @@ import java.util.regex.Pattern;
  * RF2 · editar informações pessoais (LGPD Art. 18, III — correção). E-mail e senha têm endpoints próprios com
  * modo sudo; data de nascimento só muda pelo suporte (verificação de idade, ECA Digital); o tipo de usuário
  * não muda por aqui. Conta com selo que troca nome, @usuário ou dados da categoria volta para verificação.
+ * Gosto: até 5 culinárias favoritas (dado comum) e estilos alimentares, que podem revelar saúde ou religião e só
+ * são gravados com o consentimento {@code SENSITIVE_PROFILE_DATA} (RF3, LGPD Art. 11).
  */
 @Service
 public class ProfileService {
@@ -29,21 +35,26 @@ public class ProfileService {
     private static final Pattern HANDLE = Pattern.compile("^[a-z0-9._]{3,30}$");
     private static final Pattern URL = Pattern.compile("^https://[^\\s]{4,200}$");
     private static final Pattern PHONE = Pattern.compile("^\\+[1-9]\\d{7,14}$");
+    static final int MAX_FAVORITE_CUISINES = 5;
 
     private final UserAccountRepository users;
     private final MediaUploads media;
     private final PublicLinks links;
+    private final ConsentService consents;
 
-    public ProfileService(UserAccountRepository users, MediaUploads media, PublicLinks links) {
+    public ProfileService(UserAccountRepository users, MediaUploads media, PublicLinks links,
+                          ConsentService consents) {
         this.users = users;
         this.media = media;
         this.links = links;
+        this.consents = consents;
     }
 
     public record ProfilePatch(String name, String handle, String bio, List<String> pronouns, List<String> links,
                                String countryOfResidence, String stateOfResidence, String cityOfResidence,
                                String recoveryEmail, String cellphoneNumber,
-                               Map<String, Object> typeDetails) {
+                               Map<String, Object> typeDetails, List<String> favoriteCuisines,
+                               List<String> dietaryStyles) {
     }
 
     @Transactional(readOnly = true)
@@ -53,7 +64,8 @@ public class ProfileService {
 
     @Transactional
     public ProfileView update(long userId, ProfilePatch p) {
-        UserAccount u = users.findById(userId).orElseThrow();
+        // com estilos alimentares, trava a conta: a revogação do consentimento sensível não pode correr junto
+        UserAccount u = (p.dietaryStyles() == null ? users.findById(userId) : users.lockById(userId)).orElseThrow();
         List<String> errors = new ArrayList<>();
         boolean identityChanged = false;
         if (p.name() != null) {
@@ -131,6 +143,28 @@ public class ProfileService {
                 identityChanged = true;
             }
         }
+        if (p.favoriteCuisines() != null) {
+            List<String> codes = distinct(p.favoriteCuisines());
+            if (codes.size() > MAX_FAVORITE_CUISINES) {
+                errors.add("Escolha até " + MAX_FAVORITE_CUISINES + " culinárias favoritas.");
+            } else if (codes.stream().anyMatch(c -> Cuisine.fromCode(c).isEmpty())) {
+                errors.add("Culinária desconhecida. Use os códigos de GET /api/v1/taxonomy.");
+            } else {
+                u.setFavoriteCuisines(codes);
+            }
+        }
+        if (p.dietaryStyles() != null) {
+            List<String> codes = distinct(p.dietaryStyles());
+            if (!codes.isEmpty() && !consents.granted(userId, ConsentPurpose.SENSITIVE_PROFILE_DATA)) {
+                throw new AccountExceptions.Forbidden("Para guardar estilos alimentares no perfil, ligue antes o "
+                        + "consentimento \"" + ConsentPurpose.SENSITIVE_PROFILE_DATA.getLabel() + "\" em Privacidade.");
+            }
+            if (codes.stream().anyMatch(c -> DietaryStyle.fromCode(c).isEmpty())) {
+                errors.add("Estilo alimentar desconhecido. Use os códigos de GET /api/v1/taxonomy.");
+            } else {
+                u.setDietaryStyles(codes);
+            }
+        }
         if (!errors.isEmpty()) {
             throw new AccountExceptions.Invalid(errors);
         }
@@ -172,7 +206,18 @@ public class ProfileService {
                 u.getCellphoneNumber(), u.getUserDateOfBirth(), u.getBio(), u.getPronouns(),
                 u.getLinks(), u.getCountryOfResidence(), u.getStateOfResidence(), u.getCityOfResidence(),
                 CategoryView.of(u.getUserType()), u.getCategoryVerification(), u.getTypeDetails(), u.getPhotoObjectKey(),
-                links.mediaUrl(u.getPhotoObjectKey()));
+                links.mediaUrl(u.getPhotoObjectKey()), orEmpty(u.getFavoriteCuisines()),
+                orEmpty(u.getDietaryStyles()));
+    }
+
+    private static List<String> orEmpty(List<String> codes) {
+        return codes == null ? List.of() : List.copyOf(codes);
+    }
+
+    /** Sem repetição e na ordem escolhida; nulo ou em branco fica para a validação de código. */
+    private static List<String> distinct(List<String> codes) {
+        return codes.stream().map(c -> c == null ? "" : c.strip().toUpperCase(java.util.Locale.ROOT))
+                .distinct().toList();
     }
 
     private static String blankToNull(String s) {

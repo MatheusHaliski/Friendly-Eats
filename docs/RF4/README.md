@@ -20,6 +20,25 @@ paths:
   - src/main/java/com/friendlyeats/api/MeController.java
   - src/main/java/com/friendlyeats/api/ViewerResolver.java
   - src/main/java/com/friendlyeats/api/ApiExceptionHandler.java
+  - frontend/apps/web/app/entrar/page.tsx
+  - frontend/apps/web/app/conta/page.tsx
+  - frontend/apps/web/components/auth/LoginView.tsx
+  - frontend/apps/web/components/account/AccountView.tsx
+  - frontend/apps/web/components/SiteHeader.tsx
+  - frontend/apps/web/components/Providers.tsx
+  - frontend/apps/web/lib/queries.ts
+  - frontend/apps/web/lib/safe-redirect.ts
+  - frontend/apps/web/lib/use-countdown.ts
+  - frontend/apps/web/next.config.ts
+  - frontend/packages/api/src/client.ts
+  - frontend/apps/web/app/configuracoes/seguranca/page.tsx
+  - frontend/apps/web/components/settings/SecuritySection.tsx
+  - frontend/apps/web/components/settings/MfaPanel.tsx
+  - frontend/apps/web/components/settings/QrCode.tsx
+  - frontend/apps/web/components/settings/RecoveryCodes.tsx
+  - frontend/apps/web/components/settings/SudoFields.tsx
+  - frontend/apps/web/lib/use-leave.ts
+  - frontend/apps/web/components/Form.tsx
 ---
 
 # RF4 · Login, sessão, controle de acesso e 2FA
@@ -52,11 +71,17 @@ paths:
    - **Nunca sobrescreve o fator ativo:** confirmar uma configuração quando o 2FA já foi ligado em outra sessão dá
      `409` (`INSERT … ON CONFLICT DO NOTHING`).
 8. **Controle de acesso:** são `GET` públicos os Termos (`/api/v1/legal/**`), a taxonomia (`/api/v1/taxonomy`), a
-   página do estabelecimento (`/api/v1/establishments/*`) e a lista de avaliações dele
-   (`/api/v1/establishments/*/reviews`); todo o resto exige sessão; escrita exige `X-XSRF-TOKEN`; interagir e enviar
+   busca (`/api/v1/establishments`, [RF10](../RF10/README.md)), a página do estabelecimento
+   (`/api/v1/establishments/*`) e a lista de avaliações dele
+   (`/api/v1/establishments/*/reviews`), o feed e a página do post (`/api/v1/posts`, `/api/v1/posts/*`,
+   `/api/v1/posts/trending`, `/api/v1/establishments/*/posts`, [RF14](../RF14/README.md)), os comentários
+   (`/api/v1/posts/*/comments`, [RF12](../RF12/README.md)), os perfis públicos (`/api/v1/users`,
+   `/api/v1/users/*/profile`, `/api/v1/users/*/posts`, [RF15](../RF15/README.md)) e o catálogo de molduras
+   (`/api/v1/backgrounds/**`, [RF16](../RF16/README.md)); todo o resto exige sessão; escrita exige `X-XSRF-TOKEN`; interagir e enviar
    foto exigem conta `ACTIVE`; conta suspensa não entra. A regra de 18+ dos lugares de bebida alcoólica **não** está no
-   filtro, e sim no serviço ([RF6](../RF6/README.md)): o filtro deixa o `GET` passar e o serviço responde `401` com
-   mensagem própria ao visitante e `404` ao menor.
+   filtro, e sim no serviço ([RF6](../RF6/README.md), e o mesmo para o post 18+ no [RF14](../RF14/README.md)): o
+   filtro deixa o `GET` passar e o serviço responde `401` com mensagem própria ao visitante e `404` ao menor. O perfil
+   privado também é decidido no serviço.
 9. **Sessões ativas:** lista com navegador/sistema, criação, último acesso e "esta sessão", **sem expor o id real**;
    encerrar uma ou todas as outras; trocar a senha encerra as outras.
 
@@ -69,6 +94,11 @@ paths:
 | `GET /api/v1/establishments/{id}` e `GET /api/v1/establishments/{id}/reviews` | ✅ página no ar (lugar 18+: 401 do serviço) | ✅ (menor de 18 em lugar 18+: 404) | ✅ (menor de 18 em lugar 18+: 404) |
 | `POST /api/v1/establishments`, `PATCH /api/v1/establishments/{id}`, `PUT …/classification` | 401 | 403 | ✅ só conta de estabelecimento ou varejo (senão 403), e o dono (senão 404) |
 | `…/reviews/me` (`GET`, `PUT`, `DELETE`) | 401 | ✅ `GET`/`DELETE` · 403 no `PUT` | ✅ (organização e dono: 403 no `PUT`) |
+| `GET /api/v1/posts`, `/api/v1/posts/{id}`, `/api/v1/posts/trending`, `/api/v1/posts/vocabulary`, `/api/v1/posts/{id}/comments`, `/api/v1/establishments/{id}/posts` | ✅ só `LIVRE` (post 18+: 401 do serviço) | ✅ (menor de 18: sem 18+) | ✅ (menor de 18: sem 18+) |
+| `GET /api/v1/users`, `/api/v1/users/{id}/profile`, `/api/v1/users/{id}/posts` | ✅ (perfil privado: mínimo e 403 nos posts) | ✅ | ✅ |
+| `GET /api/v1/backgrounds/**` (catálogo de molduras) | ✅ | ✅ | ✅ |
+| `POST /api/v1/posts`, `PATCH`/`DELETE /api/v1/posts/{id}`, `…/archive`, `…/restore` | 401 | 403 | ✅ pelo tipo de conta e selo (senão 403); só o autor edita (senão 404) |
+| `PUT`/`DELETE …/like` e `…/save`, `POST …/comments`, `DELETE …/comments/{id}`, `POST …/shares` | 401 | 403 | ✅ (arquivado ou alerta: 409; comentários fechados: 403) |
 | `/api/v1/auth/**` (cadastro, login, 2FA, reativar, sair) | ✅ | ✅ | ✅ |
 | `/api/v1/me/**` (perfil, preferências, sessões, 2FA, excluir) | 401 | ✅ | ✅ |
 | `POST /api/v1/media/uploads` (URL pré-assinada da foto) | 401 | 403 | ✅ |
@@ -84,9 +114,12 @@ paths:
 
 | Camada | Artefato | Situação |
 |---|---|---|
-| Segurança | `SecurityConfig` (CSRF SPA, regras, cabeçalhos; `GET` público de `/api/v1/legal/**`, `/api/v1/taxonomy`, `/api/v1/establishments/*` e `/api/v1/establishments/*/reviews`, com a regra de 18+ no serviço), `SessionService`, `AbsoluteSessionTimeoutFilter`, `LoginThrottle`, `PendingLogin`, `FriendlyPrincipal`, `ClientInfo`, `AppSecrets`, `SecretCipher`, `Totp`, `ProblemResponses` | ✅ |
+| Segurança | `SecurityConfig` (CSRF SPA, regras, cabeçalhos; `GET` público de `/api/v1/legal/**`, `/api/v1/taxonomy`, `/api/v1/establishments` (busca), `/api/v1/establishments/*` e `/api/v1/establishments/*/reviews`, dos posts com os comentários e o "em alta" (`/api/v1/posts`, `/api/v1/posts/*`, `/api/v1/posts/*/comments`, `/api/v1/posts/trending`, `/api/v1/establishments/*/posts`), dos perfis (`/api/v1/users`, `/api/v1/users/*/profile`, `/api/v1/users/*/posts`) e de `/api/v1/backgrounds/**`, com as regras de 18+ e de perfil privado no serviço), `SessionService`, `AbsoluteSessionTimeoutFilter`, `LoginThrottle`, `PendingLogin`, `FriendlyPrincipal`, `ClientInfo`, `AppSecrets`, `SecretCipher`, `Totp`, `ProblemResponses` | ✅ |
 | Aplicação | `AuthService` (login em etapas), `MfaService`, `StepUp` (modo sudo), `AccountNotifier`; `CommonExceptions.Unauthenticated(String)` para o `401` com mensagem própria (lugar 18+, RF6) | ✅ |
 | Persistência | `user_mfa`, `user_recovery_code` (V1); sessões no Valkey `fe:session` | ✅ |
 | API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}`; `ApiExceptionHandler` em Problem Details pt-BR, com `409` (nunca `500`) quando dois pedidos correm para a mesma chave única ou a mesma versão (`DataIntegrityViolationException` com SQLState 23505, `ObjectOptimisticLockingFailureException`) | ✅ |
-| Testes | `EstablishmentApiIT.establishmentPageIsPublicOnlyWithTheOwnerSealAndHidesTheHomeKitchenStreet` (GET público sem sessão), `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults` (401 do serviço para o visitante em lugar 18+), `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice` (6 envios simultâneos da mesma avaliação: só 200, 201 ou 409); `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões; `secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor`: 8 logins simultâneos com o mesmo código e duas configurações concorrentes) | ✅ |
+| Testes | `EstablishmentApiIT.establishmentPageIsPublicOnlyWithTheOwnerSealAndHidesTheHomeKitchenStreet` (GET público sem sessão), `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults` (401 do serviço para o visitante em lugar 18+), `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice` (6 envios simultâneos da mesma avaliação: só 200, 201 ou 409); `PostApiIT.feedPagesByCursorAndHidesExpiredAdultPrivateAndInactiveContent` (feed e página do post sem sessão, 401 do post 18+), `PostApiIT.eachKindHasItsPublishersAndTheOwnersPostsAreAboutTheirOwnPlace` (escrita sem sessão: 401), `UserProfileApiIT.profileFeedListsActivePublicAccountsWithBadgeAndSealAndFilters` (perfis sem sessão); `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões; `secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor`: 8 logins simultâneos com o mesmo código e duas configurações concorrentes) | ✅ |
+| Tela | app web: `/entrar` (senha, passo do código 2FA, reativação, 429 com contagem regressiva), `/conta` (sessão, sair, "Meus lugares" com `publishBlockers`); cliente da API com `credentials: same-origin`, `X-XSRF-TOKEN` a partir do cookie e nova tentativa se o token estiver velho; `next.config.ts` repassa `/api` ao backend (mesma origem) e manda `X-Content-Type-Options`, `Referrer-Policy: no-referrer` e `frame-ancestors 'none'`; nada de token no `localStorage`; `Providers` avisa as outras abas no logout (`BroadcastChannel`) e, com a sessão, aplica as preferências de exibição da conta ([RF2](../RF2/README.md)), voltando ao padrão quando a sessão acaba; e2e `entrar.spec.ts` e `conta.spec.ts` | ✅ |
 | Pendências | passkeys/WebAuthn; e-mail transacional; CAPTCHA depois de muitas falhas | ⏳ |
+| Telas de segurança | app web `/configuracoes/seguranca`: trocar a senha (modo sudo), sessões abertas com "Sair" e "Sair de todos os outros aparelhos", alertas de login e o 2FA de ponta a ponta (QR code gerado no navegador, confirmação, códigos de recuperação para copiar ou baixar, gerar novos, desligar); aviso ao sair com mudança não salva (`use-leave`); e2e `configuracoes.spec.ts` com axe | ✅ |
+| Foco nos avisos | `/entrar`, senha e sessões e 2FA: o alerta, o resumo de erros e o aviso de concluído recebem o foco depois de montados (`useDeferredFocus`) | ✅ |

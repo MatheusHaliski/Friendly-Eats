@@ -16,6 +16,15 @@ flowchart TD
     F -- sim --> C2
     B -- e-mail ou senha --> G[Fluxo próprio com modo sudo · RF4]
     B -- data de nascimento ou tipo --> H[Só pelo suporte]
+    B -- favoriteCuisines --> Q{Até 5 códigos de Cuisine?}
+    Q -- não --> E422
+    Q -- sim --> C2
+    B -- dietaryStyles --> LK[(SELECT … FOR UPDATE na conta)]
+    LK --> S{Lista vazia ou<br/>SENSITIVE_PROFILE_DATA ligado?}
+    S -- não --> E403[403 · ligue o consentimento · RF3]
+    S -- sim --> SK{Códigos de DietaryStyle?}
+    SK -- não --> E422
+    SK -- sim --> C2
     C1 & C2 --> L[(UPDATE user_account)]
 ```
 

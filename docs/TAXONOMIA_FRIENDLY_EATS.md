@@ -8,7 +8,7 @@ alergênicos, tipo de estabelecimento, facetas, preço, estrelas e local). Cores
 Base: as quatro pesquisas de 25/10/2026 (culinária e estilos; estabelecimentos e contas; preço, estrelas e local;
 conteúdo e sinais visuais), conciliadas com o que o código já faz.
 
-**Legenda.** Sem marcação = regra da v1 (RF1 a RF8). ⏳ = planejado, ainda sem código. `≈` = equivalência aproximada,
+**Legenda.** Sem marcação = regra já no código (RF1 a RF16). ⏳ = planejado, ainda sem código. `≈` = equivalência aproximada,
 que exige revisão humana na importação.
 
 ## Sumário
@@ -26,7 +26,8 @@ que exige revisão humana na importação.
 11. [Local](#11-local)
 12. [Chip de culinária](#12-chip-de-culinária)
 13. [Mapa para os RFs](#13-mapa-para-os-rfs)
-14. [Fontes](#14-fontes)
+14. [Conteúdo: posts, feeds e interações](#14-conteúdo-posts-feeds-e-interações)
+15. [Fontes](#15-fontes)
 
 ---
 
@@ -72,10 +73,15 @@ flowchart LR
     AV -->|nota inteira 1 a 5| ESTRELAS[Estrelas]
     AV -->|conforme visit_mode| DIM[Dimensões]
     AV -->|gasto por pessoa| PRECO
-    ITEM[Item de cardápio ou post] -.->|CONTEM ou PODE_CONTER| ALERG[Alergênico]
+    POST[Post de comida] -->|CONTEM ou PODE_CONTER| ALERG[Alergênico]
+    POST -->|0 ou 1| CUL
+    POST -->|0 ou 1| FMT
+    POST -->|0 ou 1| EST
+    ITEM[Item de cardápio] -.->|CONTEM ou PODE_CONTER| ALERG
 ```
 
-A linha tracejada indica o que ainda está planejado (alergênicos por item, RF9).
+A linha tracejada indica o que ainda está planejado (alergênicos por item de cardápio). Os posts e os seus tipos estão
+na [seção 14](#14-conteúdo-posts-feeds-e-interações).
 
 ---
 
@@ -89,12 +95,12 @@ de `type_details` e o selo estão no [RF1](RF1/README.md).
 | Código | Rótulo | Escuro / claro | Glifo | Ícone Lucide | Pode | Não pode | Selo inicial |
 |---|---|---|---|---|---|---|---|
 | `COMENSAL` | Comensal | `#48A8FF` / `#05558F` | ◇ losango | `user-round` | avaliar, publicar, seguir, comentar; a partir de 13 anos (menor de 16 com proteções travadas) | ser dono de estabelecimento; publicar alerta sanitário | `NOT_REQUIRED` |
-| `CRIADOR` | Criador | `#F7C638` / `#876A06` | ✦ estrela | `camera` | o mesmo que o comensal, com perfil de canal (`CRITICO`, `BLOG`, `VIDEO`, `PODCAST`, `GUIA`) | ser dono de estabelecimento; ⏳ publicar publi, permuta ou convite sem o chip Publicidade (CONAR) | `NOT_REQUIRED` |
+| `CRIADOR` | Criador | `#F7C638` / `#876A06` | ✦ estrela | `camera` | o mesmo que o comensal, com perfil de canal (`CRITICO`, `BLOG`, `VIDEO`, `PODCAST`, `GUIA`) | ser dono de estabelecimento; publicar promoção sem o chip Publicidade (CDC art. 36, CONAR) | `NOT_REQUIRED` |
 | `CHEF` | Chef | `#D6C5FF` / `#7D5BBA` | ⬠ pentágono | `chef-hat` | o mesmo que o comensal, com função (`CHEF`, `COZINHEIRO`, `CONFEITEIRO`, `PADEIRO`, `BARISTA`, `SOMMELIER`, `BARTENDER`, `NUTRICIONISTA`) e registro profissional privado; ⏳ vínculo "chef do X" confirmado pelo estabelecimento | ser dono de estabelecimento; ⏳ avaliar o lugar com que tem vínculo | `NOT_REQUIRED` |
 | `ESTABELECIMENTO` | Estabelecimento | `#E88F12` / `#7F4D06` | ▭ retângulo | `store` | ser dono de estabelecimento dos grupos que não são `VAREJO`; editar tipo, classificação, local e preço declarado; ⏳ responder avaliações em público | **avaliar** (qualquer lugar); publicar como organização antes do selo | **`PENDING`** |
 | `VAREJO` | Varejo & Marca | `#EE559F` / `#96075A` | △ triângulo | `shopping-basket` | ser dono de estabelecimento do grupo `VAREJO`; ⏳ catálogo e "onde encontrar" | **avaliar**; publicar como organização antes do selo | **`PENDING`** |
 | `COMUNIDADE` | Comunidade | `#08DABD` / `#0B8170` | ⬢ hexágono | `users` | avaliar (em nome do grupo, sem peso extra), publicar; ⏳ membros, eventos e listas coletivas | ser dono de estabelecimento; vender | `NOT_REQUIRED` |
-| `OFICIAL` | Oficial | `#0C0A07` + anel `#D6D0C8` / `#0C0A07` | ◎ círculo duplo | `landmark` | publicar alerta sanitário e recall (`canPublishFoodAlerts`, depois do selo; o tipo de post é ⏳ RF9) | **avaliar**; ser dono de estabelecimento | **`PENDING`** |
+| `OFICIAL` | Oficial | `#0C0A07` + anel `#D6D0C8` / `#0C0A07` | ◎ círculo duplo | `landmark` | publicar alerta sanitário e recall (`canPublishFoodAlerts`, depois do selo; tipo `ALERTA_SANITARIO`, [RF9](RF9/README.md)) | **avaliar**; ser dono de estabelecimento | **`PENDING`** |
 
 - **Selo** (`category_verification`): `NOT_REQUIRED`, ou `PENDING` → `VERIFIED` | `REJECTED` depois da moderação.
   Com `VERIFIED`, o nome ganha o ícone `badge-check`. O selo diz só "é quem diz ser": **nunca é pago e nunca indica
@@ -400,8 +406,9 @@ contaminação cruzada".
   quatro cereais com glúten formam um só item da lista, por isso há 21 códigos vigentes.
 - As advertências da Anvisa **não se aplicam** à comida preparada e vendida no próprio estabelecimento. No Friendly
   Eats, a informação é autodeclarada, e o aviso precisa deixar isso claro.
-- ⏳ **Modelo de uso:** lista por **item de cardápio ou post** (não por estabelecimento), cada alergênico com
-  `CONTEM` ou `PODE_CONTER`.
+- **Modelo de uso:** lista por **post** (`Allergen`, [RF9](RF9/README.md)), não por estabelecimento, cada alergênico
+  com `CONTEM` ou `PODE_CONTER`; o post aceita só os códigos vigentes, e as advertências vão num campo próprio
+  (`warnings`). ⏳ O mesmo modelo por **item de cardápio**.
 - Os códigos propostos já ficam reservados. Quando a revisão de 2025 entrar em vigor, só muda a situação.
 
 | Código | Rótulo ("Contém…") | Situação |
@@ -470,7 +477,9 @@ Regras:
 3. Não inferir saúde nem religião a partir de posts, buscas ou avaliações, e não guardar essas inferências. Quando a
    pessoa escreve "sou celíaco" num post público, isso não vira atributo do perfil.
 4. Menor de idade: preferência com dado de saúde exige o consentimento de um dos pais ou do responsável (Art. 14,
-   *não verificado*).
+   *não verificado*). Enquanto esse fluxo não existe, `SENSITIVE_PROFILE_DATA` fica **travado para menor de 18**
+   (`ConsentPurpose.MinorRule.UNDER_18`); localização, feed personalizado e marketing ficam travados para menor de 16
+   (ECA Digital).
 
 ---
 
@@ -647,7 +656,7 @@ comunidade, como o Google.
 | `LGBTQIA_ACOLHEDOR` | Espaço LGBTQIA+ acolhedor | dono, com moderação |
 
 "Não aceita pets" nunca pode parecer "não aceita cão-guia": o cão de assistência é sempre permitido (Lei 11.126/2005,
-*não verificado*).
+confirmada na [pesquisa de requisitos](PESQUISA_REQUISITOS.md)).
 
 ### 8.4 Acessibilidade ⏳
 
@@ -974,18 +983,77 @@ Exemplos: pizzaria com `ITALIANA` principal → `EUROPEIA` (a culinária vem ant
 | RF6 | Cadastrar e verificar estabelecimento | tipo e grupo (7), conta dona (2.4), local (11), preço declarado (9) | v1 |
 | RF7 | Classificar estabelecimento | culinária (3), formato (4), abordagem (5), estilos (6.1), chip (12) | v1 |
 | RF8 | Avaliar com estrelas | nota, estados, dimensões, `visit_mode`, fórmulas (10), preço pelas avaliações (9.3) | v1 |
-| RF9 | Publicar conteúdo | ⏳ alergênicos por item ou post (6.2), alerta sanitário da conta `OFICIAL` | ⏳ planejado |
+| RF9 | Publicar conteúdo | tipos de post e quem publica (14), alergênicos por post (6.2), 18+ (14.3), alerta sanitário da conta `OFICIAL`; ⏳ cardápio por item | 🟡 parcial |
 | RF10 | Buscar e filtrar | ⏳ raios (11.3), filtros por todos os eixos, ordenação por `WR` | ⏳ planejado |
 | RF11 | Página do estabelecimento | ⏳ facetas (8), histograma, origem do preço | ⏳ planejado |
-| RF12 | Interações | ⏳ resposta do dono (`RULE_OWNER_REPLY`), seguir, salvar | ⏳ planejado |
+| RF12 | Interações | curtir, salvar, comentar e compartilhar (`ReactionKind`, `ShareChannel`, 14.4); ⏳ resposta do dono (`RULE_OWNER_REPLY`), seguir | 🟡 parcial |
+| RF14 | Feed e página do post | `FeedType` (14.2), 18+ (14.3), "em alta" | 🟡 parcial |
+| RF15 | Perfil público e feed de perfis | tipos de conta com cor, glifo e selo (2.1), `FeedType.PROFILE` | 🟡 parcial |
 | RF13 | Moderação e avaliações falsas | ⏳ `MODERADOR`, `UNDER_REVIEW` / `REMOVED`, regras `RULE_*`, R8 e R10 | ⏳ planejado |
+| RF16 | Moldura do post | cartelas da época com a cozinha de cada estação, padrões de mesa, layout Cardápio; tipo de conta (2) na direção recomendada | 🟡 parcial |
 
 Ao criar ou mudar um desses RFs, atualize esta taxonomia no mesmo commit sempre que surgir um ator, atributo, categoria
 ou card novo (`CLAUDE.md`).
 
 ---
 
-## 14. Fontes
+## 14. Conteúdo: posts, feeds e interações
+
+Os 7 tipos de post de comida vêm da pesquisa 04 (seção 1.3). A borda do card muda de **forma**, não de cor (só o
+alerta tem a faixa hazard), e cada tipo tem ícone Lucide e rótulo. Ficam para depois (⏳) a avaliação como post, a
+lista ou guia, o check-in e o vídeo.
+
+### 14.1 Tipos de post (`PostKind`) e quem publica
+
+| Código | Rótulo | Ícone Lucide | Borda | Feed | Quem publica | Obrigatório | Sai do feed |
+|---|---|---|---|---|---|---|---|
+| `FOTO_PRATO` | Foto de prato | `clapperboard` (o `camera` é da conta Criador, DESIGN_SYSTEM) | `SEM_MOLDURA` | `POST` | qualquer conta ativa | foto e texto alternativo | nunca |
+| `RECEITA` | Receita | `book-open` | `TRACEJADA` | `POST` | qualquer conta ativa | ingredientes e modo de preparo | nunca |
+| `PERGUNTA` | Pergunta | `message-circle-question` | `BALAO` | `POST` | qualquer conta ativa, exceto `OFICIAL` | a pergunta | nunca |
+| `PRATO_DO_DIA` | Prato do dia | `hand-platter` | `DUPLA` | `POST` | só `ESTABELECIMENTO` `VERIFIED`, sobre um lugar dela | lugar e preço em centavos | às 23h59 de `America/Sao_Paulo` do dia |
+| `PROMOCAO` | Promoção | `badge-percent` | `ETIQUETA` | `POST` | `ESTABELECIMENTO` ou `VAREJO` `VERIFIED`, sobre um lugar seu; `CRIADOR` com o chip **Publicidade** | vigência e "de/por" (de > por) ou desconto de 1% a 90% | no fim da vigência |
+| `EVENTO` | Evento | `calendar-days` | `DATA` | `POST` | `ESTABELECIMENTO`, `VAREJO`, `COMUNIDADE` ou `CHEF` | início, fim e preço ou gratuito | no fim do evento |
+| `ALERTA_SANITARIO` | Alerta sanitário | `triangle-alert` | `HAZARD` | `ALERT` | só `OFICIAL` `VERIFIED` (`canPublishFoodAlerts`) | produto, marca, lotes, motivo e fonte https | nunca (sem moldura, sempre Livre, sem curtida nem comentário) |
+
+- Organizações (`ESTABELECIMENTO`, `VAREJO`, `OFICIAL`) só publicam qualquer tipo depois do selo `VERIFIED`.
+- Todo post pode citar um lugar (visível para o autor), uma culinária, um formato, estilos alimentares e alergênicos.
+- Ciclo de vida (`PostStatus`): `DRAFT`, `PUBLISHED`, `ARCHIVED` e `REMOVED` (terminal, conteúdo apagado).
+- Encerrado (prato do dia, promoção ou evento vencidos) não é status: deriva de `expires_at`, sai do feed e ganha o
+  rótulo "Encerrado".
+
+### 14.2 Feeds (`FeedType`)
+
+| Código | O que lista | Onde |
+|---|---|---|
+| `PROFILE` | contas ativas com perfil público (organizações só com selo) | [RF15](RF15/README.md) |
+| `POST` | os 6 tipos de post de comida | [RF14](RF14/README.md) |
+| `ALERT` | só os alertas sanitários | [RF14](RF14/README.md) |
+
+### 14.3 Classificação etária (`AgeRating`)
+
+| Código | Chip | Regra |
+|---|---|---|
+| `LIVRE` | Livre | padrão |
+| `AGE_18` | 18+ | automático quando o formato é alcoólico (`CERVEJA`, `VINHO`, `COQUETEIS_DESTILADOS`) ou o lugar tem foco em bebida alcoólica (seção 7.2); não aparece para visitante nem para menor de 18; menor não publica. O alerta sanitário é sempre `LIVRE` |
+
+O chip **Publicidade** (`advertising`) é independente da classificação e pode aparecer com Livre ou 18+.
+⏳ **Patrocinado** (impulsionado na plataforma).
+
+### 14.4 Interações
+
+| Vocabulário | Códigos | Regra |
+|---|---|---|
+| `ReactionKind` | `LIKE` (público, contado) · `SAVE` (privado, sem contador) | idempotente, uma por conta |
+| `ShareChannel` | `COPY_LINK` · `NATIVE` · `WHATSAPP` · `TELEGRAM` · `X` · `EMAIL` | conta pares (conta, canal) distintos; o link `/p/{id}` não diz quem compartilhou |
+| `CommentStatus` | `VISIBLE` · `REMOVED` | quem comenta segue o `who_can_comment` do autor (`EVERYONE`, `FOLLOWERS`, `NOBODY`) |
+
+### 14.5 Alergênicos no post (`Allergen`)
+
+O enum usa exatamente os códigos da seção 6.2: 21 alergênicos `VIGENTE`, 5 `PROPOSTO` (reservados e recusados no
+post) e as advertências `LACTOSE` e `GLUTEN` (`Kind.ADVERTENCIA`, campo `warnings`). Cada alergênico tem o nível
+`CONTEM` ou `PODE_CONTER`, e a tela mostra sempre o aviso de informação autodeclarada.
+
+## 15. Fontes
 
 **Plataformas e vocabulários**
 

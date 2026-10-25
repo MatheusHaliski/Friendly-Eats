@@ -3,6 +3,7 @@ package com.friendlyeats.api;
 import com.friendlyeats.application.establishment.EstablishmentDrafts.ClassificationDraft;
 import com.friendlyeats.application.establishment.EstablishmentDrafts.EstablishmentDraft;
 import com.friendlyeats.application.establishment.EstablishmentDrafts.ReviewDraft;
+import com.friendlyeats.application.establishment.EstablishmentSearch;
 import com.friendlyeats.application.establishment.EstablishmentService;
 import com.friendlyeats.application.establishment.EstablishmentViews.EstablishmentView;
 import com.friendlyeats.application.establishment.EstablishmentViews.ReviewPage;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Estabelecimentos (RF6), classificação (RF7) e avaliações com estrelas (RF8). Leitura pública (com a regra de 18+
+ * Busca (RF10), estabelecimentos (RF6), classificação (RF7) e avaliações com estrelas (RF8). Leitura pública (com a regra de 18+
  * para lugares de bebida alcoólica); escrita exige sessão e {@code X-XSRF-TOKEN}.
  */
 @RestController
@@ -35,11 +36,36 @@ public class EstablishmentController {
     private final ViewerResolver viewer;
     private final EstablishmentService establishments;
     private final ReviewService reviews;
+    private final EstablishmentSearch search;
 
-    public EstablishmentController(ViewerResolver viewer, EstablishmentService establishments, ReviewService reviews) {
+    public EstablishmentController(ViewerResolver viewer, EstablishmentService establishments, ReviewService reviews,
+                                   EstablishmentSearch search) {
         this.viewer = viewer;
         this.establishments = establishments;
         this.reviews = reviews;
+        this.search = search;
+    }
+
+    /** Busca e filtros (RF10). Parâmetros repetíveis aceitam também lista separada por vírgula. */
+    @GetMapping("/establishments")
+    public EstablishmentSearch.Page search(@RequestParam(required = false) String q,
+                                           @RequestParam(required = false) List<String> chip,
+                                           @RequestParam(required = false) List<String> cuisine,
+                                           @RequestParam(required = false) List<String> format,
+                                           @RequestParam(required = false) List<String> type,
+                                           @RequestParam(required = false) List<String> group,
+                                           @RequestParam(required = false) List<String> price,
+                                           @RequestParam(required = false) Double minRating,
+                                           @RequestParam(required = false) List<String> dietary,
+                                           @RequestParam(required = false) Double lat,
+                                           @RequestParam(required = false) Double lng,
+                                           @RequestParam(required = false) Double radiusKm,
+                                           @RequestParam(required = false) String municipality,
+                                           @RequestParam(required = false) String sort,
+                                           @RequestParam(required = false) Integer page,
+                                           @RequestParam(required = false) Integer size) {
+        return search.search(viewer.viewerId(), new EstablishmentSearch.Query(q, chip, cuisine, format, type, group, price,
+                minRating, dietary, lat, lng, radiusKm, municipality, sort, page, size));
     }
 
     @PostMapping("/establishments")
