@@ -90,6 +90,9 @@ public class EstablishmentService {
     public EstablishmentView create(long viewerId, EstablishmentDraft d) {
         UserAccount owner = requireOwnerAccount(viewerId);
         String informal = informalFormat(owner);
+        if (informal != null) {
+            establishments.lockOwner(viewerId);
+        }
         if (informal != null && establishments.countByOwnerId(viewerId) > 0) {
             throw new CommonExceptions.Conflict("Cadastro com CPF tem um único ponto de venda. Para abrir outro, "
                     + "cadastre o negócio com CNPJ.");
@@ -305,7 +308,7 @@ public class EstablishmentService {
         return new EstablishmentView(e.getId(), e.getName(), e.getDescription(), type(e.getPrimaryType()),
                 e.getSecondaryTypes().stream().map(EstablishmentService::type).toList(),
                 new Coded(e.getTypeGroup().name(), e.getTypeGroup().getLabel(), null),
-                classification(e), price(e, counting), location(e, isOwner), rating(counting),
+                classification(e), price(e, counting), location(e, isOwner, owner), rating(counting),
                 owner.map(EstablishmentService::ownerView).orElse(null), e.isAlcoholFocused(), e.getStatus(),
                 isOwner ? blockers.isEmpty() : null, blockers, e.getCreatedAt(), e.getUpdatedAt());
     }
@@ -355,12 +358,20 @@ public class EstablishmentService {
                 source, reports, e.getPriceMinCents(), e.getPriceMaxCents(), accessible);
     }
 
-    private static LocationView location(Establishment e, boolean isOwner) {
+    /**
+     * A regra da cozinha caseira vale pelo cadastro atual da conta dona, não só pelo do lugar: se a conta passar a
+     * ser {@code COZINHA_CASEIRA} depois, o endereço completo já gravado deixa de sair para o público.
+     */
+    private static LocationView location(Establishment e, boolean isOwner, Optional<UserAccount> owner) {
         AddressVisibility v = e.getAddressVisibility();
+        if (v == AddressVisibility.ADDR_PUBLIC_FULL && owner.map(EstablishmentService::informalFormat)
+                .filter("COZINHA_CASEIRA"::equals).isPresent()) {
+            v = AddressVisibility.ADDR_PUBLIC_BAIRRO;
+        }
         if (isOwner || v == AddressVisibility.ADDR_PUBLIC_FULL) {
             return new LocationView(e.getCountry(), e.getUf(), e.getMunicipalityIbge(), e.getCity(),
                     e.getNeighborhood(), e.getStreet(), e.getStreetNumber(), e.getAddressComplement(), e.getCep(),
-                    e.getLatitude(), e.getLongitude(), e.getGeoPrecision().name(), v.name(), false);
+                    e.getLatitude(), e.getLongitude(), e.getGeoPrecision().name(), e.getAddressVisibility().name(), false);
         }
         if (v == AddressVisibility.ADDR_PUBLIC_BAIRRO) {
             boolean point = e.getLatitude() != null;

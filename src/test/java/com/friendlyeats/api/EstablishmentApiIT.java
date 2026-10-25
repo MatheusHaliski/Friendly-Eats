@@ -169,6 +169,33 @@ class EstablishmentApiIT {
                 .containsEntry("streetNumber", null).containsEntry("approximate", true)
                 .containsEntry("latitude", -8.1175).containsEntry("longitude", -34.9025);
 
+        // vários cadastros simultâneos do negócio com CPF: um único ponto de venda, mesmo na corrida
+        UserAccount truck = save(owner("Taco do Zé", "taco@example.com", UserCategoryEnum.ESTABELECIMENTO,
+                Map.of("informalFormat", "FOOD_TRUCK", "cpf", "11144477735", "tradeName", "Taco do Zé",
+                        "city", "Curitiba", "state", "PR")));
+        Map<String, Object> truckBody = Map.of("name", "Taco do Zé", "primaryType", "FOOD_TRUCK",
+                "location", Map.of("uf", "PR", "municipalityIbge", "4106902", "city", "Curitiba", "street", "Praça Rui Barbosa"),
+                "classification", Map.of("primaryFormat", "TACOS_BURRITOS"));
+        List<ApiClient> tabs = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            ApiClient tab = new ApiClient(port);
+            assertThat(tab.login(truck.getEmail(), PASSWORD).getStatusCode().value()).isEqualTo(200);
+            tab.get("/api/v1/auth/csrf");
+            tabs.add(tab);
+        }
+        assertThat(tabs.parallelStream().map(tab -> tab.send(HttpMethod.POST, "/api/v1/establishments", truckBody)
+                .getStatusCode().value()).toList()).isSubsetOf(201, 409).containsOnlyOnce(201);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM establishment WHERE owner_id = ?", Integer.class,
+                truck.getId())).isEqualTo(1);
+
+        // a conta passa a ser cozinha caseira depois: o endereço completo já gravado deixa de ser público
+        jdbc.update("UPDATE user_account SET type_details = '{\"informalFormat\":\"COZINHA_CASEIRA\",\"cpf\":"
+                + "\"52998224725\",\"tradeName\":\"Sabor Mineiro\",\"city\":\"Belo Horizonte\",\"state\":\"MG\"}' "
+                + "WHERE id = ?", restaurant.getId());
+        assertThat(map(new ApiClient(port).get("/api/v1/establishments/" + id).getBody(), "location"))
+                .containsEntry("street", null).containsEntry("addressVisibility", "ADDR_PUBLIC_BAIRRO")
+                .containsEntry("approximate", true);
+
         // dono fecha o lugar de vez; a página fica para o histórico
         Map<String, Object> closed = send(HttpMethod.PATCH, "/api/v1/establishments/" + kitchenId, homeCook,
                 Map.of("status", "CLOSED")).getBody();
@@ -246,7 +273,7 @@ class EstablishmentApiIT {
                 .map(tab -> tab.send(HttpMethod.PUT, reviews + "/me", Map.of("rating", 4, "visitMode", "DINE_IN"))
                         .getStatusCode().value())
                 .toList();
-        assertThat(statuses).containsOnly(200, 201, 409).contains(201);
+        assertThat(statuses).isSubsetOf(200, 201, 409).containsOnlyOnce(201);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM review WHERE author_id = ?", Integer.class, eager.getId()))
                 .isEqualTo(1);
 

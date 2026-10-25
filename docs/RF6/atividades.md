@@ -45,7 +45,9 @@ flowchart TD
     LG -- não --> N401[401 · entre na sua conta, 18+]
     LG -- sim --> AD{18 anos ou mais?}
     AD -- não --> N404
-    AD -- sim --> V{Visibilidade do endereço}
+    AD -- sim --> CC{ADDR_PUBLIC_FULL e a conta dona<br/>hoje é cozinha caseira?}
+    CC -- sim --> P2
+    CC -- não --> V{Visibilidade do endereço}
     V -- ADDR_PUBLIC_FULL --> P1[Endereço completo e pino]
     V -- ADDR_PUBLIC_BAIRRO --> P2[Bairro e município · ponto no centro<br/>da célula de 0,005° · approximate]
     V -- ADDR_HIDDEN --> P3[Só UF, município e cidade]

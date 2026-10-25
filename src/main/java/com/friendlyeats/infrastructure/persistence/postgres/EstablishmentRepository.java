@@ -13,6 +13,13 @@ public interface EstablishmentRepository extends JpaRepository<Establishment, Lo
 
     long countByOwnerId(Long ownerId);
 
+    /**
+     * Trava a linha da conta dona até o fim da transação: dois cadastros simultâneos do mesmo negócio com CPF
+     * ficam em fila, e o segundo já conta o primeiro (um único ponto de venda).
+     */
+    @Query(value = "SELECT id FROM user_account WHERE id = :ownerId FOR UPDATE", nativeQuery = true)
+    Long lockOwner(Long ownerId);
+
     /** Eliminação da conta dona (RF5); as avaliações do lugar saem junto (ON DELETE CASCADE). */
     @Modifying
     @Query("delete from Establishment e where e.ownerId = :ownerId")

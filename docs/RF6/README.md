@@ -41,7 +41,9 @@ paths:
    ou `VAREJO` cadastra; os outros tipos recebem `403` com a sugestão de avaliar ou publicar sobre o lugar. A conta
    precisa estar `ACTIVE` (e-mail confirmado); senão, `403`. Resposta: `201` com a página do dono.
 2. **Negócio com CPF** (`type_details.informalFormat`, [RF1](../RF1/README.md)) tem um **único ponto**: o segundo
-   cadastro dá `409`, com a orientação de cadastrar o negócio com CNPJ. Os tipos ficam presos ao formato (R9):
+   cadastro dá `409`, com a orientação de cadastrar o negócio com CNPJ. A linha da conta é travada (`SELECT … FOR
+   UPDATE`) antes da contagem, então dois cadastros simultâneos ficam em fila e o segundo também dá `409`. Os tipos
+   ficam presos ao formato (R9):
    `AMBULANTE` → `AMBULANTE`, `FOOD_TRUCK` → `FOOD_TRUCK`, `COZINHA_CASEIRA` → `COZINHA_ARTESANAL` ou `MARMITARIA`.
 3. **Tipo.** 1 principal (obrigatório) e até 3 secundários distintos, sem repetir o principal (R1). Os 48 tipos ficam
    em 7 grupos, e o grupo (`type_group`) deriva do principal (R3). Conta `VAREJO` só cadastra tipo principal do grupo
@@ -54,7 +56,9 @@ paths:
    - `ADDR_PUBLIC_BAIRRO` mostra UF, município, cidade e bairro, e o ponto vira o **centro da célula de 0,005°**
      (cerca de 550 m), igual em toda consulta, com `approximate: true` e `geoPrecision: GEO_BAIRRO_CENTROID`;
    - `ADDR_HIDDEN` mostra só UF, município e cidade, sem ponto;
-   - a **cozinha caseira** nasce com `ADDR_PUBLIC_BAIRRO`, e `ADDR_PUBLIC_FULL` é recusado;
+   - a **cozinha caseira** nasce com `ADDR_PUBLIC_BAIRRO`, e `ADDR_PUBLIC_FULL` é recusado. A regra vale pelo cadastro
+     **atual** da conta dona: se ela passar a ser `COZINHA_CASEIRA` depois, um `ADDR_PUBLIC_FULL` já gravado é
+     mostrado ao público como `ADDR_PUBLIC_BAIRRO`;
    - o dono sempre vê o endereço completo.
 6. **Preço declarado.** É o gasto por pessoa em centavos: o mínimo é obrigatório quando há máximo, os valores ficam
    entre R$ 0 e R$ 5.000, e o máximo não pode ser menor que o mínimo. `notApplicable` vale só nos grupos `VAREJO` e
@@ -104,6 +108,6 @@ paths:
 | Persistência | `V2__estabelecimento_e_avaliacao.sql`: tabela `establishment` com CHECKs, `point` gerado (`geography(Point,4326)`) e índices GiST, GIN e trigrama; `EstablishmentRepository` (`countByOwnerId`, `deleteAllOwnedBy`) | ✅ |
 | API | `POST /api/v1/establishments`, `GET` e `PATCH /api/v1/establishments/{id}`, `GET /api/v1/me/establishments`; GET público no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Configuração | `friendly-eats.price.reference-brl` (58), `multipliers` (0.7,1.4,2.8), `round-brl` (5), `min-reports` (5) | ✅ |
-| Testes | `TaxonomyRulesTest.vocabulariesHaveTheResearchedSizeAndEveryCuisineDescendsFromItsMacroGeneric`, `TaxonomyRulesTest.typesFollowTheAccountKindAndPolosAreNeverSecondary`, `TaxonomyRulesTest.locationUsesTheIbgeCodeKeepsPinsInBrazilAndHidesTheHomeKitchenStreet`, `TaxonomyRulesTest.priceScaleDoublesFromTheReferenceMealAndRoundsToFiveReais`; `EstablishmentApiIT.establishmentPageIsPublicOnlyWithTheOwnerSealAndHidesTheHomeKitchenStreet`, `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice` (preço pelas avaliações), `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults` (18+), `EstablishmentApiIT.accountEliminationRemovesReviewsAndOwnedEstablishments` | ✅ |
+| Testes | `TaxonomyRulesTest.vocabulariesHaveTheResearchedSizeAndEveryCuisineDescendsFromItsMacroGeneric`, `TaxonomyRulesTest.typesFollowTheAccountKindAndPolosAreNeverSecondary`, `TaxonomyRulesTest.locationUsesTheIbgeCodeKeepsPinsInBrazilAndHidesTheHomeKitchenStreet`, `TaxonomyRulesTest.priceScaleDoublesFromTheReferenceMealAndRoundsToFiveReais`; `EstablishmentApiIT.establishmentPageIsPublicOnlyWithTheOwnerSealAndHidesTheHomeKitchenStreet` (inclui 6 cadastros simultâneos com CPF e a conta que vira cozinha caseira depois), `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice` (preço pelas avaliações), `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults` (18+), `EstablishmentApiIT.accountEliminationRemovesReviewsAndOwnedEstablishments` | ✅ |
 | Pendências | verificação automática de CNPJ e CNAE (BrasilAPI, matriz R8); moderação: `REMOVED` e revisão do selo (RF13); auditoria de troca de tipo principal (R10); busca por raio e filtros (RF10); facetas operacionais (seção 8 da taxonomia); preço pelo cardápio (`PRICE_SRC_MENU`) e cardápio por item (RF9); CEP pelo ViaCEP e geocodificação; contêiner `dentro_de → POLO` (R5) | ⏳ |
 | Tela | formulário de cadastro com pino no mapa e página do estabelecimento (RF11) | ⏳ |

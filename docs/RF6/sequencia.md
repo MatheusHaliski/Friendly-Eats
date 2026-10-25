@@ -19,8 +19,12 @@ sequenceDiagram
     S->>DB: conta do dono
     alt conta não é ESTABELECIMENTO nem VAREJO, ou não está ACTIVE
         S-->>D: 403
-    else negócio com CPF que já tem um ponto (countByOwnerId maior que 0)
-        S-->>D: 409
+    end
+    opt negócio com CPF
+        S->>DB: SELECT id FROM user_account WHERE id = dono FOR UPDATE
+        alt já tem um ponto (countByOwnerId maior que 0)
+            S-->>D: 409
+        end
     end
     S->>R: types · location (cozinha caseira?) · price (grupo) · classification (RF7)
     alt algum erro
