@@ -18,7 +18,12 @@ flowchart TD
     K -- CRIADOR --> K2[formato, canal, site]
     K -- CHEF --> K3[função · registro profissional privado]
     K -- COMUNIDADE --> K4[tipo, cidade/UF, contato]
-    K -- ESTABELECIMENTO --> K5[CNPJ, razão social, nome fantasia,<br/>CNAE, cidade/UF, representante]
+    K -- ESTABELECIMENTO --> IF{informalFormat?}
+    IF -- "não (tem CNPJ)" --> K5[CNPJ, razão social, nome fantasia,<br/>CNAE, cidade/UF, representante]
+    IF -- "AMBULANTE · FOOD_TRUCK ·<br/>COZINHA_CASEIRA" --> K8[CPF do titular privado,<br/>nome fantasia, cidade/UF]
+    K8 --> CPF{CPF válido e sem<br/>CNPJ, CNAE ou razão social?}
+    CPF -- não --> E
+    CPF -- sim --> S2
     K -- VAREJO --> K6[segmento, CNPJ, razão social, CNAE, representante]
     K -- OFICIAL --> K7[órgão, CNPJ, site, representante]
     K1 & K2 & K3 & K4 --> S1[selo NOT_REQUIRED]

@@ -10,10 +10,11 @@ flowchart LR
     UC1(["Criar conta"])
     UC2(["Escolher tipo de conta<br/>cor · glifo · rótulo"])
     UC3(["Preencher campos do tipo<br/>CNPJ · CNAE · função · canal"])
+    UC8(["Cadastrar negócio informal<br/>só com CPF"])
     UC4(["Ler e aceitar os Termos de Uso"])
     UC5(["Confirmar e-mail com código"])
     UC6(["Informar e-mail do responsável"])
-    UC7(["Conferir selo de estabelecimento,<br/>varejo e órgão oficial ⏳"]):::planned
+    UC7(["Conferir selo de estabelecimento,<br/>varejo e órgão oficial<br/>(CPF: identidade e alvará) ⏳"]):::planned
 
     MOD["Moderação"]:::actor
     MAIL["Serviço de e-mail"]:::actor
@@ -25,6 +26,7 @@ flowchart LR
     UC1 -. «include» .-> UC5
     UC2 -. «include» .-> UC3
     UC6 -. «extend» menor de 16 .-> UC1
+    UC8 -. «extend» ambulante · food truck · cozinha caseira .-> UC3
     UC7 -. «extend» tipo com selo .-> UC2
     UC7 --- MOD
     UC5 --- MAIL

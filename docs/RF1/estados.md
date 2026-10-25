@@ -20,7 +20,7 @@ stateDiagram-v2
     direction LR
     [*] --> NotRequired : comensal · criador · chef · comunidade
     [*] --> Pending : estabelecimento · varejo · oficial
-    Pending --> Verified : moderação confere CNPJ, CNAE (ou órgão) e representante ⏳
+    Pending --> Verified : moderação confere CNPJ, CNAE (ou órgão) e representante,<br/>ou o CPF do titular e o alvará no negócio informal ⏳
     Pending --> Rejected : dados não conferem ⏳
     Verified --> Pending : troca de nome, @ ou dados do tipo (RF2)
 ```

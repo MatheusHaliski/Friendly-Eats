@@ -1,6 +1,6 @@
 # Termos de Uso do Friendly Eats
 
-**Versão 2026-10-25** · vigente a partir de {{DATA_VIGENCIA}}
+**Versão 2026-10-25.1** · vigente a partir de {{DATA_VIGENCIA}}
 
 > ⚠️ **Rascunho para revisão jurídica.** Os campos entre `{{ }}` são dados da empresa que opera o app e que
 > faltam preencher. Depois de preenchidos e revisados, publicar o texto em `{{URL_DOS_TERMOS}}` e manter a
@@ -53,7 +53,7 @@ todos começam desligados.
   - perfil privado;
   - comentários só de seguidores;
   - lembrete de tempo de uso.
-- Contas de **criador, chef, estabelecimento, varejo, comunidade e órgão oficial** precisam de um responsável maior de 18 anos; nas organizações, com poderes para agir em nome delas.
+- Contas de **criador, chef, estabelecimento, varejo, comunidade e órgão oficial** precisam de um responsável maior de 18 anos; nas organizações, com poderes para agir em nome delas. No negócio informal cadastrado com CPF, quem responde pelo negócio é o próprio titular.
 - Você deve informar dados verdadeiros. Contas criadas para enganar outras pessoas podem ser suspensas.
 
 ## 4. Sua conta e a segurança dela
@@ -72,12 +72,13 @@ No cadastro você escolhe um dos sete tipos de conta. Cada tipo tem uma cor, um 
 | Comensal | Pessoas que comem, avaliam e compartilham |
 | Criador | Crítica, blog, vídeo, podcast ou guia gastronômico |
 | Chef | Chefs, cozinheiros, confeiteiros, padeiros, baristas, sommeliers, bartenders e nutricionistas |
-| Estabelecimento | Restaurantes, bares, cafés, padarias, food trucks |
+| Estabelecimento | Restaurantes, bares, cafés, padarias, food trucks, ambulantes e cozinhas caseiras |
 | Varejo & Marca | Mercados, empórios, indústrias, distribuidores e produtores |
 | Comunidade | Confrarias, clubes, coletivos e feiras gastronômicas |
 | Oficial | Anvisa, vigilâncias sanitárias, Procon e outros órgãos públicos |
 
 - Contas de **estabelecimento**, **varejo** e **órgão oficial** só publicam como organização depois que conferimos CNPJ, atividade econômica (CNAE) ou o órgão, e o representante.
+- **Ambulantes, food trucks e cozinhas caseiras sem CNPJ** podem se cadastrar como estabelecimento com o **CPF do titular**. Nesse caso conferimos a identidade da pessoa e, quando houver, o alvará ou a licença sanitária. O CPF serve só para essa conferência e nunca aparece no perfil.
 - O selo indica **identidade verificada**, não pagamento nem qualidade da comida.
 - Trocar nome, @usuário ou dados do tipo de uma conta verificada leva a uma nova conferência.
 

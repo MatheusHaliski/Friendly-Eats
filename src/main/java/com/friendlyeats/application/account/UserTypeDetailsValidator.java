@@ -2,6 +2,7 @@ package com.friendlyeats.application.account;
 
 import com.friendlyeats.domain.model.CategoryVerification;
 import com.friendlyeats.domain.model.Cnpj;
+import com.friendlyeats.domain.model.Cpf;
 import com.friendlyeats.domain.model.UserCategoryEnum;
 
 import java.util.ArrayList;
@@ -15,6 +16,9 @@ import java.util.regex.Pattern;
  * Campos específicos de cada um dos 7 tipos de conta, guardados em {@code type_details}. Só as chaves listadas são
  * aceitas (minimização: nada de campo livre que vire depósito de dado pessoal). Chaves "privadas" nunca aparecem no
  * perfil público.
+ *
+ * <p>Estabelecimento tem duas formas: com CNPJ (razão social, CNAE e representante) ou, para negócio informal
+ * ({@code informalFormat} = ambulante, food truck ou cozinha caseira), só com o CPF do titular, que é privado.
  */
 public final class UserTypeDetailsValidator {
 
@@ -27,10 +31,17 @@ public final class UserTypeDetailsValidator {
     /** Campos que só o titular e a moderação veem. */
     public static final Set<String> PRIVATE_KEYS = Set.of("contactName", "contactEmail",
             "representativeName", "representativeRole", "representativeEmail", "professionalRegistration",
-            "guardianEmail");
+            "guardianEmail", "cpf");
+
+    /** Negócios que costumam operar sem CNPJ e podem se cadastrar com o CPF do titular. */
+    public static final Set<String> INFORMAL_FORMATS = Set.of("AMBULANTE", "FOOD_TRUCK", "COZINHA_CASEIRA");
 
     record Rule(Set<String> required, Set<String> optional, Map<String, Set<String>> choices) {
     }
+
+    /** Estabelecimento sem CNPJ: o titular responde pelo negócio, então não há razão social, CNAE nem representante. */
+    private static final Rule INFORMAL_PLACE = new Rule(Set.of("informalFormat", "cpf", "tradeName", "city", "state"),
+            Set.of("website"), Map.of("informalFormat", INFORMAL_FORMATS));
 
     private static final Map<UserCategoryEnum, Rule> RULES = Map.of(
             UserCategoryEnum.COMENSAL, new Rule(Set.of(),
@@ -63,13 +74,16 @@ public final class UserTypeDetailsValidator {
 
     /** Valida e normaliza; lança {@link AccountExceptions.Invalid} com todos os problemas de uma vez. */
     public static Map<String, Object> validate(UserCategoryEnum type, Map<String, Object> raw) {
-        Rule rule = RULES.get(type);
         Map<String, Object> in = raw == null ? Map.of() : raw;
+        boolean informal = type == UserCategoryEnum.ESTABELECIMENTO && in.get("informalFormat") != null
+                && !in.get("informalFormat").toString().isBlank();
+        Rule rule = informal ? INFORMAL_PLACE : RULES.get(type);
+        String label = informal ? type.getLabel() + " sem CNPJ (cadastro com CPF)" : type.getLabel();
         List<String> errors = new ArrayList<>();
         Map<String, Object> out = new LinkedHashMap<>();
         for (Map.Entry<String, Object> e : in.entrySet()) {
             if (!rule.required().contains(e.getKey()) && !rule.optional().contains(e.getKey())) {
-                errors.add("Campo \"" + e.getKey() + "\" não se aplica à categoria " + type.getLabel() + ".");
+                errors.add("Campo \"" + e.getKey() + "\" não se aplica à categoria " + label + ".");
                 continue;
             }
             if (e.getValue() == null || e.getValue().toString().isBlank()) {
@@ -84,8 +98,12 @@ public final class UserTypeDetailsValidator {
         }
         for (String req : rule.required()) {
             if (!out.containsKey(req)) {
-                errors.add("Preencha o campo \"" + req + "\" da categoria " + type.getLabel() + ".");
+                errors.add("Preencha o campo \"" + req + "\" da categoria " + label + ".");
             }
+        }
+        if (type == UserCategoryEnum.ESTABELECIMENTO && !informal && !out.containsKey("cnpj")) {
+            errors.add("Sem CNPJ? Ambulante, food truck e cozinha caseira se cadastram com \"informalFormat\" ("
+                    + String.join(", ", INFORMAL_FORMATS.stream().sorted().toList()) + ") e o CPF do titular.");
         }
         rule.choices().forEach((key, allowed) -> {
             if (out.containsKey(key) && !allowed.contains(out.get(key).toString())) {
@@ -95,6 +113,10 @@ public final class UserTypeDetailsValidator {
         out.computeIfPresent("cnpj", (k, v) -> Cnpj.normalize(v.toString()));
         if (out.containsKey("cnpj") && !Cnpj.isValid(out.get("cnpj").toString())) {
             errors.add("CNPJ inválido. Confira os 14 caracteres (o CNPJ pode ter letras desde 2026).");
+        }
+        out.computeIfPresent("cpf", (k, v) -> Cpf.normalize(v.toString()));
+        if (out.containsKey("cpf") && !Cpf.isValid(out.get("cpf").toString())) {
+            errors.add("CPF inválido. Confira os 11 dígitos.");
         }
         for (String key : List.of("website")) {
             if (out.containsKey(key) && !URL.matcher(out.get(key).toString()).matches()) {

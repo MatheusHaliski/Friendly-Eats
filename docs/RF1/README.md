@@ -2,13 +2,14 @@
 rf: RF1
 titulo: Cadastro com tipo de conta e aceite dos Termos de Uso
 status: parcial
-cards: [FE-01, FE-02, FE-03]
+cards: [FE-01, FE-02, FE-03, FE-07]
 paths:
   - src/main/java/com/friendlyeats/domain/model/UserAccount.java
   - src/main/java/com/friendlyeats/domain/model/UserCategoryEnum.java
   - src/main/java/com/friendlyeats/domain/model/AccountStatus.java
   - src/main/java/com/friendlyeats/domain/model/CategoryVerification.java
   - src/main/java/com/friendlyeats/domain/model/Cnpj.java
+  - src/main/java/com/friendlyeats/domain/model/Cpf.java
   - src/main/java/com/friendlyeats/domain/model/TermsAcceptance.java
   - src/main/java/com/friendlyeats/application/account/RegistrationService.java
   - src/main/java/com/friendlyeats/application/account/UserTypeDetailsValidator.java
@@ -32,7 +33,7 @@ paths:
 
 | | |
 |---|---|
-| **Base legal (LGPD)** | Art. 7º, V (execução de contrato) para os dados do cadastro e o aceite dos Termos; Art. 7º, I (consentimento) para os usos opcionais, que começam desligados ([RF3](../RF3/README.md)) |
+| **Base legal (LGPD)** | Art. 7º, V (execução de contrato) para os dados do cadastro e o aceite dos Termos, inclusive o CPF do negócio informal, usado só para conferir o selo e nunca exibido (Art. 6º, III); Art. 7º, I (consentimento) para os usos opcionais, que começam desligados ([RF3](../RF3/README.md)) |
 | **Termos de Uso** | [`docs/legal/TERMOS_DE_USO.md`](../legal/TERMOS_DE_USO.md), com marcadores `{{…}}` para os dados da empresa; aceite obrigatório, caixa desmarcada |
 | **ECA Digital** | Mínimo 13 anos; menor de 16 informa o e-mail do responsável e nasce com proteções travadas; qualquer tipo que não seja comensal exige 18+ |
 | **Status** | 🟡 Parcial: API, regras, verificação de e-mail e testes prontos; envio real de e-mail, consulta automática de CNPJ e telas ainda não |
@@ -46,12 +47,17 @@ paths:
    - **Chef:** função (`CHEF`, `COZINHEIRO`, `CONFEITEIRO`, `PADEIRO`, `BARISTA`, `SOMMELIER`, `BARTENDER`, `NUTRICIONISTA`);
      registro profissional opcional e privado.
    - **Estabelecimento:** CNPJ, razão social, nome fantasia, **CNAE** (formato `5611-2/01`), cidade/UF e representante.
+   - **Estabelecimento sem CNPJ** (negócio informal): `informalFormat` (`AMBULANTE`, `FOOD_TRUCK`, `COZINHA_CASEIRA`),
+     **CPF do titular** (dígitos verificadores conferidos, guardado sem pontuação e **privado**), nome fantasia e
+     cidade/UF; site opcional. Razão social, CNAE, representante e CNPJ não se aplicam e são recusados. Sem
+     `informalFormat` e sem CNPJ, o erro explica a alternativa.
    - **Varejo & Marca:** segmento (`MERCADO`, `EMPORIO`, `INDUSTRIA`, `DISTRIBUIDOR`, `PRODUTOR`), CNPJ, razão social, CNAE e representante.
    - **Comunidade:** tipo (`CONFRARIA`, `CLUBE`, `COLETIVO`, `FEIRA`, `GRUPO_INFORMAL`), cidade/UF e contato.
    - **Oficial:** órgão (`ANVISA`, `VIGILANCIA_ESTADUAL`, `VIGILANCIA_MUNICIPAL`, `PROCON`, `MINISTERIO_AGRICULTURA`, `OUTRO_ORGAO`), CNPJ, site e representante.
    - CNPJ aceita o formato **alfanumérico** (IN RFB 2.229/2024).
-3. Estabelecimento, varejo e oficial nascem com selo `PENDING`: leem e interagem, mas só publicam como organização
-   depois da moderação. Os demais nascem `NOT_REQUIRED`.
+3. Estabelecimento (com CNPJ ou com CPF), varejo e oficial nascem com selo `PENDING`: leem e interagem, mas só publicam
+   como organização depois da moderação. Os demais nascem `NOT_REQUIRED`. No negócio com CPF, a moderação confere a
+   identidade do titular e, quando houver, o alvará ou a licença sanitária.
 4. Idade: menos de 13 é recusado; menos de 16 exige `guardianEmail` e preferências protetivas; tipo diferente de
    comensal exige 18+.
 5. Na mesma transação: conta `PENDING_VERIFICATION`, linha em `terms_acceptance` (versão, canal, HMAC do IP),
@@ -86,11 +92,11 @@ O preto da conta Oficial dá 1,06:1 sobre o fundo escuro; o anel de 2 px `#D6D0C
 
 | Camada | Artefato | Situação |
 |---|---|---|
-| Domínio | `UserAccount` (e-mail normalizado, `markEmailVerified`), `UserCategoryEnum` (7 tipos, `needsSeal`, `canPublishFoodAlerts`), `CategoryVerification`, `Cnpj`, `TermsAcceptance` | ✅ |
-| Regras | `RegistrationService`, `UserTypeDetailsValidator` (campos por tipo, CNAE), `AgePolicy`, `PasswordPolicy`, `EmailVerificationService`, `LegalDocuments` | ✅ |
+| Domínio | `UserAccount` (e-mail normalizado, `markEmailVerified`), `UserCategoryEnum` (7 tipos, `needsSeal`, `canPublishFoodAlerts`), `CategoryVerification`, `Cnpj`, `Cpf`, `TermsAcceptance` | ✅ |
+| Regras | `RegistrationService`, `UserTypeDetailsValidator` (campos por tipo, CNAE, estabelecimento com CPF), `AgePolicy`, `PasswordPolicy`, `EmailVerificationService`, `LegalDocuments` | ✅ |
 | Persistência | `V1__baseline.sql`: `user_account`, `terms_acceptance`, `consent_event`, `user_preference` | ✅ |
 | API | `POST /api/v1/auth/register`, `GET /api/v1/legal/terms`, `POST /api/v1/me/verify-email` (+ `/resend`), `POST /api/v1/me/terms` | ✅ |
-| Testes | `AccountRulesTest` (campos por tipo, CNAE, selo), `DomainModelTest`, `AuthApiIT.registerWithChosenTypeAndTermsStartsASessionThatAnIncognitoWindowDoesNotSee`, `AuthApiIT.registrationRulesTermsTypeFieldsAgeAndUniqueness`, `AuthApiIT.minorsKeepProtectiveDefaults` | ✅ |
+| Testes | `AccountRulesTest` (campos por tipo, CNAE, selo, CPF, `informalPlaceRegistersWithAPrivateCpfInsteadOfCnpj`), `DomainModelTest`, `AuthApiIT.registerWithChosenTypeAndTermsStartsASessionThatAnIncognitoWindowDoesNotSee`, `AuthApiIT.registrationRulesTermsTypeFieldsAgeAndUniqueness`, `AuthApiIT.minorsKeepProtectiveDefaults` | ✅ |
 | Termos | preencher os `{{…}}` e passar por revisão jurídica | 🟡 |
-| Pendências | e-mail transacional real; eliminar cadastro não confirmado em 7 dias; consulta de CNPJ e CNAE (BrasilAPI/Receita); cadastro de ambulante e cozinha caseira só com CPF (decisão de produto) | ⏳ |
+| Pendências | e-mail transacional real; eliminar cadastro não confirmado em 7 dias; consulta de CNPJ e CNAE (BrasilAPI/Receita) | ⏳ |
 | Tela | protótipo e app | ⏳ |

@@ -40,6 +40,16 @@ classDiagram
         VERIFIED
         REJECTED
     }
+    class Cnpj {
+        <<utility>>
+        +normalize(String)$ String
+        +isValid(String)$ boolean
+    }
+    class Cpf {
+        <<utility>>
+        +normalize(String)$ String
+        +isValid(String)$ boolean
+    }
     class TermsAcceptance {
         -Long userId
         -String document
@@ -54,6 +64,8 @@ classDiagram
         <<utility>>
         +validate(UserCategoryEnum, Map)$ Map
         +initialVerification(UserCategoryEnum, Map)$ CategoryVerification
+        +PRIVATE_KEYS$ Set
+        +INFORMAL_FORMATS$ Set
         +publicView(Map)$ Map
     }
     class AgePolicy {
@@ -82,6 +94,8 @@ classDiagram
     RegistrationService --> EmailVerificationService
     RegistrationService ..> UserAccount : cria
     RegistrationService ..> TermsAcceptance : grava
+    UserTypeDetailsValidator --> Cnpj
+    UserTypeDetailsValidator --> Cpf : estabelecimento sem CNPJ
     UserAccount --> UserCategoryEnum
     UserAccount --> CategoryVerification
 ```

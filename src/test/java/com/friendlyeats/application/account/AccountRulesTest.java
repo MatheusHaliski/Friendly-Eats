@@ -3,6 +3,7 @@ package com.friendlyeats.application.account;
 import com.friendlyeats.domain.model.AccountStatus;
 import com.friendlyeats.domain.model.CategoryVerification;
 import com.friendlyeats.domain.model.Cnpj;
+import com.friendlyeats.domain.model.Cpf;
 import com.friendlyeats.domain.model.UserCategoryEnum;
 import com.friendlyeats.domain.model.UserAccount;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,45 @@ class AccountRulesTest {
         assertThat(Cnpj.isValid("12.ABC.345/01DE-36")).isFalse();
         assertThat(Cnpj.isValid("11111111111111")).isFalse();
         assertThat(Cnpj.isValid("12.ABC.345/01DE-3X")).isFalse();
+    }
+
+    @Test
+    void cpfChecksBothVerifierDigits() {
+        assertThat(Cpf.isValid("529.982.247-25")).isTrue();
+        assertThat(Cpf.isValid("11144477735")).isTrue();
+        assertThat(Cpf.isValid("529.982.247-24")).isFalse();
+        assertThat(Cpf.isValid("111.111.111-11")).isFalse();
+        assertThat(Cpf.isValid("5299822472")).isFalse();
+    }
+
+    @Test
+    void informalPlaceRegistersWithAPrivateCpfInsteadOfCnpj() {
+        Map<String, Object> truck = UserTypeDetailsValidator.validate(UserCategoryEnum.ESTABELECIMENTO,
+                Map.of("informalFormat", "FOOD_TRUCK", "cpf", "529.982.247-25", "tradeName", "Taco do Zé",
+                        "city", "Curitiba", "state", "PR"));
+        assertThat(truck).containsEntry("cpf", "52998224725");
+        assertThat(UserTypeDetailsValidator.initialVerification(UserCategoryEnum.ESTABELECIMENTO, truck))
+                .isEqualTo(CategoryVerification.PENDING);
+        assertThat(UserTypeDetailsValidator.publicView(truck)).containsKeys("informalFormat", "tradeName", "city")
+                .doesNotContainKey("cpf");
+
+        assertThatThrownBy(() -> UserTypeDetailsValidator.validate(UserCategoryEnum.ESTABELECIMENTO,
+                Map.of("informalFormat", "COZINHA_CASEIRA", "cpf", "529.982.247-24", "cnpj", "11222333000181",
+                        "tradeName", "Marmitas da Lu", "city", "Recife", "state", "PE")))
+                .isInstanceOf(AccountExceptions.Invalid.class)
+                .satisfies(e -> assertThat(((AccountExceptions.Invalid) e).errors())
+                        .anyMatch(m -> m.contains("CPF inválido")).anyMatch(m -> m.contains("\"cnpj\" não se aplica")));
+        assertThatThrownBy(() -> UserTypeDetailsValidator.validate(UserCategoryEnum.ESTABELECIMENTO,
+                Map.of("informalFormat", "RESTAURANTE", "cpf", "529.982.247-25", "tradeName", "X",
+                        "city", "Recife", "state", "PE")))
+                .isInstanceOf(AccountExceptions.Invalid.class);
+        assertThatThrownBy(() -> UserTypeDetailsValidator.validate(UserCategoryEnum.VAREJO,
+                Map.of("informalFormat", "AMBULANTE", "cpf", "529.982.247-25")))
+                .isInstanceOf(AccountExceptions.Invalid.class);
+        assertThatThrownBy(() -> UserTypeDetailsValidator.validate(UserCategoryEnum.ESTABELECIMENTO,
+                Map.of("tradeName", "Sem Papel")))
+                .satisfies(e -> assertThat(((AccountExceptions.Invalid) e).errors())
+                        .anyMatch(m -> m.startsWith("Sem CNPJ?")));
     }
 
     @Test

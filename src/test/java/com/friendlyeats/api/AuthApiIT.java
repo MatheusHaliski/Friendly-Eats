@@ -72,7 +72,7 @@ class AuthApiIT {
     @Test
     void registerWithChosenTypeAndTermsStartsASessionThatAnIncognitoWindowDoesNotSee() {
         ApiClient browser = new ApiClient(port);
-        assertThat(browser.get("/api/v1/legal/terms").getBody()).containsEntry("version", "2026-10-25");
+        assertThat(browser.get("/api/v1/legal/terms").getBody()).containsEntry("version", "2026-10-25.1");
 
         ResponseEntity<Map> created = browser.post("/api/v1/auth/register", registration("ana@example.com", "ana.ribeiro", "COMENSAL",
                 "2000-05-20", Map.of("city", "Curitiba")));
@@ -96,7 +96,7 @@ class AuthApiIT {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM consent_event WHERE user_id = ? AND NOT granted", Integer.class, id))   // 5 finalidades, todas desligadas
                 .isEqualTo(5);
         assertThat(jdbc.queryForObject("SELECT version FROM terms_acceptance WHERE user_id = ?", String.class, id))
-                .isEqualTo("2026-10-25");
+                .isEqualTo("2026-10-25.1");
 
         // verificação de e-mail
         assertThat(browser.post("/api/v1/me/verify-email", Map.of("code", "000000")).getStatusCode().value()).isEqualTo(422);
@@ -126,6 +126,14 @@ class AuthApiIT {
                 registration("gov@example.com", "sabor.mineiro", "ESTABELECIMENTO", "1980-01-01", placeDetails));
         assertThat(gov.getStatusCode().value()).isEqualTo(201);
         assertThat(map(gov.getBody(), "user")).containsEntry("categoryVerification", "PENDING");
+
+        // food truck sem CNPJ: entra com o CPF do titular e também fica com o selo pendente
+        Map<String, Object> truckDetails = Map.of("informalFormat", "FOOD_TRUCK", "cpf", "529.982.247-25",
+                "tradeName", "Taco do Zé", "city", "Curitiba", "state", "PR");
+        ResponseEntity<Map> truck = new ApiClient(port).post("/api/v1/auth/register",
+                registration("ze@example.com", "taco.do.ze", "ESTABELECIMENTO", "1985-05-05", truckDetails));
+        assertThat(truck.getStatusCode().value()).isEqualTo(201);
+        assertThat(map(truck.getBody(), "user")).containsEntry("categoryVerification", "PENDING");
 
         assertThat(browser.post("/api/v1/auth/register",
                 registration("kid@example.com", "kid_user", "COMENSAL", Instant.now().minus(Duration.ofDays(365 * 10)).toString().substring(0, 10), Map.of()))
@@ -394,7 +402,7 @@ class AuthApiIT {
         r.put("userType", type);
         r.put("dateOfBirth", birth);
         r.put("acceptTerms", true);
-        r.put("termsVersion", "2026-10-25");
+        r.put("termsVersion", "2026-10-25.1");
         r.put("typeDetails", details);
         return r;
     }

@@ -14,7 +14,7 @@ sequenceDiagram
     API-->>V: versão vigente dos Termos + cookie XSRF-TOKEN
     V->>API: POST /api/v1/auth/register {nome, @, e-mail, senha, tipo, nascimento, aceite, versão, typeDetails}
     API->>R: register(pedido, ClientInfo: canal + HMAC do IP)
-    R->>R: Termos? idade? senha? campos do tipo? CNAE? (todos os erros juntos)
+    R->>R: Termos? idade? senha? campos do tipo? CNPJ e CNAE, ou CPF se informalFormat? (todos os erros juntos)
     alt inválido
         R-->>V: 422 {errors: [...]}
     else e-mail ou @ em uso

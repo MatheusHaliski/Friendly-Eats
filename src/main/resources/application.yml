@@ -71,7 +71,7 @@ friendly-eats:
     session-absolute-timeout: 24h
   legal:
     # Termos de Uso do Friendly Eats (docs/legal/TERMOS_DE_USO.md); mudar a versão pede novo aceite
-    terms-version: "2026-10-25"
+    terms-version: "2026-10-25.1"
     terms-url: ${TERMS_URL:http://localhost:3000/termos}
     privacy-version: "2026-10-25"
   registration:
