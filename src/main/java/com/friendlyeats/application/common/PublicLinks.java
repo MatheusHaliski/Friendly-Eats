@@ -17,8 +17,8 @@ public class PublicLinks {
     }
 
     /** Link do perfil que vai para fora do app (WhatsApp, e-mail...): sem rastreamento de quem compartilhou. */
-    public String profileShareUrl(String handle) {
-        return handle == null ? null : publicBaseUrl + "/@" + handle;
+    public String profileShareUrl(long userId) {
+        return publicBaseUrl + "/u/" + userId;
     }
 
     /** Link do post que vai para fora do app (RF12): também sem dizer quem compartilhou. */

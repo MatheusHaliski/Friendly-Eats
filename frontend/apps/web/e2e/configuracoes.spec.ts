@@ -191,6 +191,8 @@ test.describe('Exibição (RF2)', () => {
       notifications: { likes: true, comments: true, shares: true, foodAlerts: false },
     });
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    // o tamanho do texto vale no app inteiro, também depois de recarregar
+    await expect(page.locator('html')).toHaveAttribute('style', /font-size: 120%/);
     await expect(page.getByTestId('alternar-tema')).toHaveAttribute('aria-pressed', 'true');
     expect(await page.evaluate(() => localStorage.getItem('fe:tema'))).toBe('dark');
 

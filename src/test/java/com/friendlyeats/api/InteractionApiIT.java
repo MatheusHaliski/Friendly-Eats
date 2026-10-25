@@ -59,6 +59,36 @@ class InteractionApiIT extends PostItBase {
     }
 
     @Test
+    void removingTheSameCommentTwiceDecrementsTheCounterOnce() throws Exception {
+        String id = publishId(chef, post("PERGUNTA", "Qual o melhor pão de queijo da cidade?"));
+        String box = "/api/v1/posts/" + id + "/comments";
+        send(HttpMethod.POST, box, chef, Map.of("body", "Eu começo: o da feira de domingo."));
+        get("/api/v1/posts/" + id, ana);   // abre a sessão das duas contas antes das threads
+        for (int round = 0; round < 5; round++) {
+            Number commentId = (Number) map(send(HttpMethod.POST, box, ana, Map.of("body", "Rodada " + round))
+                    .getBody(), "comment").get("id");
+            // quem escreveu e o dono do post apagam ao mesmo tempo: só uma exclusão vale
+            java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+            java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(2);
+            List<java.util.concurrent.Future<Integer>> results = List.of(ana, chef).stream()
+                    .map(who -> pool.submit(() -> {
+                        start.await();
+                        return status(send(HttpMethod.DELETE, box + "/" + commentId, who, null));
+                    })).toList();
+            start.countDown();
+            List<Integer> statuses = new java.util.ArrayList<>();
+            for (java.util.concurrent.Future<Integer> r : results) {
+                statuses.add(r.get());
+            }
+            pool.shutdown();
+            assertThat(statuses).containsExactlyInAnyOrder(204, 404);
+            assertThat(map(get("/api/v1/posts/" + id, null).getBody(), "counts")).containsEntry("comments", 1);
+        }
+        assertThat(jdbc.queryForObject("SELECT comment_count FROM post WHERE id = ?::uuid", Integer.class, id))
+                .isEqualTo(1);
+    }
+
+    @Test
     void commentsFollowTheAuthorsAudienceAndMinorsAreProtected() {
         String id = publishId(chef, post("PERGUNTA", "Fermento natural ou biológico?"));
         String box = "/api/v1/posts/" + id + "/comments";

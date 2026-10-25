@@ -17,6 +17,17 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Long> 
     List<PostComment> findByPostIdAndStatusAndIdGreaterThanOrderByIdAsc(
             UUID postId, CommentStatus status, long afterId, Limit limit);
 
+    /**
+     * Apaga o comentário só se ele ainda estiver visível. Duas exclusões ao mesmo tempo (quem escreveu e o dono do
+     * post): a segunda espera a trava da linha, relê o WHERE e volta 0, então o contador desce uma vez só.
+     */
+    @Modifying
+    @Query(value = """
+            UPDATE post_comment SET status = 'REMOVED', body = NULL, removed_at = now()
+            WHERE id = :commentId AND status = 'VISIBLE'
+            """, nativeQuery = true)
+    int removeIfVisible(long commentId);
+
     @Modifying
     @Query(value = """
             UPDATE post p SET comment_count = p.comment_count - c.n

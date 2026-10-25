@@ -28,7 +28,7 @@ class UserProfileApiIT extends PostItBase {
                 .containsEntry("bio", "Comida de rua e boteco").containsEntry("privateProfile", false)
                 .containsEntry("postCount", 3).containsEntry("verified", false)
                 .containsEntry("postsPath", "/api/v1/users/" + creator.getId() + "/posts")
-                .containsEntry("shareUrl", "http://localhost:3000/@gula.critica")
+                .containsEntry("shareUrl", "http://localhost:3000/u/" + creator.getId())
                 .doesNotContainKeys("email", "cellphoneNumber", "dateOfBirth", "cityOfResidence");
         assertThat(map(profile, "category")).containsEntry("code", "CRIADOR").containsEntry("glyph", "✦")
                 .containsEntry("lucideIcon", "camera").containsEntry("color", "#F7C638")

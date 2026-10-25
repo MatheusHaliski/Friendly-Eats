@@ -1,9 +1,11 @@
 'use client';
 
-import { isApiError } from '@friendly-eats/api';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { isApiError, type PreferencesView } from '@friendly-eats/api';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { useEffect, useState, type ReactNode } from 'react';
-import { SESSION_KEY } from '@/lib/queries';
+import { api } from '@/lib/api';
+import { applyFontScale } from '@/lib/font-scale';
+import { PREFERENCES_KEY, SESSION_KEY, useSession } from '@/lib/queries';
 
 export const SESSION_CHANNEL = 'fe-sessao';
 
@@ -31,6 +33,27 @@ export function broadcastLogout() {
   }
 }
 
+/**
+ * Preferências de exibição da conta que valem no app inteiro (RF2): hoje, o tamanho do texto. Aplica ao carregar
+ * as preferências e de novo quando Configurações → Exibição salva (o cache delas é atualizado); sem conta, volta
+ * ao padrão do navegador.
+ */
+function AccountDisplay() {
+  const session = useSession();
+  const prefs = useQuery<PreferencesView>({
+    queryKey: PREFERENCES_KEY,
+    queryFn: () => api.me.preferences(),
+    enabled: !!session.data,
+    staleTime: 5 * 60_000,
+  });
+  const scale = session.data ? prefs.data?.fontScale : null;
+  useEffect(() => {
+    if (session.isPending || (session.data && prefs.isPending)) return;
+    applyFontScale(scale);
+  }, [scale, session.isPending, session.data, prefs.isPending]);
+  return null;
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   const [client] = useState(makeClient);
   useEffect(() => {
@@ -44,5 +67,10 @@ export function Providers({ children }: { children: ReactNode }) {
     };
     return () => ch.close();
   }, [client]);
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={client}>
+      <AccountDisplay />
+      {children}
+    </QueryClientProvider>
+  );
 }

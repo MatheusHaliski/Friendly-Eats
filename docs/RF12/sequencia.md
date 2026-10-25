@@ -65,8 +65,13 @@ sequenceDiagram
     alt nem quem escreveu nem o dono do post
         API-->>U: 403
     else ok
-        S->>DB: status REMOVED, body NULL, comment_count - 1
-        API-->>U: 204
+        S->>DB: UPDATE post_comment SET status REMOVED, body NULL WHERE id e status VISIBLE
+        alt 0 linhas (outra exclusão chegou antes)
+            API-->>U: 404
+        else 1 linha
+            S->>DB: comment_count - 1
+            API-->>U: 204
+        end
     end
 ```
 

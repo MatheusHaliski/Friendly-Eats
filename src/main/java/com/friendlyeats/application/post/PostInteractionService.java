@@ -128,7 +128,10 @@ public class PostInteractionService {
         if (!comment.canBeRemovedBy(viewerId, post)) {
             throw new CommonExceptions.Forbidden("Só quem escreveu ou o dono do post pode apagar este comentário.");
         }
-        comment.remove();
+        if (comments.removeIfVisible(commentId) == 0) {
+            // outra exclusão chegou antes: o contador já desceu
+            throw new CommonExceptions.NotFound("Comentário não encontrado.");
+        }
         posts.addToCommentCount(post.getId(), -1);
         trending.interaction(post, InteractionType.COMMENT, -1);
     }

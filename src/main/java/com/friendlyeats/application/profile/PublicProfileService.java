@@ -66,7 +66,7 @@ public class PublicProfileService {
         return new PublicProfileView(u.getId(), u.getName(), u.getHandle(), badge, verified, authors.isPrivate(u),
                 links.mediaUrl(u.getPhotoObjectKey()), u.getBio(), u.getPronouns(), u.getLinks(), city(u), uf(u),
                 u.getCreatedAt(), posts.countByAuthorIdAndStatusIn(u.getId(), PostStatus.PUBLIC),
-                "/api/v1/users/" + u.getId() + "/posts", links.profileShareUrl(u.getHandle()));
+                "/api/v1/users/" + u.getId() + "/posts", links.profileShareUrl(u.getId()));
     }
 
     /** Publicados e arquivados (com os encerrados marcados), dos mais novos aos mais antigos; 18+ só para maior. */

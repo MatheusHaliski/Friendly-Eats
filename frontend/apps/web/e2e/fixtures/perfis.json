@@ -27,7 +27,7 @@
     "memberSince": "2026-03-02T12:00:00Z",
     "postCount": 1,
     "postsPath": "/api/v1/users/310/posts",
-    "shareUrl": "https://friendlyeats.app/@chefrafa"
+    "shareUrl": "https://friendlyeats.app/u/310"
   },
   {
     "id": 501,
@@ -58,7 +58,7 @@
     "memberSince": "2026-05-10T12:00:00Z",
     "postCount": 2,
     "postsPath": "/api/v1/users/501/posts",
-    "shareUrl": "https://friendlyeats.app/@anacomebem"
+    "shareUrl": "https://friendlyeats.app/u/501"
   },
   {
     "id": 610,
@@ -84,7 +84,7 @@
     "memberSince": "2026-06-21T12:00:00Z",
     "postCount": 1,
     "postsPath": "/api/v1/users/610/posts",
-    "shareUrl": "https://friendlyeats.app/@confrariadopao"
+    "shareUrl": "https://friendlyeats.app/u/610"
   },
   {
     "id": 700,
@@ -112,7 +112,7 @@
     "memberSince": "2026-01-15T12:00:00Z",
     "postCount": 2,
     "postsPath": "/api/v1/users/700/posts",
-    "shareUrl": "https://friendlyeats.app/@anvisa"
+    "shareUrl": "https://friendlyeats.app/u/700"
   },
   {
     "id": 900,
@@ -140,7 +140,7 @@
     "memberSince": "2026-02-11T12:00:00Z",
     "postCount": 2,
     "postsPath": "/api/v1/users/900/posts",
-    "shareUrl": "https://friendlyeats.app/@sabormineiro"
+    "shareUrl": "https://friendlyeats.app/u/900"
   },
   {
     "id": 42,
@@ -168,7 +168,7 @@
     "memberSince": "2026-08-30T12:00:00Z",
     "postCount": 1,
     "postsPath": "/api/v1/users/42/posts",
-    "shareUrl": "https://friendlyeats.app/@juliandrade"
+    "shareUrl": "https://friendlyeats.app/u/42"
   },
   {
     "id": 205,
@@ -194,7 +194,7 @@
     "memberSince": "2026-09-12T12:00:00Z",
     "postCount": 1,
     "postsPath": "/api/v1/users/205/posts",
-    "shareUrl": "https://friendlyeats.app/@brunocosta"
+    "shareUrl": "https://friendlyeats.app/u/205"
   },
   {
     "id": 808,
@@ -220,6 +220,6 @@
     "memberSince": "2026-07-01T12:00:00Z",
     "postCount": 0,
     "postsPath": "/api/v1/users/808/posts",
-    "shareUrl": "https://friendlyeats.app/@marinasouza"
+    "shareUrl": "https://friendlyeats.app/u/808"
   }
 ]

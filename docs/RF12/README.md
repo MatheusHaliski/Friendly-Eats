@@ -44,7 +44,9 @@ paths:
 3. **Caixa de mensagens.** `GET /comments?after=&limit=` é pública e lista do mais antigo para o mais novo, paginada
    por id (`nextAfter`), com o `total`. `POST /comments {body}` (até 2.000 caracteres, sem só espaços: `400`).
    `DELETE /comments/{commentId}` só por quem escreveu ou pelo dono do post (`403` para os outros); a remoção apaga o
-   texto e mantém o id para a moderação.
+   texto e mantém o id para a moderação. A troca para `REMOVED` é atômica (`removeIfVisible`: `UPDATE … WHERE status =
+   'VISIBLE'`): se quem escreveu e o dono apagam ao mesmo tempo, só uma exclusão vale (a outra recebe `404`) e o
+   contador desce uma vez só (`InteractionApiIT.removingTheSameCommentTwiceDecrementsTheCounterOnce`).
 4. **Quem comenta** (`CommentPolicy`), pelo `who_can_comment` de quem publicou:
    - `EVERYONE`: qualquer conta ativa;
    - `NOBODY`: só o autor (`403` "Quem publicou fechou os comentários deste post.");

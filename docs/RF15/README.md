@@ -32,7 +32,7 @@ paths:
    inexistente, suspensa, em exclusão ou eliminada dá `404`, sem dizer o motivo. Mostra nome, @, bolinha
    (`AccountBadge`: cor nos dois temas, glifo, ícone Lucide e rótulo), selo (`verified`), foto, bio, pronomes, links,
    cidade e UF de atuação, data de entrada, número de posts públicos (publicados e arquivados), o caminho dos posts e o
-   link compartilhável (`{public-base-url}/@handle`).
+   link compartilhável (`{public-base-url}/u/{id}`, a rota do perfil no app web; um endereço por `@handle` fica para quando houver a busca por handle).
 2. **Perfil privado** (`profile_private`): para quem não é o titular, só nome, @, bolinha, selo e
    `privateProfile: true`; o resto vem `null`. Sem linha de preferências, vale o padrão do cadastro (privado para
    menor de 16).

@@ -15,7 +15,7 @@ test.describe('Perfil público (RF15)', () => {
     await expect(page.getByTestId('posts-perfil').getByRole('article')).toHaveCount(1);
     await page.getByRole('button', { name: 'Copiar link do perfil' }).click();
     await expect(page.getByText('Link do perfil copiado.')).toBeVisible();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('https://friendlyeats.app/@chefrafa');
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('https://friendlyeats.app/u/310');
     expect(api.find('GET', /\/users\/310\/posts$/)).toHaveLength(1);
     await expectAccessibleInBothThemes(page, 'Perfil público');
   });
