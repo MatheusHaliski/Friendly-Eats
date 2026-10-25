@@ -34,6 +34,7 @@ paths:
   - frontend/apps/web/lib/field-errors.ts
   - frontend/apps/web/lib/markdown.tsx
   - frontend/apps/web/lib/uf.ts
+  - frontend/apps/web/components/Form.tsx
 ---
 
 # RF1 · Cadastro com tipo de conta
@@ -112,3 +113,4 @@ O preto da conta Oficial dá 1,06:1 sobre o fundo escuro; o anel de 2 px `#D6D0C
 | Termos | preencher os `{{…}}` e passar por revisão jurídica | 🟡 |
 | Pendências | e-mail transacional real; eliminar cadastro não confirmado em 7 dias; consulta de CNPJ e CNAE (BrasilAPI/Receita) | ⏳ |
 | Tela | app web: `/cadastro` (7 tipos com cor + glifo + rótulo, campos do tipo, "Não tenho CNPJ" com CPF, Termos desmarcados), `/confirmar-email` e `/termos` (gerada de `docs/legal/TERMOS_DE_USO.md`); e2e `cadastro.spec.ts` com axe | ✅ |
+| Foco nos erros | `/cadastro` e `/confirmar-email`: o resumo de erros e os avisos recebem o foco **depois** de montados (`useDeferredFocus`, em `components/Form.tsx`); antes, o foco pedido por `requestAnimationFrame` se perdia com a máquina ocupada; e2e `cadastro.spec.ts` | ✅ |

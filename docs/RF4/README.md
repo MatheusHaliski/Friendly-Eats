@@ -38,6 +38,7 @@ paths:
   - frontend/apps/web/components/settings/RecoveryCodes.tsx
   - frontend/apps/web/components/settings/SudoFields.tsx
   - frontend/apps/web/lib/use-leave.ts
+  - frontend/apps/web/components/Form.tsx
 ---
 
 # RF4 · Login, sessão, controle de acesso e 2FA
@@ -121,3 +122,4 @@ paths:
 | Tela | app web: `/entrar` (senha, passo do código 2FA, reativação, 429 com contagem regressiva), `/conta` (sessão, sair, "Meus lugares" com `publishBlockers`); cliente da API com `credentials: same-origin`, `X-XSRF-TOKEN` a partir do cookie e nova tentativa se o token estiver velho; `next.config.ts` repassa `/api` ao backend (mesma origem) e manda `X-Content-Type-Options`, `Referrer-Policy: no-referrer` e `frame-ancestors 'none'`; nada de token no `localStorage`; e2e `entrar.spec.ts` e `conta.spec.ts` | ✅ |
 | Pendências | passkeys/WebAuthn; e-mail transacional; CAPTCHA depois de muitas falhas | ⏳ |
 | Telas de segurança | app web `/configuracoes/seguranca`: trocar a senha (modo sudo), sessões abertas com "Sair" e "Sair de todos os outros aparelhos", alertas de login e o 2FA de ponta a ponta (QR code gerado no navegador, confirmação, códigos de recuperação para copiar ou baixar, gerar novos, desligar); aviso ao sair com mudança não salva (`use-leave`); e2e `configuracoes.spec.ts` com axe | ✅ |
+| Foco nos avisos | `/entrar`, senha e sessões e 2FA: o alerta, o resumo de erros e o aviso de concluído recebem o foco depois de montados (`useDeferredFocus`) | ✅ |

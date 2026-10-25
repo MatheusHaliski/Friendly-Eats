@@ -17,6 +17,7 @@ paths:
   - frontend/apps/web/components/settings/AccountSection.tsx
   - frontend/apps/web/components/Dialog.tsx
   - frontend/apps/web/components/auth/LoginView.tsx
+  - frontend/apps/web/components/Form.tsx
 ---
 
 # RF5 · Excluir conta, reativar e eliminar
@@ -74,3 +75,4 @@ paths:
 | Pendências | exportar dados (Art. 18, V) por URL pré-assinada; Cassandra; destruir a DEK (crypto-shredding); reconciliação diária | ⏳ |
 | Tela | modal de exclusão (`alertdialog` com consequências, data final, "Baixar uma cópia", caixa "Entendo" + senha + código) e oferta de reativação no login | ⏳ |
 | Telas | app web `/configuracoes/conta`: diálogo "Excluir sua conta?" com as consequências, a caixa de confirmação, senha e código 2FA (`Dialog` com foco preso, Esc fecha e o foco volta); depois do 202 mostra a data-limite para reativar; `/entrar` em exclusão mostra "Sua conta está em exclusão" com "Reativar minha conta" e "Manter a exclusão e sair"; e2e `configuracoes.spec.ts` e `entrar.spec.ts` | ✅ |
+| Foco no diálogo | Excluir conta: o resumo de erros e o botão de concluir recebem o foco depois de montados (`useDeferredFocus`); a reativação em `/entrar` segue igual | ✅ |

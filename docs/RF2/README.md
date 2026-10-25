@@ -38,6 +38,7 @@ paths:
   - frontend/apps/web/lib/field-errors.ts
   - frontend/packages/api/src/endpoints.ts
   - frontend/packages/api/src/types.ts
+  - frontend/apps/web/components/Form.tsx
 ---
 
 # RF2 · Perfil, preferências e foto
@@ -95,3 +96,4 @@ paths:
 | Testes | `AuthApiIT.preferencesIncludingAppBackgroundAndProfileEditing`, `AuthApiIT.minorsKeepProtectiveDefaults`, `ImageSanitizerTest` (EXIF/GPS some, 8 orientações, recorte de avatar, bomba de descompressão), `ProfilePhotoApiIT` (Garage real: envio pré-assinado, chave alheia, tamanho fora da assinatura, arquivo que não é foto, troca e remoção), `UserAccountRepositoryIT` | ✅ |
 | Pendências | troca de e-mail; auditoria | ⏳ |
 | Telas | app web `/configuracoes` (lista no celular, menu lateral no computador), **Perfil** (nome, @, bio, pronomes, links, local, contato, campos do tipo, foto com envio direto ao bucket e o cartão "Seu gosto" com até 5 culinárias e os estilos alimentares) e **Exibição** (tema aplicado ao app inteiro, fundo, fonte, movimento, aba inicial e lembrete de uso travado para menor de 16); erros do 422 por campo (`mapProfileErrors`); e2e `configuracoes.spec.ts` (troca de foto, gosto, menor com proteções travadas) com axe nos dois temas | ✅ |
+| Foco nos erros | Perfil e Exibição: o resumo de erros e o aviso "Perfil salvo" recebem o foco depois de montados (`useDeferredFocus`); era a falha intermitente do e2e `configuracoes.spec.ts` (Perfil, 422 e 409), que passou 6 vezes seguidas com a correção; `field-errors.ts` e `photo.ts` ganharam `mapPostErrors` e `uploadPostPhoto` para o [RF9](../RF9/README.md), sem mudar as funções do perfil | ✅ |
