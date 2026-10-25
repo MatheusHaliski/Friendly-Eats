@@ -5,7 +5,6 @@ import com.friendlyeats.application.account.AccountViews.MfaStatusView;
 import com.friendlyeats.application.account.AccountViews.RecoveryCodesView;
 import com.friendlyeats.domain.model.RecoveryCode;
 import com.friendlyeats.domain.model.UserAccount;
-import com.friendlyeats.domain.model.UserMfa;
 import com.friendlyeats.infrastructure.persistence.postgres.RecoveryCodeRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserAccountRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserMfaRepository;
@@ -100,10 +99,11 @@ public class MfaService {
         if (step.isEmpty()) {
             throw new AccountExceptions.Invalid("Código incorreto. Confira a hora do celular e tente de novo.");
         }
-        UserMfa enabled = new UserMfa(userId, cipher.encrypt(pending.secret(), userId));
-        enabled.consumeStep(step.getAsLong());
-        mfa.save(enabled);
         session.removeAttribute(SETUP_ATTRIBUTE);
+        // outra configuração (em outra sessão) pode ter ligado o 2FA depois do startSetup: não sobrescreve o fator ativo
+        if (mfa.enableIfAbsent(userId, cipher.encrypt(pending.secret(), userId), step.getAsLong()) == 0) {
+            throw new AccountExceptions.Conflict("O 2FA já está ativo. Desative antes de configurar outro aparelho.");
+        }
         notifier.mfaChanged(users.findById(userId).orElseThrow(), true);
         return newRecoveryCodes(userId);
     }
@@ -118,14 +118,13 @@ public class MfaService {
         if (clean.matches("\\d{6}")) {
             return mfa.findById(userId).map(m -> {
                 OptionalLong step = Totp.verify(cipher.decrypt(m.getTotpSecret(), userId), clean, clock.instant());
-                return step.isPresent() && m.consumeStep(step.getAsLong());
+                return step.isPresent() && mfa.consumeStep(userId, step.getAsLong()) == 1;
             }).orElse(false);
         }
         String normalized = clean.toLowerCase(Locale.ROOT).replace("-", "");
         for (RecoveryCode rc : recovery.findByUserIdAndUsedAtIsNull(userId)) {
             if (hasher.matches(normalized, rc.getCodeHash())) {
-                rc.markUsed(clock.instant());
-                return true;
+                return recovery.markUsed(rc.getId(), clock.instant()) == 1;
             }
         }
         return false;

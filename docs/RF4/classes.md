@@ -51,6 +51,17 @@ classDiagram
         -String codeHash
         -Instant usedAt
     }
+    class UserMfaRepository {
+        <<repository>>
+        +consumeStep(Long, long) int
+        +enableIfAbsent(Long, byte[], long) int
+    }
+    class RecoveryCodeRepository {
+        <<repository>>
+        +findByUserIdAndUsedAtIsNull(Long) List
+        +markUsed(Long, Instant) int
+        +deleteAllOf(Long) int
+    }
     AuthService --> LoginThrottle
     AuthService --> MfaService
     AuthService --> SessionService
@@ -58,7 +69,9 @@ classDiagram
     SessionService ..> FriendlyPrincipal
     MfaService --> Totp
     MfaService --> SecretCipher
-    MfaService ..> UserMfa
-    MfaService ..> RecoveryCode
+    MfaService --> UserMfaRepository
+    MfaService --> RecoveryCodeRepository
+    UserMfaRepository ..> UserMfa
+    RecoveryCodeRepository ..> RecoveryCode
     StepUp --> MfaService
 ```

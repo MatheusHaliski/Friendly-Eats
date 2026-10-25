@@ -44,9 +44,13 @@ paths:
 5. **Mensagens neutras** ("E-mail ou senha incorretos.") e o mesmo custo de hash para e-mail inexistente.
 6. **Limite de tentativas:** por conta, espera progressiva a partir da 5ª falha em 15 min, até 15 min (`429` +
    `Retry-After`); por IP, 20/min e 100/h.
-7. **2FA por app autenticador:** TOTP SHA-1, 6 dígitos, 30 s, ±1 passo, anti-replay; segredo de 160 bits cifrado com
-   AES-256-GCM; **10 códigos de recuperação** de uso único, guardados em Argon2id. Ativar, regenerar e desativar exigem
-   senha (+ código). Sem SMS.
+7. **2FA por app autenticador:** TOTP SHA-1, 6 dígitos, 30 s, ±1 passo; segredo de 160 bits cifrado com AES-256-GCM;
+   **10 códigos de recuperação** de uso único, guardados em Argon2id. Ativar, regenerar e desativar exigem senha
+   (+ código). Sem SMS.
+   - **Uso único atômico:** o passo do TOTP e o código de recuperação são consumidos por `UPDATE` condicional no banco;
+     com várias requisições ao mesmo tempo, só uma entra.
+   - **Nunca sobrescreve o fator ativo:** confirmar uma configuração quando o 2FA já foi ligado em outra sessão dá
+     `409` (`INSERT … ON CONFLICT DO NOTHING`).
 8. **Controle de acesso:** os Termos são públicos; todo o resto exige sessão; escrita exige `X-XSRF-TOKEN`; interagir
    e enviar foto exigem conta `ACTIVE`; conta suspensa não entra.
 9. **Sessões ativas:** lista com navegador/sistema, criação, último acesso e "esta sessão", **sem expor o id real**;
@@ -76,5 +80,5 @@ paths:
 | Aplicação | `AuthService` (login em etapas), `MfaService`, `StepUp` (modo sudo), `AccountNotifier` | ✅ |
 | Persistência | `user_mfa`, `user_recovery_code` (V1); sessões no Valkey `fe:session` | ✅ |
 | API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}` | ✅ |
-| Testes | `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões) | ✅ |
+| Testes | `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões; `secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor`: 8 logins simultâneos com o mesmo código e duas configurações concorrentes) | ✅ |
 | Pendências | passkeys/WebAuthn; e-mail transacional; CAPTCHA depois de muitas falhas | ⏳ |

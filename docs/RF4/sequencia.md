@@ -31,7 +31,11 @@ sequenceDiagram
         U->>APP: código de 6 dígitos (ou xxxxx-xxxxx)
         APP->>API: POST /api/v1/auth/login/2fa
         API->>A: completeMfa
-        A->>DB: decifra o segredo · TOTP ±1 passo · passo > último usado?
+        A->>DB: decifra o segredo · TOTP ±1 passo
+        A->>DB: UPDATE user_mfa SET last_used_step = passo WHERE last_used_step < passo
+        alt 0 linhas (código já usado, mesmo por outra requisição simultânea)
+            A-->>APP: 401
+        end
         A->>VK: changeSessionId · grava FriendlyPrincipal(id)
         A-->>APP: 200 {status: AUTHENTICATED, user}
     end
@@ -54,6 +58,10 @@ sequenceDiagram
     API-->>APP: {secret, otpauthUri} → QR code + chave para digitar
     U->>APP: código do app autenticador
     APP->>API: POST /api/v1/me/mfa/totp/confirm {code}
-    M->>DB: INSERT user_mfa (segredo AES-256-GCM) · 10 user_recovery_code (Argon2id)
+    M->>DB: INSERT user_mfa … ON CONFLICT (user_id) DO NOTHING (segredo AES-256-GCM)
+    alt 2FA já ligado por outra sessão
+        M-->>APP: 409
+    end
+    M->>DB: 10 user_recovery_code (Argon2id)
     API-->>APP: 10 códigos xxxxx-xxxxx (mostrados uma vez)
 ```
