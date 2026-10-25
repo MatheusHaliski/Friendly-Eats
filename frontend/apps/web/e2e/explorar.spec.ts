@@ -71,16 +71,23 @@ test.describe('Explorar (RF10)', () => {
   test('perto de mim usa a localização só depois do clique e não a põe na URL', async ({ page, context, api }) => {
     await context.grantPermissions(['geolocation']);
     await context.setGeolocation({ latitude: -19.93612, longitude: -43.93456 });
-    await page.goto('/');
+    await page.goto('/?page=1');
     await expect(page.getByText('A sua localização é usada só nesta busca e não é guardada.')).toBeVisible();
     await expect(page.getByTestId('lista-lugares')).toBeVisible();
     expect(api.find('GET', /^\/api\/v1\/establishments$/).every((r) => !r.search.has('lat'))).toBe(true);
 
     await page.getByRole('button', { name: 'Usar minha localização' }).click();
     await expect(page.getByText('Usando a sua localização')).toBeVisible();
-    await expect.poll(() => api.last('GET', /^\/api\/v1\/establishments$/)?.search.get('lat')).toBe('-19.936');
+    // vinha da página 2: "perto de mim" recomeça da primeira (a última busca tem lat e page=0)
+    await expect
+      .poll(() => {
+        const r = api.last('GET', /^\/api\/v1\/establishments$/)?.search;
+        return r ? `${r.get('lat')}|${r.get('page')}` : null;
+      })
+      .toBe('-19.936|0');
     let s = api.last('GET', /^\/api\/v1\/establishments$/)!.search;
     expect(s.get('lng')).toBe('-43.935');
+    expect(page.url()).not.toMatch(/page=/);
     expect(s.get('radiusKm')).toBe('5');
     await expect(page.getByTestId('contagem')).toContainText('num raio de 5 km');
     await expect(page.getByRole('article', { name: 'Sabor Mineiro' })).toContainText('a 400 m');

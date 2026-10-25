@@ -47,6 +47,11 @@ export function ExploreView() {
       router.replace(`/${filtersToSearch(next)}`, { scroll: false });
     });
   const update = (patch: Partial<ExploreFilters>) => go({ ...shown, page: 0, ...patch });
+  // ligar ou desligar "perto de mim" muda o conjunto de resultados: volta para a primeira página
+  const changeCoords = (c: Coords | null) => {
+    setCoords(c);
+    if (shown.page !== 0) go({ ...shown, page: 0 });
+  };
   const clear = () => {
     setCoords(null);
     go(parseFilters(new URLSearchParams()));
@@ -117,7 +122,7 @@ export function ExploreView() {
               taxonomy={taxonomy.data}
               taxonomyError={taxonomy.isError}
               coords={coords}
-              onCoords={setCoords}
+              onCoords={changeCoords}
               onChange={update}
               onClear={clear}
               canClear={hasActiveFilters(shown) || coords !== null}
