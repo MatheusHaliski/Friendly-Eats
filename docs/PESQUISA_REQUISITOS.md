@@ -81,7 +81,8 @@ O ECA Digital, art. 39, ajusta várias obrigações ao porte do serviço, o que 
 
 ## 3. Proposta de RFs
 
-Os 71 RCs viram 20 RFs, entre os planejados (RF11 e RF13) e os novos (RF17 a RF36). Os que se sobrepõem entre eixos
+Os 71 RCs viram 20 RFs, entre os planejados (RF11 e RF13) e os novos (RF17 a RF36). A pesquisa de fontes de dados
+acrescenta o RF37 (catálogo mundial de lugares). Os que se sobrepõem entre eixos
 foram juntados: "Eu fiz" (COM-12) com "Fiz essa receita" (REC-04); visita comprovada (COM-05) com NFC-e (SEG-06);
 contestação pelo dono (EST-14) com (SEG-08); e revisão humana (SEG-02) com governança de IA (REC-18).
 
@@ -113,9 +114,55 @@ contestação pelo dono (EST-14) com (SEG-08); e revisão humana (SEG-02) com go
 **Could, sem RF por enquanto:** nutrição estimada e grau de processamento (REC-06), "tá na época" (REC-07),
 aproveitamento integral e doação (REC-09), harmonização com bebida (REC-12) e fila de espera virtual (EST-10).
 
-**Restaurantes do mundo todo:** a pesquisa de fontes de dados (Google Places, Foursquare Open Source Places,
-Overture, OpenStreetMap e outras) está em andamento e deve virar um RF próprio, com a listagem clicável e o modal
-explicativo.
+### RF37 · Catálogo mundial de lugares não reivindicados (listagem clicável com modal explicativo)
+
+Pesquisa completa: [pesquisa/restaurantes-do-mundo/RECOMENDACAO.md](pesquisa/restaurantes-do-mundo/RECOMENDACAO.md).
+Os scripts da prova prática estão em `scripts/pesquisa/restaurantes-do-mundo/`.
+
+- **Base: Overture Maps Places**, publicada todo mês em GeoParquet (versão `2026-10-21.0`).
+  - Cobertura medida: cerca de **11 milhões** de lugares de comida e bebida no mundo, **709.904 no Brasil**, dos
+    quais 288.975 com confiança ≥ 0,77.
+  - Licença por registro (CDLA-Permissive-2.0, Apache-2.0 ou CC0) e **custo de licença zero**.
+  - Cada lugar tem um ID estável, o que permite comparar uma versão com a seguinte.
+- **Complementos:**
+  - Wikidata (CC0) para lugares notáveis;
+  - depois, o Foursquare Open Source Places (Apache-2.0, exige conta), que informa a data de fechamento.
+- **OpenStreetMap fica fora** até um parecer jurídico ⚖️: misturar restaurantes do OSM com os de outra fonte obriga
+  a publicar o resultado sob a licença ODbL.
+- **APIs pagas não servem de base:** Google, Yelp, Foursquare API, Tripadvisor, HERE, TomTom e Mapbox só deixam
+  guardar o ID ou fazer cache curto (de 24 h a 30 dias). Só o Google Places, por exemplo, custaria cerca de
+  US$ 12 a 14 mil por mês no cenário estudado.
+- **Tabelas separadas:** `catalog_place` + `place_source` (origem, licença, versão e ID externo), sem misturar com
+  `establishment`.
+  - A tabela do RF6 exige dono, código IBGE e ponto dentro do Brasil.
+  - O lugar entra como "não reivindicado" e vira `establishment` quando o dono reivindica a página (RF20).
+- **LGPD:**
+  - não importar cozinha caseira, MEI em casa nem e-mail;
+  - endereço com cara de residência aparece só como bairro;
+  - opt-out sem login, com uma lista de supressão que impede reimportar o lugar;
+  - nota de terceiros nunca é copiada.
+- **Modal** (sobre o `Dialog` que já existe), com:
+  - "De onde vem esta informação" e a atribuição da fonte;
+  - "Não reivindicado" e "Este lugar é seu?";
+  - "Pode estar desatualizado";
+  - "Ver página", "Como chegar" (só um link de mapas) e "Sugerir correção".
+- **Prova prática:**
+
+  | Região | Lugares | Telefone | Site | Culinária mapeável | Horário |
+  |---|---|---|---|---|---|
+  | Pinheiros e Vila Madalena (SP) | 2.652 | 88 % | 61 % | 18 % | 0 % |
+  | Baixa e Chiado (Lisboa) | 2.589 | 91 % | 58 % | 25 % | 0 % |
+
+  Nenhuma culinária regional brasileira aparece nos dados.
+- **Achados que pedem mudança de código** (entram no mesmo PR do RF37, junto com a taxonomia, o RF6, o RF7 e o RF10):
+  1. **A regra do chip do RF7 erra fora do Brasil:** os formatos `REFEICOES` e `CARNES_PESCADOS` viram o chip
+     "Brasileira", e uma marisqueira de Lisboa sairia como brasileira.
+  2. **Classificação incompleta:** de 44 % a 46 % dos lugares importados têm só o tipo, que o RF7 recusa. Falta o
+     status "classificação pendente".
+  3. **Telefone sozinho não serve para achar duplicatas:** há dezenas de lugares vizinhos com o mesmo telefone e
+     nomes diferentes. A deduplicação precisa de nome normalizado + distância + telefone.
+
+Prioridade sugerida: **Should**, na onda 2, depois do RF20, que traz a reivindicação da página. Esforço: G.
 
 ## 4. Ordem sugerida
 
