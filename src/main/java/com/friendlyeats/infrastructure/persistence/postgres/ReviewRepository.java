@@ -26,6 +26,14 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             """)
     List<Review> findCounting(Long establishmentId, AccountStatus active);
 
+    /** O mesmo que {@link #findCounting}, para vários lugares de uma vez (cards da busca, RF10). */
+    @Query("""
+            select r from Review r, UserAccount u
+            where u.id = r.authorId and r.establishmentId in :establishmentIds
+              and r.status = com.friendlyeats.domain.model.Review.Status.PUBLISHED and u.accountStatus = :active
+            """)
+    List<Review> findCountingIn(java.util.Collection<Long> establishmentIds, AccountStatus active);
+
     @Query(value = """
             select r, u from Review r, UserAccount u
             where u.id = r.authorId and r.establishmentId = :establishmentId

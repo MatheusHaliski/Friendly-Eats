@@ -48,7 +48,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/v1/legal/**", "/api/v1/taxonomy").permitAll()
                         // páginas e avaliações de estabelecimentos são públicas; a regra de 18+ fica no serviço
-                        .requestMatchers(HttpMethod.GET, "/api/v1/establishments/*", "/api/v1/establishments/*/reviews")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/establishments", "/api/v1/establishments/*",
+                                "/api/v1/establishments/*/reviews")
                         .permitAll()
                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated())

@@ -52,7 +52,8 @@ paths:
    - **Nunca sobrescreve o fator ativo:** confirmar uma configuração quando o 2FA já foi ligado em outra sessão dá
      `409` (`INSERT … ON CONFLICT DO NOTHING`).
 8. **Controle de acesso:** são `GET` públicos os Termos (`/api/v1/legal/**`), a taxonomia (`/api/v1/taxonomy`), a
-   página do estabelecimento (`/api/v1/establishments/*`) e a lista de avaliações dele
+   busca (`/api/v1/establishments`, [RF10](../RF10/README.md)), a página do estabelecimento
+   (`/api/v1/establishments/*`) e a lista de avaliações dele
    (`/api/v1/establishments/*/reviews`); todo o resto exige sessão; escrita exige `X-XSRF-TOKEN`; interagir e enviar
    foto exigem conta `ACTIVE`; conta suspensa não entra. A regra de 18+ dos lugares de bebida alcoólica **não** está no
    filtro, e sim no serviço ([RF6](../RF6/README.md)): o filtro deixa o `GET` passar e o serviço responde `401` com
@@ -84,7 +85,7 @@ paths:
 
 | Camada | Artefato | Situação |
 |---|---|---|
-| Segurança | `SecurityConfig` (CSRF SPA, regras, cabeçalhos; `GET` público de `/api/v1/legal/**`, `/api/v1/taxonomy`, `/api/v1/establishments/*` e `/api/v1/establishments/*/reviews`, com a regra de 18+ no serviço), `SessionService`, `AbsoluteSessionTimeoutFilter`, `LoginThrottle`, `PendingLogin`, `FriendlyPrincipal`, `ClientInfo`, `AppSecrets`, `SecretCipher`, `Totp`, `ProblemResponses` | ✅ |
+| Segurança | `SecurityConfig` (CSRF SPA, regras, cabeçalhos; `GET` público de `/api/v1/legal/**`, `/api/v1/taxonomy`, `/api/v1/establishments` (busca), `/api/v1/establishments/*` e `/api/v1/establishments/*/reviews`, com a regra de 18+ no serviço), `SessionService`, `AbsoluteSessionTimeoutFilter`, `LoginThrottle`, `PendingLogin`, `FriendlyPrincipal`, `ClientInfo`, `AppSecrets`, `SecretCipher`, `Totp`, `ProblemResponses` | ✅ |
 | Aplicação | `AuthService` (login em etapas), `MfaService`, `StepUp` (modo sudo), `AccountNotifier`; `CommonExceptions.Unauthenticated(String)` para o `401` com mensagem própria (lugar 18+, RF6) | ✅ |
 | Persistência | `user_mfa`, `user_recovery_code` (V1); sessões no Valkey `fe:session` | ✅ |
 | API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}`; `ApiExceptionHandler` em Problem Details pt-BR, com `409` (nunca `500`) quando dois pedidos correm para a mesma chave única ou a mesma versão (`DataIntegrityViolationException` com SQLState 23505, `ObjectOptimisticLockingFailureException`) | ✅ |

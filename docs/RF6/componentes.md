@@ -17,5 +17,5 @@ flowchart LR
     AS["AccountService.eliminate · RF5"] --> ER
     ES -.-> GEO["ViaCEP · geocodificação ⏳"]
     ES -.-> BR["BrasilAPI CNPJ ⏳"]
-    SR["Busca por raio · RF10 ⏳"] -.-> PG
+    SR["EstablishmentSearch · RF10<br/>busca, filtros e raio"] --> PG
 ```

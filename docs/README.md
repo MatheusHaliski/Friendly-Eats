@@ -31,10 +31,11 @@ tracejada).
 | [RF6](RF6/README.md) | Cadastrar estabelecimento: tipo, local e preço declarado | 🟡 parcial |
 | [RF7](RF7/README.md) | Classificar estabelecimento: culinária, formato, abordagem e estilos | 🟡 parcial |
 | [RF8](RF8/README.md) | Avaliar com estrelas (1 a 5) e nota agregada | 🟡 parcial |
+| [RF10](RF10/README.md) | Buscar e filtrar estabelecimentos (taxonomia, preço, estrelas e raio) | 🟡 parcial |
 
 Próximos (seguem a [taxonomia](TAXONOMIA_FRIENDLY_EATS.md#13-mapa-para-os-rfs)): RF9 publicar conteúdo, com
-cardápio e alergênicos por item · RF10 buscar e filtrar, com busca por raio · RF11 página do estabelecimento, com as
-facetas · RF12 interações, com a resposta do dono · RF13 moderação e avaliações falsas.
+cardápio e alergênicos por item · RF11 página do estabelecimento, com as facetas · RF12 interações, com a resposta do
+dono · RF13 moderação e avaliações falsas.
 
 ## Outros documentos
 

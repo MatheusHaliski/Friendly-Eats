@@ -13,7 +13,7 @@ flowchart LR
     ES --> RC["RatingCalculator<br/>friendly-eats.rating"]
     RR & RV & UR --> PG[("PostgreSQL<br/>review · review_revision")]
     AS["AccountService.eliminate · RF5"] --> RR
-    RC -.-> BUSCA["Ranking na busca · RF10 ⏳"]
+    RR --> BUSCA["EstablishmentSearch · RF10<br/>findCountingIn · score na ordem"]
     RS -.-> MOD["Moderação · RF13 ⏳"]
     RS -.-> VER["Check-in · NFC-e ⏳"]
 ```

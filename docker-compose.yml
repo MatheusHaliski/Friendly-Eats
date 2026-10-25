@@ -9,7 +9,7 @@ name: friendly-eats
 services:
   postgres:
     image: postgis/postgis:17-3.5
-    container_name: os-postgres
+    container_name: fe-postgres
     environment:
       POSTGRES_DB: friendly_eats
       POSTGRES_USER: friendly
@@ -26,7 +26,7 @@ services:
 
   valkey:
     image: valkey/valkey:9-alpine
-    container_name: os-valkey
+    container_name: fe-valkey
     command: ["valkey-server", "--appendonly", "yes"]
     ports:
       - "6379:6379"
@@ -42,7 +42,7 @@ services:
   # Bucket criado pelo serviço garage-init; endpoint S3 em http://localhost:3900.
   garage:
     image: dxflrs/garage:v2.4.1
-    container_name: os-garage
+    container_name: fe-garage
     ports:
       - "3900:3900"   # API S3
       - "3902:3902"   # leitura pública das mídias (s3_web), o papel da CDN em dev
@@ -61,7 +61,7 @@ services:
   garage-init:
     # init.sh fala com a Admin API v2 por HTTP; a imagem do curl traz o sh que a do Garage não tem
     image: curlimages/curl:8.11.1
-    container_name: os-garage-init
+    container_name: fe-garage-init
     depends_on:
       garage:
         condition: service_healthy
@@ -72,7 +72,7 @@ services:
 
   cassandra:
     image: cassandra:5.0
-    container_name: os-cassandra
+    container_name: fe-cassandra
     profiles: ["full"]
     environment:
       CASSANDRA_CLUSTER_NAME: friendly-eats
@@ -95,7 +95,7 @@ services:
   # Aplica o schema.cql uma vez que o Cassandra estiver saudável.
   cassandra-init:
     image: cassandra:5.0
-    container_name: os-cassandra-init
+    container_name: fe-cassandra-init
     profiles: ["full"]
     depends_on:
       cassandra:

@@ -324,7 +324,7 @@ public class EstablishmentService {
                 s.accessibleLabel());
     }
 
-    private PriceView price(Establishment e, List<Review> counting) {
+    PriceView price(Establishment e, List<Review> counting) {
         if (e.isPriceNotApplicable()) {
             return priceView(PriceLevel.PRICE_NA, null, 0, e);
         }
@@ -362,7 +362,7 @@ public class EstablishmentService {
      * A regra da cozinha caseira vale pelo cadastro atual da conta dona, não só pelo do lugar: se a conta passar a
      * ser {@code COZINHA_CASEIRA} depois, o endereço completo já gravado deixa de sair para o público.
      */
-    private static LocationView location(Establishment e, boolean isOwner, Optional<UserAccount> owner) {
+    static LocationView location(Establishment e, boolean isOwner, Optional<UserAccount> owner) {
         AddressVisibility v = e.getAddressVisibility();
         if (v == AddressVisibility.ADDR_PUBLIC_FULL && owner.map(EstablishmentService::informalFormat)
                 .filter("COZINHA_CASEIRA"::equals).isPresent()) {
@@ -385,7 +385,7 @@ public class EstablishmentService {
                 null, null, null, null, "GEO_MUNICIPIO_CENTROID", v.name(), true);
     }
 
-    private static ClassificationView classification(Establishment e) {
+    static ClassificationView classification(Establishment e) {
         List<DietaryOfferView> offers = e.getDietaryOffers().entrySet().stream()
                 .map(x -> new DietaryOfferView(x.getKey().name(), x.getKey().getLabel(), x.getValue().name())).toList();
         return new ClassificationView(cuisine(e.getPrimaryCuisine()),

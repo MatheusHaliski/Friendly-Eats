@@ -1,6 +1,13 @@
 # Perfil de desenvolvimento local: mvn spring-boot:run (o plugin ativa "dev")
 # Segredo efêmero (AppSecrets), cookie sem __Host-/Secure para funcionar em http://localhost
 # e o código de verificação de e-mail aparece no log.
+# O Cassandra ainda não é usado pelo código (timeline e notificações vêm com RF9/RF12), então o perfil dev sobe
+# só com `docker compose up -d`. Com `docker compose --profile full up -d`, rode com CASSANDRA_DEV_EXCLUDE= (vazio).
+# Dados de exemplo (DevSeed) entram com o banco vazio.
+spring:
+  autoconfigure:
+    exclude: ${CASSANDRA_DEV_EXCLUDE:org.springframework.boot.cassandra.autoconfigure.CassandraAutoConfiguration,org.springframework.boot.cassandra.autoconfigure.health.CassandraHealthContributorAutoConfiguration,org.springframework.boot.cassandra.autoconfigure.health.CassandraReactiveHealthContributorAutoConfiguration,org.springframework.boot.data.cassandra.autoconfigure.DataCassandraAutoConfiguration,org.springframework.boot.data.cassandra.autoconfigure.DataCassandraReactiveAutoConfiguration,org.springframework.boot.data.cassandra.autoconfigure.DataCassandraRepositoriesAutoConfiguration,org.springframework.boot.data.cassandra.autoconfigure.DataCassandraReactiveRepositoriesAutoConfiguration}
+
 server:
   servlet:
     session:
