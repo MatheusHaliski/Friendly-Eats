@@ -14,6 +14,7 @@ paths:
   - src/main/java/com/friendlyeats/application/media/**
   - src/main/java/com/friendlyeats/infrastructure/storage/**
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/UserPreferenceRepository.java
+  - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/UserAccountRepository.java
   - src/main/java/com/friendlyeats/api/MeController.java
   - src/main/java/com/friendlyeats/api/MediaUploadController.java
   - infra/garage/**
@@ -28,13 +29,17 @@ paths:
 |---|---|
 | **Base legal (LGPD)** | Art. 18, III (correção). Foto sem EXIF/GPS: o local e o aparelho não vão junto (Art. 6º, III, necessidade) |
 | **ECA Digital** | Menor de 16: perfil privado, comentários só de seguidores e lembrete de uso travados (`403`); tema e fundo livres |
-| **Status** | 🟡 Parcial: perfil, preferências e foto com testes; culinárias favoritas e estilos alimentares no perfil chegam com a taxonomia (RF7), troca de e-mail e auditoria ainda não |
+| **Status** | 🟡 Parcial: perfil, gosto (culinárias favoritas e estilos alimentares), preferências e foto com testes; troca de e-mail e auditoria ainda não |
 
 ## Critérios de aceite
 
 1. **Editáveis** (`PATCH /api/v1/me/profile`): nome, `@usuário` (único), bio (até 150), até 4 pronomes, até 5 links
    `https`, país/UF/cidade, e-mail de recuperação, celular E.164 e os campos do tipo de conta (revalidados como no
    [RF1](../RF1/README.md)).
+   - **Gosto:** `favoriteCuisines` (até 5 códigos de `Cuisine`, sem repetição, na ordem escolhida) e `dietaryStyles`
+     (códigos de `DietaryStyle`). Estilos alimentares podem revelar saúde ou religião: só são gravados com o
+     consentimento `SENSITIVE_PROFILE_DATA` ligado ([RF3](../RF3/README.md)), senão `403`; lista vazia apaga sempre.
+     Código desconhecido ou mais de 5 culinárias → `422`. Os dois aparecem no `ProfileView`.
 2. **Não editáveis por aqui:** e-mail e senha (fluxo com modo sudo, [RF4](../RF4/README.md)), data de nascimento
    (suporte) e tipo de conta.
 3. Conta **com selo** que troca nome, `@` ou dados do tipo volta para `PENDING` (nova conferência).
@@ -65,5 +70,6 @@ paths:
 | Aplicação / API | `ProfileService`, `PreferencesService`; `GET/PATCH /api/v1/me/profile`, `GET/PATCH /api/v1/me/preferences`, `PUT/DELETE /api/v1/me/photo` | ✅ |
 | Foto | `MediaUploadController`, `MediaUploads` (`Fit.AVATAR`), `ImageSanitizer`, `MediaJanitor`, `S3MediaStorage` (AWS SDK v2) | ✅ |
 | Ambiente | Garage no Compose e nos testes (`infra/garage/`, `support/GarageContainer`); `uploads/` expira em 1 dia e CORS para a origem web | ✅ |
+| Gosto | `ProfilePatch`/`ProfileView` com `favoriteCuisines` e `dietaryStyles`; estilos conferem `ConsentService.granted` com a conta travada (`UserAccountRepository.lockById`); `ConsentApiIT` | ✅ |
 | Testes | `AuthApiIT.preferencesIncludingAppBackgroundAndProfileEditing`, `AuthApiIT.minorsKeepProtectiveDefaults`, `ImageSanitizerTest` (EXIF/GPS some, 8 orientações, recorte de avatar, bomba de descompressão), `ProfilePhotoApiIT` (Garage real: envio pré-assinado, chave alheia, tamanho fora da assinatura, arquivo que não é foto, troca e remoção), `UserAccountRepositoryIT` | ✅ |
-| Pendências | culinárias favoritas e estilos alimentares na API, com consentimento `SENSITIVE_PROFILE_DATA` (RF3, RF7); troca de e-mail; auditoria | ⏳ |
+| Pendências | troca de e-mail; auditoria | ⏳ |

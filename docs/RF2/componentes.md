@@ -19,4 +19,6 @@ flowchart LR
     PFS --> PR["UserPreferenceRepository"]
     UR & PR --> PG[("PostgreSQL")]
     PS --> PL["PublicLinks<br/>avatarUrl"]
+    PS --> CS["ConsentService<br/>RF3"]
+    CS --> PG
 ```

@@ -470,7 +470,9 @@ Regras:
 3. Não inferir saúde nem religião a partir de posts, buscas ou avaliações, e não guardar essas inferências. Quando a
    pessoa escreve "sou celíaco" num post público, isso não vira atributo do perfil.
 4. Menor de idade: preferência com dado de saúde exige o consentimento de um dos pais ou do responsável (Art. 14,
-   *não verificado*).
+   *não verificado*). Enquanto esse fluxo não existe, `SENSITIVE_PROFILE_DATA` fica **travado para menor de 18**
+   (`ConsentPurpose.MinorRule.UNDER_18`); localização, feed personalizado e marketing ficam travados para menor de 16
+   (ECA Digital).
 
 ---
 

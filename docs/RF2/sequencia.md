@@ -24,6 +24,32 @@ sequenceDiagram
     end
 ```
 
+## Informar o gosto
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor T as Titular (app)
+    participant API as MeController
+    participant P as ProfileService
+    participant C as ConsentService
+    participant DB as PostgreSQL
+
+    T->>API: PATCH /api/v1/me/profile {favoriteCuisines: [ITALIANA, JAPONESA], dietaryStyles: [SEM_GLUTEN]}
+    API->>P: update(titular, patch)
+    P->>DB: SELECT … FROM user_account FOR UPDATE
+    P->>C: granted(titular, SENSITIVE_PROFILE_DATA)
+    C->>DB: SELECT user_consent_current
+    alt consentimento desligado
+        P-->>T: 403 · ligue "Estilos alimentares no perfil" em Privacidade
+    else código desconhecido ou mais de 5 culinárias
+        P-->>T: 422 com todos os erros
+    else ok
+        P->>DB: UPDATE favorite_cuisines · dietary_styles
+        P-->>T: 200 perfil {favoriteCuisines, dietaryStyles, …}
+    end
+```
+
 ## Trocar a foto de perfil
 
 ```mermaid

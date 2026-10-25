@@ -21,6 +21,7 @@ classDiagram
         +String purpose
         +boolean granted
         +String policyVersion
+        +Instant occurredAt
     }
     class ConsentPurpose {
         <<enumeration>>
@@ -29,19 +30,51 @@ classDiagram
         SENSITIVE_PROFILE_DATA
         MARKETING
         THIRD_PARTY_SHARING
+        +String label
+        +String description
+        +String legalBasis
+        +boolean sensitive
+        +MinorRule minorRule
+    }
+    class MinorRule {
+        <<enumeration>>
+        NONE
+        UNDER_16
+        UNDER_18
+    }
+    class ConsentService {
+        +list(long) ConsentList
+        +granted(long, ConsentPurpose) boolean
+        +set(long, String, Boolean, ClientInfo) ConsentView
+        +recordDefaults(long, ClientInfo)
+    }
+    class ConsentView {
+        <<record>>
+        +ConsentPurpose purpose
+        +String label
+        +String description
+        +String legalBasis
+        +boolean sensitive
+        +boolean granted
+        +Instant updatedAt
+        +boolean lockedForMinor
     }
     class RegistrationService {
         +register(Registration, ClientInfo) UserAccount
     }
-    class ConsentService {
-        <<planejado>>
-        +list(long) List
-        +set(long, purpose, granted, ClientInfo) ConsentView
+    class ProfileService {
+        +update(long, ProfilePatch) ProfileView
     }
-    RegistrationService ..> ConsentEvent : 5 linhas granted=false
+    class AgePolicy {
+        +protectedMinor(LocalDate) boolean
+    }
+    RegistrationService ..> ConsentService : recordDefaults (5 desligadas)
+    ProfileService ..> ConsentService : granted(SENSITIVE_PROFILE_DATA)
+    ConsentService ..> AgePolicy : lockedForMinor
     ConsentService ..> ConsentEvent : nova linha a cada mudança
+    ConsentService ..> UserConsentCurrent : estado atual
+    ConsentService --> ConsentView
     UserConsentCurrent ..> ConsentEvent : última por finalidade
     ConsentEvent --> ConsentPurpose
+    ConsentPurpose --> MinorRule
 ```
-
-As finalidades hoje são texto validado pelo `CHECK` da tabela; o enum e o `ConsentService` entram com a API.
