@@ -30,7 +30,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor A as Autor (app)
-    participant P as Posts (RF9)
+    participant P as PostPublishingService (RF9)
     participant V as BackgroundValidator
     participant S as BackgroundService
     participant DB as PostgreSQL

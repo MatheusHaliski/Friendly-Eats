@@ -31,6 +31,12 @@ flowchart TD
     W -- não --> M{Rota}
     M -- "GET /api/v1/legal/** ou /api/v1/taxonomy" --> OK[Passa sem sessão]
     M -- "GET /api/v1/establishments/* ou<br/>/api/v1/establishments/*/reviews" --> OKE[Passa sem sessão]
+    M -- "GET /api/v1/posts, /posts/*, /posts/*/comments,<br/>/posts/trending, /establishments/*/posts" --> OKP[Passa sem sessão]
+    M -- "GET /api/v1/users, /users/*/profile,<br/>/users/*/posts ou /backgrounds/**" --> OK
+    OKP --> PA{Serviço: post 18+ ou<br/>autor com perfil privado? · RF14}
+    PA -- "18+ sem sessão" --> A401
+    PA -- "18+ e menor, ou perfil privado" --> N404
+    PA -- não --> PP[200]
     M -- "/api/v1/auth/** ou /error" --> OK
     M -- "qualquer outra" --> S{Sessão válida?}
     S -- não --> U401[401]

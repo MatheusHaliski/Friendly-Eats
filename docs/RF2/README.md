@@ -89,6 +89,7 @@ paths:
 | Domínio | `UserAccount` (perfil público, `favoriteCuisines`, `dietaryStyles`), `UserPreference` (`Theme`, `AppBackground`, `HomeTab`, `CommentAudience`, `SensitiveContent`) | ✅ |
 | Aplicação / API | `ProfileService`, `PreferencesService`; `GET/PATCH /api/v1/me/profile`, `GET/PATCH /api/v1/me/preferences`, `PUT/DELETE /api/v1/me/photo` | ✅ |
 | Foto | `MediaUploadController`, `MediaUploads` (`Fit.AVATAR`), `ImageSanitizer`, `MediaJanitor`, `S3MediaStorage` (AWS SDK v2) | ✅ |
+| Links públicos | `PublicLinks`: `profileShareUrl` (`/@handle`, usado no perfil público do [RF15](../RF15/README.md)), `postShareUrl` (`/p/{id}`, compartilhar do [RF12](../RF12/README.md)) e `mediaUrl`; a mesma limpeza de foto serve ao post (`Fit.POST`, [RF9](../RF9/README.md)) | ✅ |
 | Ambiente | Garage no Compose e nos testes (`infra/garage/`, `support/GarageContainer`); `uploads/` expira em 1 dia e CORS para a origem web | ✅ |
 | Gosto | `ProfilePatch`/`ProfileView` com `favoriteCuisines` e `dietaryStyles`; estilos conferem `ConsentService.granted` com a conta travada (`UserAccountRepository.lockById`); `ConsentApiIT` | ✅ |
 | Testes | `AuthApiIT.preferencesIncludingAppBackgroundAndProfileEditing`, `AuthApiIT.minorsKeepProtectiveDefaults`, `ImageSanitizerTest` (EXIF/GPS some, 8 orientações, recorte de avatar, bomba de descompressão), `ProfilePhotoApiIT` (Garage real: envio pré-assinado, chave alheia, tamanho fora da assinatura, arquivo que não é foto, troca e remoção), `UserAccountRepositoryIT` | ✅ |

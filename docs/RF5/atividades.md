@@ -11,12 +11,14 @@ flowchart TD
     W -- sim --> R[Oferta de reativação] --> RA[(Volta ao status anterior)]
     W -- não --> J[Job diário encontra a conta vencida]
     J --> E0[Apaga as avaliações escritas pela conta · RF8<br/>review_revision por CASCADE]
-    E0 --> EE[Apaga os estabelecimentos da conta · RF6<br/>avaliações desses lugares por CASCADE]
+    EE[Apaga os estabelecimentos da conta · RF6<br/>avaliações desses lugares por CASCADE]
+    E0 --> PO[Posts da conta viram REMOVED sem conteúdo · RF9<br/>comentários sem texto, curtidas e salvos apagados,<br/>contadores dos outros posts corrigidos · RF12]
+    PO --> EE
     EE --> E1[Apaga 2FA, códigos de recuperação e preferências]
     E1 --> E2[Anonimiza: ANONYMOUS_LGPD_DELETED]
     E2 --> E3[Encerra sessões restantes]
     E3 --> CM[(COMMIT)]
-    CM --> E4[Apaga a foto de perfil do bucket]
-    E4 -.-> E5[Posts e fotos dos posts · RF9 ⏳<br/>Cassandra · DEK ⏳]
-    P -.-> H[Na carência: avaliações fora do agregado<br/>e páginas fora do ar, sem apagar]
+    CM --> E4[Apaga do bucket a foto de perfil e as fotos dos posts<br/>e tira os posts do ranking em alta]
+    E4 -.-> E5[Cassandra · DEK ⏳]
+    P -.-> H[Na carência: avaliações fora do agregado,<br/>páginas e posts fora do ar, sem apagar]
 ```

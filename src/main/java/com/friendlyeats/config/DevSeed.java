@@ -1,6 +1,15 @@
 package com.friendlyeats.config;
 
+import com.friendlyeats.application.media.MediaStorage;
+import com.friendlyeats.application.post.PostRules;
+import com.friendlyeats.domain.model.AgeRating;
 import com.friendlyeats.domain.model.CategoryVerification;
+import com.friendlyeats.domain.model.MediaType;
+import com.friendlyeats.domain.model.Post;
+import com.friendlyeats.domain.model.PostComment;
+import com.friendlyeats.domain.model.PostKind;
+import com.friendlyeats.domain.model.ReactionKind;
+import com.friendlyeats.domain.model.UuidV7;
 import com.friendlyeats.domain.model.Establishment;
 import com.friendlyeats.domain.model.Review;
 import com.friendlyeats.domain.model.UserAccount;
@@ -15,6 +24,8 @@ import com.friendlyeats.domain.taxonomy.GeoPrecision;
 import com.friendlyeats.domain.taxonomy.ReviewDimension;
 import com.friendlyeats.domain.taxonomy.VisitMode;
 import com.friendlyeats.infrastructure.persistence.postgres.EstablishmentRepository;
+import com.friendlyeats.infrastructure.persistence.postgres.PostCommentRepository;
+import com.friendlyeats.infrastructure.persistence.postgres.PostRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.ReviewRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserAccountRepository;
 import org.slf4j.Logger;
@@ -26,16 +37,25 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.imageio.ImageIO;
+import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Dados de exemplo só no perfil {@code dev} (nunca em produção): contas, lugares em São Paulo, Belo Horizonte e
- * Recife e avaliações, para o app web ter o que mostrar sem a moderação (RF13) — os selos já nascem conferidos.
+ * Recife, avaliações e um post de cada tipo com curtidas e comentários (RF9, RF12), para o app web ter o que mostrar
+ * sem a moderação (RF13) — os selos já nascem conferidos.
  * Roda só com o banco vazio. As senhas são públicas de propósito: valem apenas na sua máquina.
  */
 @Component
@@ -51,13 +71,20 @@ public class DevSeed implements ApplicationRunner {
     private final EstablishmentRepository establishments;
     private final ReviewRepository reviews;
     private final PasswordEncoder passwords;
+    private final PostRepository posts;
+    private final PostCommentRepository comments;
+    private final MediaStorage storage;
 
     public DevSeed(UserAccountRepository users, EstablishmentRepository establishments, ReviewRepository reviews,
-                   PasswordEncoder passwords) {
+                   PasswordEncoder passwords, PostRepository posts, PostCommentRepository comments,
+                   MediaStorage storage) {
         this.users = users;
         this.establishments = establishments;
         this.reviews = reviews;
         this.passwords = passwords;
+        this.posts = posts;
+        this.comments = comments;
+        this.storage = storage;
     }
 
     private record Place(String name, EstablishmentType type, Cuisine cuisine, FoodFormat format,
@@ -126,8 +153,10 @@ public class DevSeed implements ApplicationRunner {
 
         Instant now = Instant.now();
         int author = 0;
+        Map<String, Establishment> byName = new java.util.HashMap<>();
         for (Place p : places) {
             Establishment e = place(owner.getId(), p, AddressVisibility.ADDR_PUBLIC_FULL);
+            byName.put(p.name(), e);
             for (int i = 0; i < p.ratings().length; i++) {
                 UserAccount who = people.get(author++ % people.size());
                 Review r = new Review(e.getId(), who.getId());
@@ -140,8 +169,141 @@ public class DevSeed implements ApplicationRunner {
         place(lu.getId(), new Place("Marmitas da Lu", EstablishmentType.MARMITARIA, null, FoodFormat.PRATO_FEITO,
                 Map.of(), 2000, 3000, "PE", "2611606", "Recife", "Boa Viagem", "Rua da Casa", -8.1220, -34.9050,
                 new int[]{}), AddressVisibility.ADDR_PUBLIC_BAIRRO);
+        UserAccount chef = account("Rita Duarte", "chef.rita", "chef@friendlyeats.dev", UserCategoryEnum.CHEF,
+                CategoryVerification.NOT_REQUIRED, Map.of("role", "CHEF", "city", "Belo Horizonte", "state", "MG"), hash);
+        UserAccount vigilancia = account("Vigilância Sanitária de Exemplo", "vigilancia.exemplo",
+                "alertas@friendlyeats.dev", UserCategoryEnum.OFICIAL, CategoryVerification.VERIFIED,
+                Map.of("agency", "Vigilância sanitária municipal (exemplo)", "city", "São Paulo", "state", "SP"), hash);
+        seedPosts(now, ana, chef, owner, vigilancia, people, byName);
         log.info("Seed de desenvolvimento: {} lugares e {} contas. Entre com ana@friendlyeats.dev, "
-                + "dono@friendlyeats.dev ou lu@friendlyeats.dev (senha em DevSeed.PASSWORD).", places.size() + 1, users.count());
+                + "dono@friendlyeats.dev, lu@friendlyeats.dev, chef@friendlyeats.dev ou alertas@friendlyeats.dev "
+                + "(senha em DevSeed.PASSWORD).", places.size() + 1, users.count());
+    }
+
+    /** Um post de cada tipo (RF9), com curtidas e comentários (RF12). */
+    private void seedPosts(Instant now, UserAccount ana, UserAccount chef, UserAccount owner, UserAccount vigilancia,
+                           List<UserAccount> people, Map<String, Establishment> places) {
+        Post photo = post(ana, PostKind.FOTO_PRATO, "Pão de queijo saindo do forno", now.minus(Duration.ofHours(5)), p -> {
+            p.setBody("Casquinha crocante e miolo puxa-puxa. Peça o da fornada das 16h.");
+            p.setMediaType(MediaType.IMAGE);
+            p.setMediaObjectKey(examplePhoto());
+            p.setAltText("Cesta de palha com seis pães de queijo dourados sobre uma toalha xadrez.");
+            p.setEstablishmentId(places.get("Pão da Esquina").getId());
+            p.setCuisine(Cuisine.MINEIRA.name());
+            p.setFoodFormat(FoodFormat.SALGADOS.name());
+            p.setDietaryStyles(List.of(DietaryStyle.SEM_GLUTEN.name()));
+            p.setAllergens(Map.of("LEITE", "CONTEM", "OVOS", "CONTEM"));
+            p.setFoodWarnings(List.of("LACTOSE"));
+            p.setPriceCents(800);
+        });
+        Post recipe = post(chef, PostKind.RECEITA, "Feijão tropeiro da Rita", now.minus(Duration.ofHours(30)), p -> {
+            p.setBody("O segredo é dourar a farinha na gordura do bacon.");
+            p.setCuisine(Cuisine.MINEIRA.name());
+            p.setFoodFormat(FoodFormat.PRATO_FEITO.name());
+            p.setAllergens(Map.of("OVOS", "CONTEM"));
+            p.setRecipe(new Post.Recipe(List.of("500 g de feijão-carioca cozido", "200 g de bacon em cubos",
+                    "2 xícaras de farinha de mandioca", "3 ovos", "1 maço de couve"),
+                    List.of("Doure o bacon até soltar a gordura.", "Mexa os ovos na mesma panela.",
+                            "Junte o feijão escorrido e a farinha aos poucos.", "Finalize com a couve refogada."),
+                    6, 40));
+        });
+        Post question = post(people.get(1), PostKind.PERGUNTA, "Onde tem acarajé bom em São Paulo?",
+                now.minus(Duration.ofHours(2)), p -> {
+                    p.setBody("De preferência com vatapá caseiro e perto do metrô.");
+                    p.setCuisine(Cuisine.BAIANA.name());
+                    p.setCity("São Paulo");
+                });
+        Post daily = post(owner, PostKind.PRATO_DO_DIA, "Hoje: tutu à mineira com torresmo", now.minus(Duration.ofHours(1)),
+                p -> {
+                    p.setEstablishmentId(places.get("Sabor Mineiro").getId());
+                    p.setCuisine(Cuisine.MINEIRA.name());
+                    p.setFoodFormat(FoodFormat.PRATO_FEITO.name());
+                    p.setPriceCents(3990);
+                    p.setExpiresAt(PostRules.expiresAt(PostKind.PRATO_DO_DIA, now, null));
+                });
+        Post promo = post(owner, PostKind.PROMOCAO, "Segunda da pizza: a grande pelo preço da média",
+                now.minus(Duration.ofHours(8)), p -> {
+                    p.setEstablishmentId(places.get("Cantina Nonna").getId());
+                    p.setFoodFormat(FoodFormat.PIZZA.name());
+                    p.setAllergens(Map.of("TRIGO", "CONTEM", "LEITE", "CONTEM"));
+                    p.setStartsAt(now.minus(Duration.ofHours(8)));
+                    p.setEndsAt(now.plus(Duration.ofDays(7)));
+                    p.setExpiresAt(p.getEndsAt());
+                    p.setPriceFromCents(9000);
+                    p.setPriceToCents(6500);
+                });
+        Post event = post(owner, PostKind.EVENTO, "Roda de samba no boteco", now.minus(Duration.ofHours(12)), p -> {
+            p.setBody("Petiscos da casa e samba ao vivo a partir das 19h.");
+            p.setEstablishmentId(places.get("Boteco da Esquina").getId());
+            p.setFoodFormat(FoodFormat.PETISCOS_BOTECO.name());
+            p.setAgeRating(AgeRating.AGE_18);                // lugar com foco em bebida alcoólica
+            p.setStartsAt(now.plus(Duration.ofDays(3)));
+            p.setEndsAt(now.plus(Duration.ofDays(3)).plus(Duration.ofHours(5)));
+            p.setExpiresAt(p.getEndsAt());
+            p.setFreeEntry(true);
+        });
+        Post alert = post(vigilancia, PostKind.ALERTA_SANITARIO, "Recolhimento de doce de leite (dado de exemplo)",
+                now.minus(Duration.ofHours(3)), p -> {
+                    p.setBody("Não consuma o produto dos lotes abaixo. Dado fictício, só para desenvolvimento.");
+                    p.setAllergens(Map.of("LEITE", "CONTEM"));
+                    p.setFoodAlert(new Post.FoodAlert("Doce de leite pastoso 400 g", "Marca Fictícia",
+                            List.of("L2610A", "L2610B"), "Amido não declarado no rótulo.",
+                            "https://www.gov.br/anvisa/pt-br"));
+                });
+
+        List<Post> all = List.of(photo, recipe, question, daily, promo, event, alert);
+        for (int i = 0; i < all.size(); i++) {
+            Post p = all.get(i);
+            int likes = p.getKind() == PostKind.ALERTA_SANITARIO ? 0 : 3 + i % 4;
+            for (int j = 0; j < likes; j++) {
+                if (posts.insertReaction(p.getId(), people.get(2 + j).getId(), ReactionKind.LIKE.name()) == 1) {
+                    posts.addToLikeCount(p.getId(), 1);
+                }
+            }
+        }
+        comment(photo, people.get(3), "Melhor pão de queijo do bairro!");
+        comment(photo, ana, "Concordo, e o café de lá também é ótimo.");
+        comment(recipe, people.get(4), "Fiz no domingo e ficou perfeito.");
+        comment(question, people.get(5), "Tem uma baiana ótima na saída do metrô Liberdade.");
+        comment(promo, people.get(6), "Vale para entrega também?");
+        if (posts.insertShare(alert.getId(), people.get(7).getId(), "WHATSAPP") == 1) {
+            posts.addToShareCount(alert.getId(), 1);
+        }
+    }
+
+    private Post post(UserAccount author, PostKind kind, String title, Instant at, Consumer<Post> setup) {
+        Post p = new Post(author, kind, title);
+        p.setCreatedAt(at);
+        setup.accept(p);
+        p.publish();
+        return posts.saveAndFlush(p);
+    }
+
+    private void comment(Post post, UserAccount who, String body) {
+        comments.save(new PostComment(post.getId(), who.getId(), body));
+        posts.addToCommentCount(post.getId(), 1);
+    }
+
+    /** Foto de exemplo desenhada aqui e gravada no bucket; com o Garage fora do ar, o post fica sem a imagem. */
+    private String examplePhoto() {
+        String key = "posts/" + UuidV7.next() + ".jpg";
+        BufferedImage img = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = img.createGraphics();
+        g.setPaint(new GradientPaint(0, 0, new Color(0xE8, 0x8F, 0x12), 800, 600, new Color(0x7F, 0x4D, 0x06)));
+        g.fillRect(0, 0, 800, 600);
+        g.setColor(new Color(0xF7, 0xC9, 0x48));
+        for (int i = 0; i < 6; i++) {
+            g.fillOval(170 + (i % 3) * 170, 170 + (i / 3) * 150, 130, 110);
+        }
+        g.dispose();
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ImageIO.write(img, "jpeg", out);
+            storage.write(key, out.toByteArray(), "image/jpeg");
+        } catch (IOException | RuntimeException e) {
+            log.warn("Foto de exemplo não foi gravada no bucket ({}); o post fica sem a imagem.", e.getMessage());
+        }
+        return key;
     }
 
     private UserAccount account(String name, String handle, String email, UserCategoryEnum type,

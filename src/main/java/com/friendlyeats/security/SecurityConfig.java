@@ -30,8 +30,9 @@ import java.util.Map;
  *   <li>Login, 2FA, reativação e logout são endpoints próprios em {@code /api/v1/auth}; não há form login,
  *       HTTP Basic nem "lembrar de mim".</li>
  *   <li>CSRF no padrão SPA: cookie {@code XSRF-TOKEN} + cabeçalho {@code X-XSRF-TOKEN} em toda escrita.</li>
- *   <li>Leitura pública dos documentos legais, da taxonomia e das páginas de estabelecimento com as avaliações;
- *       o resto exige sessão. Regras por estado da conta (ativa, pendente, suspensa) e a de 18+ ficam nos serviços.</li>
+ *   <li>Leitura pública dos documentos legais, da taxonomia, das páginas de estabelecimento com as avaliações, dos
+ *       posts com os comentários, do "em alta", dos perfis públicos e do catálogo de molduras; o resto exige sessão.
+ *       Regras por estado da conta (ativa, pendente, suspensa), de 18+ e de perfil privado ficam nos serviços.</li>
  * </ul>
  */
 @Configuration
@@ -51,6 +52,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/establishments", "/api/v1/establishments/*",
                                 "/api/v1/establishments/*/reviews")
                         .permitAll()
+                        // posts, comentários, "em alta" e perfis públicos (RF14, RF12, RF15); 18+ e perfil privado no serviço
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts", "/api/v1/posts/*", "/api/v1/posts/*/comments",
+                                "/api/v1/posts/trending", "/api/v1/establishments/*/posts", "/api/v1/users",
+                                "/api/v1/users/*/profile", "/api/v1/users/*/posts")
+                        .permitAll()
+                        // catálogo e recomendações de moldura do post (RF16)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/backgrounds/**").permitAll()
                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e

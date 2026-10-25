@@ -4,7 +4,7 @@
 flowchart LR
     APP["App web<br/>estúdio de moldura ⏳ · card do post"] --> SEC["SecurityFilterChain"]
     SEC --> BC["BackgroundController<br/>GET /backgrounds/catalog · /recommendations<br/>público"]
-    SEC --> PC["Controller de posts (RF9)<br/>POST/PATCH com background"]
+    SEC --> PC["PostPublishingController (RF9)<br/>POST/PATCH com background<br/>PostFeedController (RF14)"]
     BC --> BS["BackgroundService"]
     PC --> BV["BackgroundValidator"]
     PC --> BS
