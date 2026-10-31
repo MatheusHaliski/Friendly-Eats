@@ -104,7 +104,7 @@ public class ModerationService {
     @Transactional
     public CaseDetailView decide(long moderatorId, long caseId, DecisionRequest req) {
         roles.requireModerator(moderatorId);
-        CaseRow c = requireCase(caseId);
+        CaseRow c = lockCase(caseId);
         if (c.status() != CaseStatus.OPEN) {
             throw new CommonExceptions.Conflict("Este caso já foi decidido. Recursos são revistos na aba Em recurso.");
         }
@@ -158,7 +158,7 @@ public class ModerationService {
     /** Recurso do autor (contra medida) ou de quem denunciou (contra arquivamento), no prazo, uma vez por decisão. */
     @Transactional
     public AppealView appeal(long viewerId, long caseId, AppealRequest req) {
-        CaseRow c = repo.findCase(caseId).orElseThrow(ModerationService::caseNotFound);
+        CaseRow c = lockCase(caseId);
         Optional<DecisionRow> first = repo.decisionsOf(c.id()).stream().filter(d -> d.stage().equals("FIRST")).findFirst();
         boolean author = Objects.equals(c.targetOwnerId(), viewerId)
                 && first.map(d -> d.action() != ModerationAction.KEEP).orElse(false);
@@ -198,7 +198,7 @@ public class ModerationService {
     @Transactional
     public CaseDetailView decideAppeal(long moderatorId, long caseId, AppealDecisionRequest req) {
         roles.requireModerator(moderatorId);
-        CaseRow c = requireCase(caseId);
+        CaseRow c = lockCase(caseId);
         if (c.status() != CaseStatus.IN_APPEAL) {
             throw new CommonExceptions.Conflict("Este caso não tem recurso aberto.");
         }
@@ -408,6 +408,11 @@ public class ModerationService {
 
     private CaseRow requireCase(long caseId) {
         return repo.findCase(caseId).orElseThrow(ModerationService::caseNotFound);
+    }
+
+    /** Lê o caso já travado ({@code FOR UPDATE}) para quem muda o status: decidir, recorrer e decidir o recurso. */
+    private CaseRow lockCase(long caseId) {
+        return repo.findCaseForUpdate(caseId).orElseThrow(ModerationService::caseNotFound);
     }
 
     private static CommonExceptions.NotFound caseNotFound() {

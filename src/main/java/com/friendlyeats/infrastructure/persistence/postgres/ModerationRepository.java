@@ -114,6 +114,15 @@ public class ModerationRepository {
                 .stream().findFirst();
     }
 
+    /**
+     * {@code SELECT … FOR UPDATE}: trava o caso até o fim da transação, para que duas pessoas moderadoras (ou dois
+     * recursos) não passem juntas pela checagem do status e gravem decisões contraditórias.
+     */
+    public Optional<CaseRow> findCaseForUpdate(long id) {
+        return jdbc.query("SELECT * FROM moderation_case WHERE id = :id FOR UPDATE", Map.of("id", id), this::caseRow)
+                .stream().findFirst();
+    }
+
     public Optional<CaseRow> findOpenCase(TargetType type, String key) {
         return jdbc.query("SELECT * FROM moderation_case WHERE target_type = :type AND target_key = :key AND status = 'OPEN'",
                 Map.of("type", type.name(), "key", key), this::caseRow).stream().findFirst();

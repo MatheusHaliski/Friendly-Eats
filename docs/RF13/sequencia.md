@@ -37,7 +37,10 @@ sequenceDiagram
     MC-->>M1: 200 fila por prioridade e prazo
     M1->>MC: POST /cases/{id}/decision {action: HIDE, policyReason: ASSEDIO, statement}
     MC->>MS: decide
-    alt M1 é o autor ou denunciou
+    MS->>DB: SELECT caso FOR UPDATE (trava até o fim da transação)
+    alt caso já decidido (outra pessoa moderadora chegou antes)
+        MS-->>M1: 409
+    else M1 é o autor ou denunciou
         MS-->>M1: 403
     end
     MS->>TG: apply(POST, id, HIDE) · moderation_state = HIDDEN

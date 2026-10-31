@@ -155,6 +155,44 @@ class ModerationApiIT extends PostItBase {
     }
 
     @Test
+    void twoModeratorsDecidingTheSameCaseAtOnceRecordOneDecision() throws Exception {
+        // as duas sessões abrem antes das threads
+        assertThat(status(get("/api/v1/moderation/cases", mod1))).isEqualTo(200);
+        assertThat(status(get("/api/v1/moderation/cases", mod2))).isEqualTo(200);
+        for (int round = 0; round < 4; round++) {
+            String id = publishId(creator, post("PERGUNTA", "Rodada " + round + " de decisão simultânea"));
+            assertThat(status(send(HttpMethod.POST, "/api/v1/reports", ana,
+                    Map.of("targetType", "POST", "targetId", id, "reason", "SPAM")))).isEqualTo(201);
+            long caseId = jdbc.queryForObject("SELECT id FROM moderation_case WHERE target_key = ?", Long.class, id);
+            // uma pessoa oculta e a outra mantém, ao mesmo tempo: só uma decisão vale, a outra recebe 409
+            java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+            java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(2);
+            List<java.util.concurrent.Future<Integer>> results = List.of(
+                    pool.submit(() -> {
+                        start.await();
+                        return status(send(HttpMethod.POST, "/api/v1/moderation/cases/" + caseId + "/decision", mod1,
+                                Map.of("action", "HIDE", "policyReason", "SPAM",
+                                        "statement", "Divulgação repetida sem relação com a conversa.")));
+                    }),
+                    pool.submit(() -> {
+                        start.await();
+                        return status(send(HttpMethod.POST, "/api/v1/moderation/cases/" + caseId + "/decision", mod2,
+                                Map.of("action", "KEEP", "policyReason", "SPAM",
+                                        "statement", "A pergunta é legítima e não fere a regra de spam.")));
+                    }));
+            start.countDown();
+            List<Integer> statuses = new java.util.ArrayList<>();
+            for (java.util.concurrent.Future<Integer> r : results) {
+                statuses.add(r.get());
+            }
+            pool.shutdown();
+            assertThat(statuses).containsExactlyInAnyOrder(200, 409);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM moderation_decision WHERE case_id = ? AND stage = "
+                    + "'FIRST'", Integer.class, caseId)).isEqualTo(1);
+        }
+    }
+
+    @Test
     void childAtRiskHidesAtOnceGoesFirstAndIsFlaggedForAuthorities() {
         String id = publishId(chef, post("PERGUNTA", "Fermento natural ou biológico?"));
         String box = "/api/v1/posts/" + id + "/comments";
