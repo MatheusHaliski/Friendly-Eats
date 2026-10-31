@@ -2,14 +2,24 @@
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { IconAccount, IconDisplay, IconPrivacy, IconProfileEdit, IconSecurity } from '@/components/icons';
+import {
+  IconAccount,
+  IconAgeVerify,
+  IconDisplay,
+  IconMyReports,
+  IconPrivacy,
+  IconProfileEdit,
+  IconSecurity,
+} from '@/components/icons';
 import { SETTINGS_SECTIONS, type SettingsSectionSlug } from '@/lib/settings-sections';
 
 const ICONS: Record<SettingsSectionSlug, (p: { size?: number; className?: string }) => ReactNode> = {
   perfil: IconProfileEdit,
   exibicao: IconDisplay,
   privacidade: IconPrivacy,
+  idade: IconAgeVerify,
   seguranca: IconSecurity,
+  denuncias: IconMyReports,
   conta: IconAccount,
 };
 
@@ -20,7 +30,7 @@ export function SettingsSideNav({ current }: { current: string }) {
       <ul className="sticky top-24 grid gap-1">
         {SETTINGS_SECTIONS.map((s) => {
           const Icon = ICONS[s.slug];
-          const active = current === s.href;
+          const active = current === s.href || current.startsWith(`${s.href}/`);
           return (
             <li key={s.slug}>
               <Link

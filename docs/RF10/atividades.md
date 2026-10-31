@@ -6,7 +6,7 @@ flowchart TD
     V -- não --> E[422 com todos os erros]
     V -- sim --> X[Culinária: soma as descendentes]
     X --> P[Só páginas públicas:<br/>lugar ACTIVE, dono ACTIVE e VERIFIED]
-    P --> AD{Adulto logado?}
+    P --> AD{Logado, 18+ declarado e<br/>idade verificada? · RF17}
     AD -- não --> NA[Tira os tipos com foco em bebida alcoólica]
     AD -- sim --> F
     NA --> F[Filtros: nome, culinária, formato, tipo,<br/>grupo, estilo e município]

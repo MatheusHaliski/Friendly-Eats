@@ -71,9 +71,34 @@ friendly-eats:
     session-absolute-timeout: 24h
   legal:
     # Termos de Uso do Friendly Eats (docs/legal/TERMOS_DE_USO.md); mudar a versão pede novo aceite
-    terms-version: "2026-10-25.1"
+    terms-version: "2026-10-31.1"
     terms-url: ${TERMS_URL:http://localhost:3000/termos}
     privacy-version: "2026-10-25"
+    # encarregado (DPO, LGPD art. 41): público em GET /api/v1/legal/privacy-contact e na página /privacidade (RF18).
+    # Vazio = "a definir" na página; preencher antes de abrir ao público.
+    controller-name: ${LEGAL_CONTROLLER_NAME:}
+    dpo-name: ${LEGAL_DPO_NAME:}
+    dpo-email: ${LEGAL_DPO_EMAIL:}
+    dpo-substitute-name: ${LEGAL_DPO_SUBSTITUTE_NAME:}
+    privacy-email: ${LEGAL_PRIVACY_EMAIL:}
+  # RF17 · verificação de idade sem autodeclaração (ECA Digital art. 9º; Decreto 12.880 arts. 19 e 24).
+  # Produção exige um fornecedor contratado (adaptador de AgeVerificationProvider); o fake só sobe em dev/it.
+  age-verification:
+    validity: 365d               # depois disso o 18+ pede nova verificação
+    reviewers: ${AGE_REVIEWERS:}  # e-mails de quem decide as contestações (Decreto art. 27), separados por vírgula
+  guardian:
+    invite-ttl: 14d              # convite ao responsável (ECA Digital art. 24)
+    pending-reminder-after: 7d   # aviso ao menor com o vínculo pendente (a conta não é bloqueada)
+    reminder-cron: "0 40 10 * * *"
+  # RF18 · central do titular
+  privacy:
+    export-due: 15d              # LGPD art. 19, II: prazo de atendimento registrado no pedido
+    export-link-ttl: 72h         # validade da URL pré-assinada do ZIP
+    export-poll: 30s             # o job busca pedidos novos neste intervalo
+    access-log-retention: 180d   # Marco Civil art. 15: 6 meses
+    access-log-every: 1h         # um registro ACCESS por usuário e IP a cada intervalo (o LOGIN sempre grava)
+    incident-retention: 1826d    # Resolução CD/ANPD 15/2024: 5 anos
+    compliance-cron: "0 25 4 * * *"
   # escala nacional de preço por pessoa (RF6): limites = referência × multiplicadores, arredondados para R$ 5
   # (R$ 58 → até 40, 40–80, 80–160, acima de 160). Reajuste anual pelo IPCA de alimentação fora do domicílio.
   price:
@@ -96,6 +121,27 @@ friendly-eats:
     deletion-cron: "0 15 3 * * *"
   notifications:
     log-codes: false             # true só no perfil dev
+  # moderação (RF13): limites e prazos são metas da casa, a confirmar com o jurídico
+  moderation:
+    bootstrap-moderators: ${MODERATOR_EMAILS:}   # e-mails separados por vírgula; recebem MODERATOR na subida
+    reports-per-hour: 10         # denúncias por conta
+    reports-per-day: 50
+    public-reports-per-hour: 5   # formulário sem conta, por origem (HMAC do IP)
+    appeal-days: 30              # prazo para recorrer (ECA Digital, art. 30)
+    appeal-response-days: 7      # meta de resposta do recurso
+    owner-contests-per-month: 10 # contestações de avaliação por lugar
+    low-trust:                   # denunciante com muitas improcedentes desce um nível na fila
+      min-dismissed: 3
+      ratio: 0.7
+      window-days: 90
+  # integridade das avaliações (RF13): sinais de fraude e congelamento
+  integrity:
+    new-account-days: 7          # conta "nova"
+    burst-window-hours: 24
+    burst-threshold: 3           # avaliações de contas novas no mesmo lugar na janela: vão para análise
+    freeze-threshold: 5          # a partir daqui, novas avaliações do lugar ficam congeladas
+    freeze-days: 7
+    same-origin-days: 30
   storage:
     # API S3: AWS S3 (sa-east-1) em produção, Garage em desenvolvimento
     endpoint: ${S3_ENDPOINT:http://localhost:3900}
@@ -103,6 +149,8 @@ friendly-eats:
     presign-endpoint: ${S3_PRESIGN_ENDPOINT:${friendly-eats.storage.endpoint}}
     region: ${S3_REGION:sa-east-1}
     bucket: ${S3_BUCKET:friendly-eats-media}
+    # privado: originais enviados pelo app (uploads/, com EXIF/GPS) e exportações do titular (exports/), nunca públicos
+    uploads-bucket: ${S3_UPLOADS_BUCKET:friendly-eats-uploads}
     # vazio = cadeia padrão da AWS (papel da instância, AWS_ACCESS_KEY_ID...); nada de segredo aqui
     access-key: ${S3_ACCESS_KEY:}
     secret-key: ${S3_SECRET_KEY:}

@@ -7,9 +7,12 @@ stateDiagram-v2
     direction LR
     [*] --> Published : PUT /reviews/me (201)
     Published --> Published : PUT de novo (200) · versão anterior em review_revision
-    Published --> UnderReview : denúncia ou anomalia ⏳ RF13
-    UnderReview --> Published : moderação mantém ⏳ RF13
-    UnderReview --> Removed : moderação remove, com motivo e recurso ⏳ RF13
+    Published --> UnderReview : sinal antifraude ou criança em risco (RF13)
+    Published --> Removed : moderação remove, com motivo e recurso (RF13)
+    UnderReview --> Published : moderação mantém (RF13)
+    UnderReview --> UnderReview : PUT do autor (200) · continua em análise
+    UnderReview --> Removed : moderação remove, com motivo e recurso (RF13)
+    Removed --> Published : recurso revertido (RF13)
     Removed --> Removed : PUT do autor (409)
     Removed --> Removed : DELETE do autor (409)
     Published --> [*] : DELETE /reviews/me (204) · eliminação da conta ou do lugar

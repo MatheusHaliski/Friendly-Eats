@@ -64,6 +64,13 @@ paths:
 7. **Alerta sanitário** aceita só compartilhar e salvar: curtir e comentar dão `409`.
 8. Cada interação que entra ou sai soma ou subtrai o seu peso no ranking "em alta" ([RF14](../RF14/README.md)) depois
    do commit.
+9. **Moderação e segurança** ([RF13](../RF13/README.md), [RF19](../RF19/README.md)):
+   - comentário retirado pela moderação (`moderation_state` preenchido) não aparece, não conta e não é apagado pelo
+     autor (`404`); voltar ao ar devolve o contador;
+   - na lista, quem vê não recebe comentários de quem o bloqueou, foi bloqueado ou silenciado por ele;
+   - comentários com palavras filtradas por quem publicou o post (lista dele e, se ligado, o filtro de ofensas) somem
+     para todos, menos para quem escreveu; quem publicou não é filtrado na própria caixa;
+   - o menu "…" de cada comentário dos outros tem "Denunciar".
 
 ## Contrato
 
@@ -93,5 +100,6 @@ paths:
 | API | `PostInteractionController`: `PUT`/`DELETE` like e save, `GET`/`POST` comments, `DELETE` comments/{id}, `POST` shares; `GET` de comentários público no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Links | `PublicLinks.postShareUrl` ([RF2](../RF2/README.md)) | ✅ |
 | Testes | `PostDomainTest.commentIsTrimmedValidatedAndRemovableByWriterOrPostOwner`, `PostDomainTest.alertTakesOnlySharesAndSavesAndExpiryIsByTheDeadline`; `InteractionApiIT.likeAndSaveAreIdempotentCountedOnceAndNeedAnActiveLogin`, `InteractionApiIT.commentsFollowTheAuthorsAudienceAndMinorsAreProtected`, `InteractionApiIT.shareReturnsThePublicLinkAndCountsEachAccountAndChannelOnce`, `InteractionApiIT.foodAlertTakesOnlySharesAndSaves`, `InteractionApiIT.accountEliminationRemovesPostsCommentsLikesAndPhotos` | ✅ |
-| Pendências | seguir perfis (libera `FOLLOWERS`); resposta identificada do estabelecimento (`RULE_OWNER_REPLY`) e "melhor resposta" da pergunta; "Meus salvos"; notificações (Cassandra) e tempo real; denúncia e moderação de comentários (RF13); limite de ritmo por conta | ⏳ |
-| Tela | app web: curtir e salvar com contagem e `aria-live` (`InteractionBar`), comentários paginados por `after` com envio e exclusão do próprio e o aviso quando fechados (`Comments`), compartilhar pelos canais do vocabulário ou copiando o link (`share.ts`); alerta sanitário só salva e compartilha; o link público `/p/[id]` redireciona para o post; e2e `post.spec.ts` com axe | ✅ |
+| Moderação e segurança | `PostComment.moderationState` e `isVisible` (sem medida), `PostCommentRepository.findByPostIdAndStatusAndModerationStateIsNull…` e `discountCommentsOf` sem os moderados ([RF13](../RF13/README.md)); filtro de bloqueio, silêncio e palavras em `listComments` com o `SafetyGuard` ([RF19](../RF19/README.md)); `ModerationApiIT.childAtRiskHidesAtOnceGoesFirstAndIsFlaggedForAuthorities`, `SafetyApiIT.filteredWordsHideCommentsOnMyPostsForEveryoneButTheirAuthor` | ✅ |
+| Pendências | seguir perfis (libera `FOLLOWERS`); resposta identificada do estabelecimento (`RULE_OWNER_REPLY`) e "melhor resposta" da pergunta; "Meus salvos"; notificações (Cassandra) e tempo real, respeitando bloqueio e silêncio (`SafetyGuard.mayReach`); limite de ritmo por conta | ⏳ |
+| Tela | app web: curtir e salvar com contagem e `aria-live` (`InteractionBar`), comentários paginados por `after` com envio e exclusão do próprio e o aviso quando fechados (`Comments`; o novo só entra direto na lista quando a última página carregada é a final, senão chega na sua vez, e a lista é única por id), compartilhar pelos canais do vocabulário ou copiando o link (`share.ts`); alerta sanitário só salva e compartilha; o link público `/p/[id]` redireciona para o post; e2e `post.spec.ts` com axe (inclusive comentar com páginas pendentes sem duplicar) | ✅ |

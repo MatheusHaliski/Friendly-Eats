@@ -15,6 +15,7 @@ import { api } from '@/lib/api';
 import { CROSS_CONTACT_WARNING, dietaryText, needsCrossContactWarning } from '@/lib/dietary';
 import { formatDistance } from '@/lib/format';
 import { placeKey } from '@/lib/queries';
+import { OpenStatusBadge } from '@/components/place/OpenStatusBadge';
 
 /** O que a nota quer dizer, conforme o estado (taxonomia, seção 10.2). */
 export function ratingMeaning(r: RatingView): string {
@@ -106,6 +107,22 @@ export function PlaceDialog({ card, reasons, onClose }: Props) {
             </p>
             <p className="text-sm text-muted">{priceMeaning(card)}</p>
           </Item>
+          <Item term="Funcionamento">
+            <p>
+              <OpenStatusBadge status={place.data?.openStatus ?? card.openStatus} size={16} />
+            </p>
+            <p className="text-sm text-muted">No horário do lugar, informado pelo estabelecimento.</p>
+          </Item>
+          {place.data && place.data.charges.lines.length > 0 && (
+            <Item term="Cobranças declaradas">
+              <ul className="grid gap-0.5" data-testid="cobrancas-resumo">
+                {place.data.charges.lines.map((l) => (
+                  <li key={`${l.code}-${l.text}`}>{l.text}</li>
+                ))}
+              </ul>
+              {place.data.charges.declaredLabel && <p className="text-sm text-muted">{place.data.charges.declaredLabel}.</p>}
+            </Item>
+          )}
           <Item term="Nota">
             <RatingInline rating={card.rating} size={16} />
             <p className="text-sm text-muted">{ratingMeaning(card.rating)}</p>

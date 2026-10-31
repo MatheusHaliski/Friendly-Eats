@@ -47,6 +47,20 @@ public final class CommonExceptions {
         }
     }
 
+    /** 429: limite de ritmo (ex.: denúncias por hora, RF13); {@code retryAfter} vai no cabeçalho Retry-After. */
+    public static class TooManyRequests extends RuntimeException {
+        private final java.time.Duration retryAfter;
+
+        public TooManyRequests(String message, java.time.Duration retryAfter) {
+            super(message);
+            this.retryAfter = retryAfter;
+        }
+
+        public java.time.Duration retryAfter() {
+            return retryAfter;
+        }
+    }
+
     /** 409: transição de estado que o recurso não aceita. */
     public static class Conflict extends RuntimeException {
         public Conflict(String message) {

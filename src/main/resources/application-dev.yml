@@ -18,6 +18,13 @@ server:
 friendly-eats:
   notifications:
     log-codes: true
+  legal:
+    controller-name: Friendly Eats (ambiente de desenvolvimento)
+    dpo-name: Encarregado de Exemplo
+    dpo-email: privacidade@friendlyeats.dev
+    privacy-email: privacidade@friendlyeats.dev
+  age-verification:
+    reviewers: ana@friendlyeats.dev   # só no dev: a Ana revisa as contestações de idade
   storage:
     # chave pública do Garage local (criada por infra/garage/init.sh); só vale na sua máquina
     access-key: ${S3_ACCESS_KEY:GK667269656e646c7965617473}

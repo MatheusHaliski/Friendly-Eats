@@ -1,6 +1,6 @@
 package com.friendlyeats.application.establishment;
 
-import com.friendlyeats.application.account.AgePolicy;
+import com.friendlyeats.application.age.AgeGate;
 import com.friendlyeats.application.common.CommonExceptions;
 import com.friendlyeats.application.establishment.EstablishmentViews.ChipView;
 import com.friendlyeats.application.establishment.EstablishmentViews.Coded;
@@ -64,9 +64,11 @@ public class EstablishmentSearch {
     public record CardLocation(String uf, String city, String neighborhood, boolean approximate) {
     }
 
+    /** {@code openStatus}: o mesmo "aberto agora" da página do lugar (RF11), no fuso do lugar. */
     public record Card(long id, String name, Coded primaryType, Coded group, ChipView chip, Coded primaryCuisine,
                        Coded primaryFormat, PriceView price, RatingView rating, CardLocation location,
-                       Double distanceKm, boolean adultsOnly, Establishment.Status status) {
+                       Double distanceKm, boolean adultsOnly, Establishment.Status status,
+                       EstablishmentViews.OpenStatusView openStatus) {
     }
 
     public record Page(List<Card> items, int page, int size, long total, Double radiusKm) {
@@ -86,7 +88,7 @@ public class EstablishmentSearch {
     private final UserAccountRepository users;
     private final EstablishmentService pages;
     private final PriceScale prices;
-    private final AgePolicy age;
+    private final AgeGate ageGate;
     private final double priorMean;
     private final double priorWeight;
     private final int minDisplay;
@@ -96,7 +98,7 @@ public class EstablishmentSearch {
 
     public EstablishmentSearch(NamedParameterJdbcTemplate jdbc, EstablishmentRepository establishments,
                                ReviewRepository reviews, UserAccountRepository users, EstablishmentService pages,
-                               PriceScale prices, AgePolicy age,
+                               PriceScale prices, AgeGate ageGate,
                                @Value("${friendly-eats.rating.prior-mean:4.2}") double priorMean,
                                @Value("${friendly-eats.rating.prior-weight:10}") double priorWeight,
                                @Value("${friendly-eats.rating.min-display:5}") int minDisplay,
@@ -109,7 +111,7 @@ public class EstablishmentSearch {
         this.users = users;
         this.pages = pages;
         this.prices = prices;
-        this.age = age;
+        this.ageGate = ageGate;
         this.priorMean = priorMean;
         this.priorWeight = priorWeight;
         this.minDisplay = minDisplay;
@@ -164,7 +166,8 @@ public class EstablishmentSearch {
         }
         int size = Math.max(1, Math.min(q.size() == null ? 20 : q.size(), MAX_PAGE_SIZE));
         int page = Math.max(0, q.page() == null ? 0 : q.page());
-        boolean adult = viewerId.flatMap(users::findById).map(u -> age.adult(u.getUserDateOfBirth())).orElse(false);
+        // RF17: lugar com foco em bebida só para maior de 18 com a idade verificada (a data declarada só restringe)
+        boolean adult = ageGate.alcoholAllowed(viewerId.flatMap(users::findById).orElse(null));
 
         MapSqlParameterSource p = new MapSqlParameterSource()
                 .addValue("priorMean", priorMean).addValue("priorWeight", priorWeight)
@@ -421,7 +424,8 @@ public class EstablishmentSearch {
                     ChipView.of(CuisineChip.of(e.getPrimaryCuisine(), e.getPrimaryFormat(), e.getDietaryOffers())),
                     c.primaryCuisine(), c.primaryFormat(), pages.price(e, rs), pages.rating(rs),
                     new CardLocation(l.uf(), l.city(), l.neighborhood(), l.approximate()),
-                    distanceKm((Double) row[1], (Boolean) row[2]), e.isAlcoholFocused(), e.getStatus()));
+                    distanceKm((Double) row[1], (Boolean) row[2]), e.isAlcoholFocused(), e.getStatus(),
+                    pages.openStatus(e)));
         }
         return out;
     }

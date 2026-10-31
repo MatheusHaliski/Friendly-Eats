@@ -3,7 +3,9 @@
 import { isApiError, type PostDetailView } from '@friendly-eats/api';
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { VerifyAgeRequired } from '@/components/age/AlcoholNotice';
 import { Notice } from '@/components/Form';
+import { ContentActions } from '@/components/moderation/ContentActions';
 import { IconLogin } from '@/components/icons';
 import { formatDateTime } from '@/lib/post-format';
 import { useMotionAllowed, usePost } from '@/lib/post-queries';
@@ -25,7 +27,7 @@ import {
 } from './PostBits';
 import { PostFrame } from './PostFrame';
 
-/** Página do post (RF14) com as interações (RF12) e as ações do autor (RF9). */
+/** Página do post (RF14) com as interações (RF12), as ações do autor (RF9) e "Denunciar" no menu "…" (RF13). */
 export function PostPage({ id }: { id: string }) {
   const post = usePost(id);
   const title = post.data?.title;
@@ -52,11 +54,15 @@ export function PostPage({ id }: { id: string }) {
           <p>
             <Link href={loginHref(`/posts/${id}`)} className="fe-btn fe-btn-primary">
               <IconLogin size={18} />
-              Entrar
+              Entrar e verificar a idade
             </Link>
           </p>
         </div>
       );
+    }
+    if (isApiError(e, 403) && e.problem.ageVerificationRequired) {
+      // RF17: adulto sem a idade verificada
+      return <VerifyAgeRequired detail={e.detail} />;
     }
     if (isApiError(e, 404)) {
       return (
@@ -91,11 +97,12 @@ function PostContent({ post }: { post: PostDetailView }) {
   const edited = post.updatedAt && post.updatedAt !== post.publishedAt;
   return (
     <div className="grid max-w-3xl gap-6">
-      <p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <Link href={isAlert ? '/feed?aba=alertas' : '/feed'} className="inline-flex min-h-6 items-center underline">
           Voltar para o feed
         </Link>
-      </p>
+        {!post.viewer.isAuthor && <ContentActions targetType="POST" targetId={post.id} context={`o post “${post.title}”`} />}
+      </div>
       <article aria-labelledby="titulo-post" className="grid gap-4">
         <PostFrame
           as="div"

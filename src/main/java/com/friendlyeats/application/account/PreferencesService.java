@@ -15,11 +15,13 @@ import java.util.Set;
 /**
  * Configurações → Exibição, Privacidade, Conteúdo, Bem-estar e Notificações. Campos {@code null} no PATCH ficam
  * como estão. Para menor de 16 (ECA Digital), afrouxar uma proteção (perfil público, conteúdo sensível) é
- * bloqueado até existir o vínculo com o responsável.
+ * bloqueado: o pedido vai ao responsável vinculado, que aprova ou nega no painel dele (RF17, {@code GuardianService}).
  */
 @Service
 public class PreferencesService {
 
+    static final String LOCKED = "Para menores de 16 anos essa proteção fica ligada; só o responsável pode alterá-la "
+            + "(ECA Digital). Peça em Configurações → Idade e responsável.";
     static final Set<String> LANGUAGES = Set.of("pt-BR", "en", "es");
     static final Set<String> NOTIFICATION_KEYS = Set.of("likes", "comments", "shares", "foodAlerts");
 
@@ -53,11 +55,13 @@ public class PreferencesService {
         UserAccount user = users.findById(userId).orElseThrow();
         boolean minor = age.protectedMinor(user.getUserDateOfBirth());
         UserPreference pref = load(userId, minor);
-        if (minor && (Boolean.FALSE.equals(p.profilePrivate())
-                || p.sensitiveContent() == UserPreference.SensitiveContent.ALLOW
-                || p.whoCanComment() == UserPreference.CommentAudience.EVERYONE)) {
-            throw new AccountExceptions.Forbidden(
-                    "Para menores de 16 anos essa proteção fica ligada; só o responsável pode alterá-la (ECA Digital).");
+        // afrouxar = mudar para o valor menos protetor; repetir o valor que o responsável já liberou (RF17) passa
+        if (minor && ((Boolean.FALSE.equals(p.profilePrivate()) && pref.isProfilePrivate())
+                || (p.sensitiveContent() == UserPreference.SensitiveContent.ALLOW
+                    && pref.getSensitiveContent() != UserPreference.SensitiveContent.ALLOW)
+                || (p.whoCanComment() == UserPreference.CommentAudience.EVERYONE
+                    && pref.getWhoCanComment() != UserPreference.CommentAudience.EVERYONE))) {
+            throw new AccountExceptions.Forbidden(LOCKED);
         }
         if (p.theme() != null) pref.setTheme(p.theme());
         if (p.appBackground() != null) pref.setAppBackground(p.appBackground());
@@ -80,7 +84,7 @@ public class PreferencesService {
         if (p.homeTab() != null) pref.setHomeTab(p.homeTab());
         if (p.sensitiveContent() != null) pref.setSensitiveContent(p.sensitiveContent());
         if (Boolean.TRUE.equals(p.clearUsageReminder())) {
-            if (minor) {
+            if (minor && pref.getUsageReminderMinutes() != null) {
                 throw new AccountExceptions.Forbidden("Para menores de 16 anos o lembrete de tempo de uso fica ligado.");
             }
             pref.setUsageReminderMinutes(null);

@@ -18,7 +18,9 @@ flowchart TD
     VI -- "FULL sem rua ou<br/>FULL na cozinha caseira" --> ERR
     VI -- ok --> PR{Preço: mínimo, máximo até R$ 5.000,<br/>não se aplica só em VAREJO e POLO?}
     PR --> CL{Classificação válida · RF7}
-    CL --> ERR{Algum erro?}
+    CL --> RF11{Blocos do RF11 válidos?<br/>horários · cobranças · facetas · botões}
+    RF11 -. erros .-> ERR
+    RF11 --> ERR{Algum erro?}
     TP -. erros .-> ERR
     LO -. erros .-> ERR
     PR -. erros .-> ERR
@@ -43,9 +45,10 @@ flowchart TD
     AL -- não --> V
     AL -- sim --> LG{Tem sessão?}
     LG -- não --> N401[401 · entre na sua conta, 18+]
-    LG -- sim --> AD{18 anos ou mais?}
-    AD -- não --> N404
-    AD -- sim --> CC{ADDR_PUBLIC_FULL e a conta dona<br/>hoje é cozinha caseira?}
+    LG -- sim --> AD{18 anos ou mais pela data declarada<br/>e idade verificada? · RF17}
+    AD -- "menor ou VERIFIED_MINOR" --> N404
+    AD -- "adulto sem verificação" --> N403[403 · ageVerificationRequired]
+    AD -- "sim" --> CC{ADDR_PUBLIC_FULL e a conta dona<br/>hoje é cozinha caseira?}
     CC -- sim --> P2
     CC -- não --> V{Visibilidade do endereço}
     V -- ADDR_PUBLIC_FULL --> P1[Endereço completo e pino]

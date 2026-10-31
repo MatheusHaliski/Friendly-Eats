@@ -27,7 +27,8 @@ que exige revisão humana na importação.
 12. [Chip de culinária](#12-chip-de-culinária)
 13. [Mapa para os RFs](#13-mapa-para-os-rfs)
 14. [Conteúdo: posts, feeds e interações](#14-conteúdo-posts-feeds-e-interações)
-15. [Fontes](#15-fontes)
+15. [Moderação e segurança entre usuários](#15-moderação-e-segurança-entre-usuários)
+16. [Fontes](#16-fontes)
 
 ---
 
@@ -141,9 +142,16 @@ A conta `ESTABELECIMENTO` pode se cadastrar sem CNPJ com `type_details.informalF
 
 | Ator | Código | O que faz | Situação |
 |---|---|---|---|
-| Visitante | — (sem conta) | lê o conteúdo público, exceto as páginas 18+ (precisa entrar); precisa de conta para avaliar, publicar ou interagir | ✅ |
+| Visitante | — (sem conta) | lê o conteúdo público na versão sem bebida alcoólica (páginas 18+ pedem conta e idade verificada, [RF17](RF17/README.md)); precisa de conta para avaliar, publicar ou interagir; vê a página `/privacidade` e escreve ao encarregado ([RF18](RF18/README.md)) | ✅ |
+| Adulto com idade verificada | `VERIFIED_ADULT` (atributo `age_verification.status`) | único que vê posts `AGE_18` e lugares com foco em bebida; vale 365 dias e a data declarada só restringe ([RF17](RF17/README.md)) | ✅ |
+| Menor de 16 | atributo derivado da data declarada (`AgePolicy.protectedMinor`) | conta com as proteções máximas, vinculada a um responsável; pede ao responsável para afrouxar ([RF17](RF17/README.md)) | ✅ |
+| Responsável | `guardian_link.guardian_id` (vínculo `ACTIVE`, não é tipo de conta) | adulto com idade verificada que aceitou o convite; painel de supervisão: aprova ou nega pedidos, afrouxa ou religa proteções, consente o dado sensível do perfil (LGPD, art. 14) e desvincula ([RF17](RF17/README.md)) | ✅ |
+| Revisor de idade | e-mail em `friendly-eats.age-verification.reviewers` (papel interno) | decide as contestações da idade aferida (Decreto 12.880, art. 27) | ✅ lista em configuração; ⏳ papel no código |
+| Encarregado (DPO) | `friendly-eats.legal.dpo-*` (configuração, não é conta) | identidade e contato públicos em `/privacidade`; recebe os pedidos do titular, com ou sem conta ([RF18](RF18/README.md)) | ✅ |
 | Conta com e-mail não confirmado | `PENDING_VERIFICATION` (estado da conta) | lê, mas não interage, não avalia e não cadastra lugar (`403`) | ✅ |
-| Moderador | `MODERADOR` (papel interno, sem perfil público) | confere selos, trata denúncias e revisões de avaliação | ⏳ papel no código; hoje toda sessão é `ROLE_USER` |
+| Moderador | `MODERADOR` (papel interno `user_role.role = 'MODERATOR'`, sessão com `ROLE_MODERATOR`; a conta continua com o seu tipo) | trata a fila de denúncias, decide com motivo, revê recursos de outra pessoa, registra a comunicação às autoridades e publica alertas ao consumidor ([RF13](RF13/README.md)); ⏳ conferir selos | ✅ RF13: concedido por configuração (`bootstrap-moderators`) ou pelo DevSeed |
+| Pessoa sem conta que denuncia | — (formulário público, nome e e-mail obrigatórios) | denuncia post, perfil ou página de lugar pelo canal de não usuários (STF, Temas 987 e 533, item 9) e recebe protocolo | ✅ RF13 |
+| Filtro antifraude | — (sistema) | põe avaliação suspeita em análise e congela novas avaliações num pico; a decisão final é humana | ✅ RF13 |
 
 ### 2.4 Regras de quem é dono e de quem avalia
 
@@ -607,11 +615,18 @@ LGPD: guardar só o necessário (CNPJ, resultado e data de cada etapa, hash do d
 
 ## 8. Facetas operacionais
 
-⏳ **Planejado.** Nenhuma faceta tem código ainda. Valor tri-estado (`SIM` / `NAO` / `DESCONHECIDO`) e origem
-(`DECLARADO_DONO`, `COMUNIDADE` com nº de confirmações, `IMPORTADO` com fonte), separando o dado do dono do dado da
-comunidade, como o Google.
+✅ **No código desde o [RF11](RF11/README.md)** (`domain/taxonomy/Facet.java`, 39 facetas; vocabulário em
+`GET /api/v1/taxonomy`, campo `facets`). Valor tri-estado: o dono declara `SIM` / `NAO` (ou os valores próprios da
+faceta, abaixo); ausente = `DESCONHECIDO` ("Sem informação"). Origem mostrada em cada item: `DECLARADO_DONO`,
+`LEI` (fixas), `HORARIO` (refeições derivadas) e `LINKS` (delivery por aplicativo). ⏳ `COMUNIDADE` com nº de
+confirmações e `IMPORTADO` com fonte, separando o dado do dono do da comunidade, como o Google.
 
-### 8.1 Atendimento ⏳
+Cada faceta tem um ícone Lucide próprio, sem repetir os reservados do [Design System](DESIGN_SYSTEM.md#1-princípios)
+(`store`, `users`, `coffee`, `sun`, `moon`, `clock`, `smartphone`, `book-open` e `message-circle` já têm outro
+sentido): por isso balcão é `concierge-bell`, grupos `users-round`, café da manhã `croissant`, almoço `salad`, jantar
+`sunset`, entrega por app `tablet-smartphone`, braille `book-a` e vale-alimentação `shopping-cart`.
+
+### 8.1 Atendimento ✅ (RF11)
 
 | Código | Rótulo | Google | OSM |
 |---|---|---|---|
@@ -621,15 +636,18 @@ comunidade, como o Google.
 | `RETIRADA_CARRO` | Retirada no carro | `curbsidePickup` | — |
 | `DRIVE_THRU` | Drive-thru | — | `drive_through=yes` |
 | `DELIVERY_PROPRIO` | Entrega própria | `delivery` | `delivery=yes` |
-| `DELIVERY_APP` | Entrega por aplicativo | `delivery` | `delivery=yes` |
+| `DELIVERY_APP` | Entrega por aplicativo · **derivada dos links de delivery** (não se declara) | `delivery` | `delivery=yes` |
 | `RESERVA` | Reservas (`OBRIGATORIA`, `RECOMENDADA`, `ACEITA`, `NAO_ACEITA`) | `reservable` | `reservation=*` |
 | `ENCOMENDA` | Sob encomenda | — | — |
-| `CARDAPIO_ONLINE` | Cardápio publicado | `url_menu` (GBP) | `website:menu` |
+| `CARDAPIO_ONLINE` | Cardápio publicado ⏳ (RF27) | `url_menu` (GBP) | `website:menu` |
 
-`formatos_servico` (multivalorado, com refeição opcional por valor): `A_LA_CARTE`, `QUILO`, `BUFFET_PRECO_FIXO`,
+`RESERVA` usa os valores `OBRIGATORIA`, `RECOMENDADA`, `ACEITA` e `NAO_ACEITA`. ⏳ `formatos_servico` (multivalorado, com refeição opcional por valor): `A_LA_CARTE`, `QUILO`, `BUFFET_PRECO_FIXO`,
 `RODIZIO`, `PF_EXECUTIVO`, `MENU_DEGUSTACAO`, `PEDIDO_BALCAO`, `PETISCOS_PORCOES`.
 
-### 8.2 Refeições ⏳
+### 8.2 Refeições ✅ derivadas do horário (RF11)
+
+`CAFE_MANHA`, `ALMOCO`, `JANTAR` e `MADRUGADA` saem do horário da semana (não se declaram); `BRUNCH`, `CAFE_TARDE` e
+`HAPPY_HOUR` ⏳ (horários adicionais).
 
 | Código | Rótulo | Regra de validação |
 |---|---|---|
@@ -641,24 +659,28 @@ comunidade, como o Google.
 | `JANTAR` | Jantar | aberto depois das 19h |
 | `MADRUGADA` | Madrugada | derivado: fecha depois de 0h |
 
-### 8.3 Ambiente e ocasião ⏳
+### 8.3 Ambiente e ocasião ✅ (RF11, menos `ENCONTRO`)
 
 | Código | Rótulo | Origem preferida |
 |---|---|---|
 | `FAMILIA_CRIANCAS` | Bom para crianças (cardápio infantil, cadeirão, espaço kids, trocador) | dono |
 | `GRUPOS` | Bom para grupos | dono + comunidade |
-| `ENCONTRO` | Encontro / romântico | comunidade (é subjetivo) |
+| `ENCONTRO` | Encontro / romântico ⏳ | comunidade (é subjetivo) |
 | `TRABALHO` | Bom para trabalhar (wi-fi, tomadas, silêncio) | dono + comunidade |
-| `PET_FRIENDLY` | Aceita pets (`DENTRO`, `SO_AREA_EXTERNA`, `NAO`) | dono |
+| `PET_FRIENDLY` | Aceita pets (`DENTRO`, `SO_AREA_EXTERNA`, `NAO`; o `NAO` diz junto "cão de assistência sempre entra") | dono |
 | `AO_AR_LIVRE` | Área ao ar livre | dono |
 | `MUSICA_AO_VIVO` | Música ao vivo (com aviso de couvert) | dono |
 | `ESPORTES_TV` | Transmissão de jogos | dono |
+| `WIFI` | Wi-Fi para clientes (código novo do RF11) | dono |
 | `LGBTQIA_ACOLHEDOR` | Espaço LGBTQIA+ acolhedor | dono, com moderação |
 
 "Não aceita pets" nunca pode parecer "não aceita cão-guia": o cão de assistência é sempre permitido (Lei 11.126/2005,
 confirmada na [pesquisa de requisitos](PESQUISA_REQUISITOS.md)).
 
-### 8.4 Acessibilidade ⏳
+### 8.4 Acessibilidade ✅ (RF11)
+
+Valores `SIM`, `PARCIAL` e `NAO`. As duas fixas aparecem em toda página, com a origem "Garantido por lei", e a API
+recusa quem tenta declará-las.
 
 | Código | Rótulo | Referência |
 |---|---|---|
@@ -676,7 +698,7 @@ confirmada na [pesquisa de requisitos](PESQUISA_REQUISITOS.md)).
 Mostrar "declarado pelo estabelecimento" e "confirmado por N visitantes", nunca "conforme NBR 9050". Estado sempre com
 ícone e texto ("Sim", "Parcial", "Não", "Sem informação").
 
-### 8.5 Pagamento ⏳
+### 8.5 Pagamento ✅ (RF11, menos `BENEFICIO_BANDEIRA`)
 
 | Código | Rótulo | Observação |
 |---|---|---|
@@ -687,9 +709,38 @@ Mostrar "declarado pelo estabelecimento" e "confirmado por N visitantes", nunca 
 | `DINHEIRO` | Dinheiro | flag derivada `SOMENTE_DINHEIRO` |
 | `VALE_REFEICAO` | Vale-refeição | refeição pronta: grupos `RESTAURANTE`, `RAPIDO`, `BAR`, `CAFE_DOCE`, `PRODUCAO` |
 | `VALE_ALIMENTACAO` | Vale-alimentação | gêneros alimentícios: grupos `VAREJO` e `POLO` |
-| `BENEFICIO_BANDEIRA` | Bandeiras aceitas | Alelo, Pluxee, Ticket, VR, Ben, Flash, Swile, Caju etc. (Decreto 12.712/2025) |
+| `BENEFICIO_BANDEIRA` | Bandeiras aceitas ⏳ | Alelo, Pluxee, Ticket, VR, Ben, Flash, Swile, Caju etc. (Decreto 12.712/2025) |
 
-Cobranças relacionadas, também ⏳: `TAXA_SERVICO`, `COUVERT` e `SINAL_RESERVA`.
+`VALE_REFEICAO` e `VALE_ALIMENTACAO` são recusados fora dos grupos da tabela (`422`).
+
+### 8.6 Cobranças declaradas ✅ (RF11)
+
+| Código | Regra | Texto público fixo |
+|---|---|---|
+| `TAXA_SERVICO` | 1% a 20% (0 = sem taxa); nunca obrigatória (Lei 13.419/2017) | "Taxa de serviço de 10% (opcional)" |
+| `COUVERT` · `ARTISTICO` | valor por pessoa e os dias com apresentação ao vivo; recusado com `MUSICA_AO_VIVO` = `NAO` | "Couvert artístico de R$ 15 por pessoa, só nos dias com apresentação ao vivo (sexta, sábado)" |
+| `COUVERT` · `ENTRADA_MESA` | valor por pessoa (pão, petiscos) | "… cobrado só se você aceitar" |
+| `FORMA_PAGAMENTO` | `DESCONTO` ou `ACRESCIMO` de 1% a 20%, uma por forma de pagamento da 8.5, recusada se a forma está como `NAO` (Lei 10.962/2004, art. 5º-A) | "5% de desconto no Pix" |
+| `CONSUMACAO_MINIMA` | **sempre recusada** (`422`; orientação dos Procons, CDC art. 39) | — |
+| `SINAL_RESERVA` | ⏳ | — |
+
+Toda cobrança mostra "Declarado pelo estabelecimento em dd/mm/aaaa" e o aviso de que a página não substitui a lista
+de preços afixada na entrada (Decreto 5.903/2006, art. 8º, § 2º).
+
+### 8.7 Botões de ação ✅ (RF11)
+
+Só links, um por provedor (`ActionProvider`), HTTPS e no domínio do provedor ou num subdomínio: reserva — `THEFORK`,
+`TAGME`, `GET_IN`, `OPENTABLE` (até 2); delivery — `IFOOD`, `RAPPI`, `AIQFOME`, `NOVENTA_E_NOVE_FOOD` (até 5, um
+preferido); `WHATSAPP` pelo número em E.164 (`https://wa.me/55…`). ⚖️ Domínios a conferir com cada provedor.
+
+### 8.8 Horário e fuso ✅ (RF11)
+
+Até 3 faixas por dia; faixa que passa da meia-noite pertence ao dia em que começa; datas especiais substituem a semana;
+fechado temporariamente com data de volta (passada a data, "Pode estar fechado"); "fechou de vez" é o `CLOSED` da 7.5.
+O "aberto agora" usa o fuso do lugar pela UF (`America/Sao_Paulo`, `America/Fortaleza`, `America/Recife`,
+`America/Maceio`, `America/Bahia`, `America/Belem`, `America/Araguaina`, `America/Manaus`, `America/Cuiaba`,
+`America/Campo_Grande`, `America/Porto_Velho`, `America/Boa_Vista`, `America/Rio_Branco`) e `America/Noronha` para
+Fernando de Noronha (IBGE 2605459). ⏳ Oeste do Amazonas em UTC−5.
 
 ---
 
@@ -840,10 +891,12 @@ calculamos as notas" explica pesos e recência.
 | Estado | Significado | Situação |
 |---|---|---|
 | `PUBLISHED` | visível e contada no agregado; a avaliação já nasce publicada, sem censura prévia (Marco Civil art. 19) | ✅ v1 |
-| `UNDER_REVIEW` | denúncia ou anomalia; sai do agregado até a decisão | ⏳ RF13 |
-| `REMOVED` | removida por política publicada, com motivo e direito de recurso; fica fora do agregado | ⏳ RF13 |
+| `UNDER_REVIEW` | sinal automático de fraude (rajada de contas novas, mesma origem) ou retirada preventiva por criança em risco; sai da lista e do agregado até a decisão; o autor vê "Em análise" | ✅ RF13 |
+| `REMOVED` | removida por política publicada, com motivo e direito de recurso; fica fora do agregado; o autor não reescreve nem apaga para recomeçar | ✅ RF13 |
 
-Transições previstas: `PUBLISHED` → `UNDER_REVIEW` → `PUBLISHED` | `REMOVED`. A edição gera uma nova versão e não é
+Transições: `PUBLISHED` → `UNDER_REVIEW` → `PUBLISHED` | `REMOVED`, e `PUBLISHED` → `REMOVED` pela decisão; o
+recurso procedente volta para `PUBLISHED`. A contestação do dono e a denúncia comum **não** tiram a avaliação do ar
+até a decisão. A edição gera uma nova versão e não é
 um estado. A pesquisa 03 também cita `PENDING`, `REJECTED` e `EDITED`, que não foram adotados.
 
 ### 10.6 Exibição
@@ -857,11 +910,11 @@ um estado. A pesquisa 03 também cita `PENDING`, `REJECTED` e `EDITED`, que não
 |---|---|---|
 | `RULE_NO_INSIDER` | o dono não avalia o próprio estabelecimento, e contas `ESTABELECIMENTO`, `VAREJO` e `OFICIAL` não avaliam. ⏳ Sócio, funcionário, parente e concorrente direto viram `REVIEW_CONFLICT` | ✅ dono e tipos de conta; ⏳ o resto |
 | `RULE_NO_SENTIMENT_INCENTIVE` | proibido oferecer benefício **condicionado** a nota positiva ou à remoção de nota negativa | ⏳ |
-| `RULE_INCENTIVE_DISCLOSED` | benefício não condicionado (cupom por qualquer avaliação) exige o selo "Recebeu benefício do estabelecimento" | ⏳ |
-| `RULE_NO_SUPPRESSION` | o estabelecimento não oculta avaliação negativa; remoção só por política publicada, com motivo e recurso | ⏳ |
+| `RULE_INCENTIVE_DISCLOSED` | quem avalia declara o vínculo (`Review.Disclosure`): `COURTESY` e `INVITATION` viram `REVIEW_INCENTIVIZED` (peso 0,6 e selo escrito "Declarou cortesia ou convite"); `RELATIONSHIP` vira `REVIEW_CONFLICT` (fora da nota) | ✅ RF13 (declaração); ⏳ benefício declarado pelo dono |
+| `RULE_NO_SUPPRESSION` | o estabelecimento não oculta avaliação negativa: contesta só pelos motivos da política (`ownerContest`), a avaliação fica no ar até a decisão, o bloqueio não esconde avaliações e a remoção sai com motivo e recurso | ✅ RF13 |
 | `RULE_OWNER_REPLY` | direito de resposta pública do estabelecimento, uma por avaliação | ⏳ |
-| `RULE_NO_AI_FAKE` | proibido texto em nome de pessoa que não existe ou não teve a experiência; detecção por velocidade, rede de contas, similaridade, IP/dispositivo e distância | ⏳ |
-| `RULE_REVIEW_BOMBING` | pico anômalo depois de notícia ou viral: congela o agregado e manda para moderação | ⏳ |
+| `RULE_NO_AI_FAKE` | proibido texto em nome de pessoa que não existe ou não teve a experiência; detecção por velocidade, rede de contas, similaridade, IP/dispositivo e distância | 🟡 RF13: rajada de contas novas (`BURST_NEW_ACCOUNTS`) e mesma origem por HMAC do IP (`SAME_ORIGIN`); ⏳ similaridade de texto, aparelho, distância e IA |
+| `RULE_REVIEW_BOMBING` | pico anômalo depois de notícia ou viral: congela **novas** avaliações e manda para moderação, com alerta ao consumidor e data de fim | ✅ RF13 (automático a partir de `freeze-threshold` e manual pela moderação) |
 | `RULE_INFLUENCER` | avaliação de perfil com relação comercial é publicidade e exige identificação (CONAR) | ⏳ |
 
 Base: CDC (arts. 6º, 36 e 37), Guia de Influenciadores do CONAR (edição 2026), Marco Civil art. 19 e STJ REsp
@@ -985,11 +1038,14 @@ Exemplos: pizzaria com `ITALIANA` principal → `EUROPEIA` (a culinária vem ant
 | RF8 | Avaliar com estrelas | nota, estados, dimensões, `visit_mode`, fórmulas (10), preço pelas avaliações (9.3) | v1 |
 | RF9 | Publicar conteúdo | tipos de post e quem publica (14), alergênicos por post (6.2), 18+ (14.3), alerta sanitário da conta `OFICIAL`; ⏳ cardápio por item | 🟡 parcial |
 | RF10 | Buscar e filtrar | ⏳ raios (11.3), filtros por todos os eixos, ordenação por `WR` | ⏳ planejado |
-| RF11 | Página do estabelecimento | ⏳ facetas (8), histograma, origem do preço | ⏳ planejado |
+| RF11 | Página do estabelecimento | facetas, cobranças, botões e horário (8), histograma (10.6), origem do preço (9.3) | 🟡 parcial |
 | RF12 | Interações | curtir, salvar, comentar e compartilhar (`ReactionKind`, `ShareChannel`, 14.4); ⏳ resposta do dono (`RULE_OWNER_REPLY`), seguir | 🟡 parcial |
 | RF14 | Feed e página do post | `FeedType` (14.2), 18+ (14.3), "em alta" | 🟡 parcial |
 | RF15 | Perfil público e feed de perfis | tipos de conta com cor, glifo e selo (2.1), `FeedType.PROFILE` | 🟡 parcial |
-| RF13 | Moderação e avaliações falsas | ⏳ `MODERADOR`, `UNDER_REVIEW` / `REMOVED`, regras `RULE_*`, R8 e R10 | ⏳ planejado |
+| RF13 | Moderação, denúncia, recurso e integridade das avaliações | `MODERADOR` (2.3), motivos, prioridades, ações e estados do caso (15.1 a 15.4), `UNDER_REVIEW` / `REMOVED` (10.5), regras `RULE_*` (10.7), alertas ao consumidor (15.5); ⏳ R8 e R10 (verificação do lugar) | 🟡 parcial |
+| RF17 | Verificação de idade e conta do responsável | adulto verificado, menor de 16, responsável e revisor de idade (2.3); 18+ (14.3) passa a exigir a verificação | 🟡 parcial |
+| RF18 | Central do titular e conformidade | encarregado (2.3); exportação, registros de acesso e incidentes | 🟡 parcial |
+| RF19 | Segurança entre usuários | bloquear, silenciar e palavras filtradas (15.6) | 🟡 parcial |
 | RF16 | Moldura do post | cartelas da época com a cozinha de cada estação, padrões de mesa, layout Cardápio; tipo de conta (2) na direção recomendada | 🟡 parcial |
 
 Ao criar ou mudar um desses RFs, atualize esta taxonomia no mesmo commit sempre que surgir um ator, atributo, categoria
@@ -1034,7 +1090,7 @@ lista ou guia, o check-in e o vídeo.
 | Código | Chip | Regra |
 |---|---|---|
 | `LIVRE` | Livre | padrão |
-| `AGE_18` | 18+ | automático quando o formato é alcoólico (`CERVEJA`, `VINHO`, `COQUETEIS_DESTILADOS`) ou o lugar tem foco em bebida alcoólica (seção 7.2); não aparece para visitante nem para menor de 18; menor não publica. O alerta sanitário é sempre `LIVRE` |
+| `AGE_18` | 18+ | automático quando o formato é alcoólico (`CERVEJA`, `VINHO`, `COQUETEIS_DESTILADOS`) ou o lugar tem foco em bebida alcoólica (seção 7.2); aparece só para maior de 18 com a idade verificada (`VERIFIED_ADULT`, [RF17](RF17/README.md)), nunca para visitante nem para menor; menor não publica. O alerta sanitário é sempre `LIVRE` |
 
 O chip **Publicidade** (`advertising`) é independente da classificação e pode aparecer com Livre ou 18+.
 ⏳ **Patrocinado** (impulsionado na plataforma).
@@ -1045,7 +1101,7 @@ O chip **Publicidade** (`advertising`) é independente da classificação e pode
 |---|---|---|
 | `ReactionKind` | `LIKE` (público, contado) · `SAVE` (privado, sem contador) | idempotente, uma por conta |
 | `ShareChannel` | `COPY_LINK` · `NATIVE` · `WHATSAPP` · `TELEGRAM` · `X` · `EMAIL` | conta pares (conta, canal) distintos; o link `/p/{id}` não diz quem compartilhou |
-| `CommentStatus` | `VISIBLE` · `REMOVED` | quem comenta segue o `who_can_comment` do autor (`EVERYONE`, `FOLLOWERS`, `NOBODY`) |
+| `CommentStatus` | `VISIBLE` · `REMOVED` | quem comenta segue o `who_can_comment` do autor (`EVERYONE`, `FOLLOWERS`, `NOBODY`); a moderação usa `moderation_state` (15.4), sem apagar o texto |
 
 ### 14.5 Alergênicos no post (`Allergen`)
 
@@ -1053,7 +1109,83 @@ O enum usa exatamente os códigos da seção 6.2: 21 alergênicos `VIGENTE`, 5 `
 post) e as advertências `LACTOSE` e `GLUTEN` (`Kind.ADVERTENCIA`, campo `warnings`). Cada alergênico tem o nível
 `CONTEM` ou `PODE_CONTER`, e a tela mostra sempre o aviso de informação autodeclarada.
 
-## 15. Fontes
+## 15. Moderação e segurança entre usuários
+
+Vocabulários do [RF13](RF13/README.md) e do [RF19](RF19/README.md). Os códigos são estáveis; os rótulos aparecem na
+tela e na decisão enviada ao autor.
+
+### 15.1 Motivos de denúncia (`ReportReason`)
+
+| Código | Rótulo | Prioridade | Vale para | Contestação do dono |
+|---|---|---|---|---|
+| `CRIANCA_EM_RISCO` | Criança ou adolescente em risco | `CRITICA` (retirada preventiva de post, comentário e avaliação) | todos | — |
+| `DESINFORMACAO_SANITARIA` | Desinformação sanitária | `URGENTE` | post, comentário, avaliação | — |
+| `ASSEDIO` | Assédio ou cyberbullying | `ALTA` | todos | — |
+| `ODIO` | Discurso de ódio ou discriminação | `ALTA` | todos | — |
+| `CONTEUDO_SEXUAL` | Nudez ou conteúdo sexual | `ALTA` | todos | — |
+| `DADO_PESSOAL` | Dado pessoal exposto | `ALTA` | todos | ✅ |
+| `GOLPE_FRAUDE` | Golpe ou fraude | `ALTA` | todos | — |
+| `AVALIACAO_FALSA` | Avaliação falsa ou com incentivo | `NORMAL` | avaliação, página de lugar, post | ✅ ("não é experiência própria") |
+| `CONFLITO_INTERESSE` | Conflito de interesse | `NORMAL` | avaliação, post | ✅ |
+| `OFENSA_OU_CRIME` | Ofensa ou acusação de crime | `NORMAL` | avaliação, post, comentário | ✅ |
+| `DIREITO_AUTORAL` | Direito autoral | `NORMAL` | post, perfil, página de lugar | — |
+| `SPAM` | Spam | `BAIXA` | todos | — |
+| `FORA_DO_TEMA` | Fora do tema ou lugar errado | `BAIXA` | avaliação, post, comentário | ✅ |
+| `OUTRO` | Outro motivo (texto obrigatório) | `NORMAL` | todos | — |
+
+"Discordo da nota" não é motivo de contestação (RC-SEG-08). Os mesmos códigos são as **regras da política** citadas
+na decisão.
+
+### 15.2 Prioridade da fila (`ModerationPriority`)
+
+| Código | Rótulo | Prazo de revisão humana ⚖️ |
+|---|---|---|
+| `CRITICA` | Crítica | 24 h (o conteúdo já saiu do ar) |
+| `URGENTE` | Urgente | 24 h |
+| `ALTA` | Alta | 72 h |
+| `NORMAL` | Normal | 7 dias |
+| `BAIXA` | Baixa | 14 dias |
+
+Denunciante com muitas improcedentes (3 ou mais em 90 dias e 70 % ou mais do total) desce um nível, sem sanção; a
+`CRITICA` nunca desce, mas deixa de retirar o conteúdo na hora.
+
+### 15.3 Alvos, origens e ações
+
+| Vocabulário | Códigos |
+|---|---|
+| Alvo (`TargetType`) | `POST` · `COMMENT` · `REVIEW` · `PROFILE` · `ESTABLISHMENT` |
+| Origem (`ReportSource`) | `USER` (com conta) · `PUBLIC_FORM` (sem conta) · `OWNER_CONTEST` (dono contesta avaliação) · `SYSTEM` (sinal antifraude) |
+| Ação (`ModerationAction`) | `KEEP` (manter) · `HIDE` (ocultar; só post e comentário) · `REMOVE` (remover; perfil = conta suspensa, lugar = página fora do ar) · `WARN` (avisar o autor) |
+| Etapa da decisão | `PREVENTIVE` (automática) · `FIRST` (moderação) · `APPEAL` (recurso, por outra pessoa) |
+| Comunicação às autoridades | `NONE` · `PENDING` (indício de abuso sexual infantil) · `SENT` (registrada pela moderação; nada é automático) |
+
+### 15.4 Estados
+
+| Vocabulário | Códigos |
+|---|---|
+| Caso (`CaseStatus`) | `OPEN` (na fila) → `DECIDED` (corre o prazo de recurso) → `IN_APPEAL` → `FINAL` |
+| Denúncia | `OPEN` → `UPHELD` (procedente) ou `DISMISSED` (improcedente) |
+| Recurso | `OPEN` → `MAINTAINED` ou `REVERSED` |
+| Post e comentário (`moderation_state`, `ContentModeration`) | `NULL` (normal) · `PREVENTIVE` · `HIDDEN` · `REMOVED`; o texto fica guardado para o recurso e a preservação |
+
+### 15.5 Integridade das avaliações
+
+| Vocabulário | Códigos |
+|---|---|
+| Sinais (`ReviewSignal`) | `BURST_NEW_ACCOUNTS` · `SAME_ORIGIN` (em análise) · `INCENTIVE_DECLARED` · `CONFLICT_DECLARED` (só registro) |
+| Alerta ao consumidor (`AlertKind`) | `AVALIACAO_PAGA` · `ATIVIDADE_SUSPEITA` · `ATENCAO_PUBLICA`, com ícone `octagon-alert` e título escrito |
+| Vínculo declarado (`Review.Disclosure`) | `NONE` · `COURTESY` · `INVITATION` · `RELATIONSHIP` |
+
+### 15.6 Segurança entre usuários (RF19)
+
+| Ação | Efeito | Quem fica sabendo |
+|---|---|---|
+| Bloquear | nos dois sentidos: perfil, posts, comentários, feed, "em alta" e busca de perfis somem (`404`); não comenta nem interage. **Avaliações continuam públicas** | ninguém |
+| Silenciar | só para quem silenciou: feed e comentários | ninguém |
+| Palavras filtradas | comentários nos posts de quem filtrou somem para todos, menos para quem escreveu; até 100 palavras ou expressões, sem acento, com trocas como `1d10t4` | ninguém |
+| Filtro de ofensas | lista padrão (`WordFilter.DEFAULT_WORDS`) ligada e travada para menor de 16; opcional para os demais | — |
+
+## 16. Fontes
 
 **Plataformas e vocabulários**
 

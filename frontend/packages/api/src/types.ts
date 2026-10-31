@@ -410,6 +410,14 @@ export interface EstablishmentView {
   publishBlockers: string[] | null;
   createdAt: string;
   updatedAt: string;
+  // página do lugar (RF11): tipos na seção própria, mais abaixo
+  openStatus: OpenStatusView;
+  hours: HoursView;
+  charges: ChargesView;
+  facets: FacetSectionView[];
+  actions: ActionView[];
+  /** Quem pede pode editar (hoje só o dono; a equipe do RF20 entra pelo PlaceEditors). */
+  viewerCanEdit: boolean;
 }
 
 export interface ReviewAuthorView {
@@ -435,7 +443,13 @@ export interface ReviewView {
   author: ReviewAuthorView;
   createdAt: string;
   updatedAt: string;
+  /** RF13: PUBLISHED; UNDER_REVIEW e REMOVED só chegam ao autor (GET …/reviews/me). */
+  status?: ReviewStatus;
 }
+
+export type ReviewStatus = 'PUBLISHED' | 'UNDER_REVIEW' | 'REMOVED';
+/** Vínculo declarado com o lugar (RF13): cortesia ou convite pesam menos; relação fica fora da nota. */
+export type ReviewDisclosure = 'NONE' | 'COURTESY' | 'INVITATION' | 'RELATIONSHIP';
 
 /** EstablishmentViews.ReviewPage (GET /api/v1/establishments/{id}/reviews). */
 export interface ReviewPage {
@@ -453,6 +467,8 @@ export interface ReviewDraft {
   dimensions: Partial<Record<ReviewDimensionCode, number>>;
   spentPerPersonCents: number | null;
   body: string | null;
+  /** RF13; ausente mantém o que estava. */
+  disclosure?: ReviewDisclosure;
 }
 
 // ------------------------------------------------------------ busca (RF10, contrato combinado com o backend)
@@ -472,6 +488,8 @@ export interface EstablishmentCard {
   distanceKm: number | null;
   adultsOnly: boolean;
   status: EstablishmentStatus;
+  /** O mesmo "aberto agora" da página (RF11). */
+  openStatus: OpenStatusView;
 }
 
 export interface SearchPage {
@@ -566,6 +584,209 @@ export interface TaxonomyCatalog {
   visitModes: Coded[];
   reviewDimensions: DimensionItem[];
   cuisineChips: ChipView[];
+  /** Facetas da página do lugar (RF11). */
+  facets: FacetItem[];
+  actionProviders: ActionProviderItem[];
+  couvertKinds: Coded[];
+}
+
+// ------------------------------------------------------------ página do lugar (RF11 · application/establishment/EstablishmentViews.java,
+// EstablishmentDrafts.java e TaxonomyCatalog.java). Seção própria: outros RFs acrescentam as suas abaixo.
+
+export type OpenState = 'OPEN' | 'CLOSED' | 'UNKNOWN' | 'TEMPORARILY_CLOSED' | 'MAYBE_CLOSED' | 'PERMANENTLY_CLOSED';
+
+/** EstablishmentViews.OpenStatusView: "aberto agora" no fuso do lugar; horários locais AAAA-MM-DDTHH:MM. */
+export interface OpenStatusView {
+  state: OpenState;
+  open: boolean;
+  label: string;
+  closesAt: string | null;
+  opensAt: string | null;
+  /** Horário especial de hoje. */
+  note: string | null;
+  timeZone: string;
+}
+
+export type WeekDay = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+
+/** "00:00" no fechamento = meia-noite; overnight = passa da meia-noite (pertence ao dia em que começa). */
+export interface RangeView {
+  opens: string;
+  closes: string;
+  overnight: boolean;
+}
+
+export interface DayHoursView {
+  day: WeekDay;
+  label: string;
+  ranges: RangeView[];
+  closed: boolean;
+  today: boolean;
+}
+
+export interface SpecialDayView {
+  /** AAAA-MM-DD. */
+  date: string;
+  label: string;
+  closed: boolean;
+  ranges: RangeView[];
+  note: string | null;
+}
+
+export interface HoursView {
+  timeZone: string;
+  /** Sem horário da semana: a página diz "Horário não informado" (nunca "Fechado"). */
+  informed: boolean;
+  weekly: DayHoursView[];
+  special: SpecialDayView[];
+  temporaryClosure: { closed: boolean; reopensOn: string | null };
+}
+
+export interface ChargeLine {
+  code: 'TAXA_SERVICO' | 'COUVERT' | 'FORMA_PAGAMENTO';
+  label: string;
+  /** Texto fixo exibido ao público. */
+  text: string;
+  detail: string | null;
+}
+
+export type CouvertKind = 'ARTISTICO' | 'ENTRADA_MESA';
+export type AdjustmentKind = 'DESCONTO' | 'ACRESCIMO';
+
+export interface ChargesView {
+  serviceFeePercent: number | null;
+  couvert: { kind: CouvertKind; label: string; cents: number; days: Coded[] } | null;
+  paymentAdjustments: Array<{ method: string; methodLabel: string; kind: AdjustmentKind; percent: number; text: string }>;
+  lines: ChargeLine[];
+  declaredAt: string | null;
+  /** "Declarado pelo estabelecimento em 30/10/2026". */
+  declaredLabel: string | null;
+  /** A página não substitui o aviso afixado na entrada (Decreto 5.903/2006, art. 8º, § 2º). */
+  notice: string;
+}
+
+export type FacetOrigin = 'DECLARADO_DONO' | 'LEI' | 'HORARIO' | 'LINKS';
+
+export interface FacetView {
+  code: string;
+  label: string;
+  value: string;
+  valueLabel: string;
+  lucideIcon: string;
+  origin: FacetOrigin;
+  originLabel: string;
+}
+
+export interface FacetSectionView {
+  code: 'ATENDIMENTO' | 'REFEICOES' | 'AMBIENTE' | 'ACESSIBILIDADE' | 'PAGAMENTO';
+  label: string;
+  items: FacetView[];
+}
+
+export type ActionKind = 'RESERVA' | 'DELIVERY' | 'WHATSAPP';
+
+/** Botão de ação: só link externo (nada de pagamento no app). */
+export interface ActionView {
+  kind: ActionKind;
+  provider: string;
+  providerLabel: string;
+  label: string;
+  url: string;
+  preferred: boolean;
+  /** "Você vai sair do Friendly Eats. Pedido e pagamento são com iFood." */
+  exitNotice: string;
+  /** Só no WhatsApp: +55… */
+  phone: string | null;
+}
+
+/** TaxonomyCatalog.FacetItem. */
+export interface FacetItem {
+  code: string;
+  label: string;
+  section: FacetSectionView['code'];
+  sectionLabel: string;
+  lucideIcon: string;
+  values: Coded[];
+  /** O dono escolhe o valor (não é fixa por lei nem derivada). */
+  declarable: boolean;
+  fixed: boolean;
+  groups: string[];
+}
+
+/** TaxonomyCatalog.ActionProviderItem. */
+export interface ActionProviderItem {
+  code: string;
+  label: string;
+  kind: ActionKind;
+  domains: string[];
+}
+
+/** EstablishmentDrafts.RangeDraft: "HH:MM"; fechar em "00:00" = meia-noite. */
+export interface RangeDraft {
+  opens: string;
+  closes: string;
+}
+
+export interface HoursDraft {
+  /** Dia ausente ou vazio = fechado; null = horário não informado. */
+  weekly: Partial<Record<WeekDay, RangeDraft[]>> | null;
+  special: Array<{ date: string; closed: boolean; ranges: RangeDraft[]; note: string | null }>;
+}
+
+export interface ChargesDraft {
+  serviceFeePercent: number | null;
+  couvert: { kind: CouvertKind; cents: number | null; days: WeekDay[] } | null;
+  paymentAdjustments: Array<{ method: string; kind: AdjustmentKind; percent: number | null }>;
+}
+
+export interface ActionsDraft {
+  links: Array<{ provider: string; url: string; preferred: boolean }>;
+  whatsapp: string | null;
+}
+
+export interface LocationDraft {
+  uf: string;
+  municipalityIbge: string;
+  city: string;
+  neighborhood: string | null;
+  street: string | null;
+  streetNumber: string | null;
+  complement: string | null;
+  cep: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  addressVisibility: 'ADDR_PUBLIC_FULL' | 'ADDR_PUBLIC_BAIRRO' | 'ADDR_HIDDEN' | null;
+}
+
+export interface ClassificationDraft {
+  primaryCuisine: string | null;
+  secondaryCuisines: string[];
+  primaryFormat: string | null;
+  secondaryFormats: string[];
+  approach: string | null;
+  dietaryOffers: Record<string, DietaryLevel>;
+}
+
+/**
+ * EstablishmentDrafts.EstablishmentDraft: POST /api/v1/establishments cria com tudo; no PATCH, chave ausente (ou null)
+ * não mexe, e cada bloco presente troca por inteiro.
+ */
+export interface EstablishmentDraft {
+  name?: string;
+  description?: string | null;
+  primaryType?: string;
+  secondaryTypes?: string[];
+  location?: LocationDraft;
+  price?: { minCents: number | null; maxCents: number | null; notApplicable: boolean };
+  classification?: ClassificationDraft;
+  /** ACTIVE (aberto) ou CLOSED (fechou de vez). */
+  status?: 'ACTIVE' | 'CLOSED';
+  hours?: HoursDraft;
+  temporaryClosure?: { closed: boolean; reopensOn: string | null };
+  charges?: ChargesDraft;
+  /** Código → valor; ausente = sem informação. */
+  facets?: Record<string, string>;
+  actions?: ActionsDraft;
 }
 
 // ------------------------------------------------------------ erros (api/ApiExceptionHandler.java)
@@ -1087,4 +1308,448 @@ export interface FrameRecommendation {
   materialId: string | null;
   seasonId: string | null;
   reason: string;
+}
+
+// ============================================================ moderação (RF13) e segurança entre usuários (RF19)
+// application/moderation/ModerationViews.java e application/safety/SafetyViews.java
+
+export type ReportTargetType = 'POST' | 'COMMENT' | 'REVIEW' | 'PROFILE' | 'ESTABLISHMENT';
+export type ReportReasonCode =
+  | 'CRIANCA_EM_RISCO'
+  | 'DESINFORMACAO_SANITARIA'
+  | 'ASSEDIO'
+  | 'ODIO'
+  | 'CONTEUDO_SEXUAL'
+  | 'DADO_PESSOAL'
+  | 'GOLPE_FRAUDE'
+  | 'AVALIACAO_FALSA'
+  | 'CONFLITO_INTERESSE'
+  | 'OFENSA_OU_CRIME'
+  | 'DIREITO_AUTORAL'
+  | 'SPAM'
+  | 'FORA_DO_TEMA'
+  | 'OUTRO';
+export type ModerationActionCode = 'KEEP' | 'HIDE' | 'REMOVE' | 'WARN';
+export type CaseStatusCode = 'OPEN' | 'DECIDED' | 'IN_APPEAL' | 'FINAL';
+
+/** GET /api/v1/reports/reasons (público). */
+export interface ReasonView {
+  code: ReportReasonCode;
+  label: string;
+  description: string;
+  priority: string;
+  priorityLabel: string;
+  targets: ReportTargetType[];
+  ownerContest: boolean;
+}
+
+export interface ReportRequest {
+  targetType: ReportTargetType;
+  targetId: string;
+  reason: ReportReasonCode;
+  details?: string | null;
+  /** Só com CRIANCA_EM_RISCO: indício de abuso sexual (marca para comunicação às autoridades). */
+  childSexualAbuse?: boolean;
+}
+
+/** Formulário sem conta: nome e e-mail obrigatórios (a denúncia não é anônima). */
+export interface PublicReportRequest extends ReportRequest {
+  name: string;
+  email: string;
+}
+
+export interface ContestRequest {
+  reason: ReportReasonCode;
+  details: string;
+}
+
+/** Recibo: protocolo DEN-aaaa-nnnnnn e o prazo de análise. */
+export interface ReceiptView {
+  protocol: string;
+  status: string;
+  message: string;
+  createdAt: string;
+  reviewBy: string;
+}
+
+export interface TargetView {
+  type: ReportTargetType;
+  typeLabel: string;
+  id: string;
+  /** Caminho no app web; nulo quando não abre mais. */
+  path: string | null;
+  excerpt: string | null;
+}
+
+export interface PriorityView {
+  code: 'CRITICA' | 'URGENTE' | 'ALTA' | 'NORMAL' | 'BAIXA';
+  label: string;
+  level: number;
+}
+
+export interface CaseSummaryView {
+  id: number;
+  protocol: string;
+  target: TargetView;
+  topReason: Coded;
+  priority: PriorityView;
+  status: Coded;
+  reportCount: number;
+  preventive: boolean;
+  authorityReferral: 'NONE' | 'PENDING' | 'SENT';
+  dueAt: string;
+  overdue: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CasePageView {
+  items: CaseSummaryView[];
+  page: number;
+  size: number;
+  total: number;
+}
+
+export interface ModerationReportView {
+  id: number;
+  protocol: string;
+  source: Coded;
+  reason: Coded;
+  details: string | null;
+  reporter: string;
+  lowTrust: boolean;
+  childSexualAbuse: boolean;
+  status: 'OPEN' | 'UPHELD' | 'DISMISSED';
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface DecisionView {
+  id: number;
+  stage: 'PREVENTIVE' | 'FIRST' | 'APPEAL';
+  action: Coded;
+  policy: Coded | null;
+  statement: string;
+  automated: boolean;
+  origin: string;
+  /** Só a moderação vê. */
+  moderatorId: number | null;
+  createdAt: string;
+}
+
+export interface AppealView {
+  id: number;
+  role: 'AUTHOR' | 'REPORTER';
+  reason: string;
+  status: 'OPEN' | 'MAINTAINED' | 'REVERSED';
+  decisionId: number;
+  resultDecisionId: number | null;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface SignalView {
+  code: string;
+  label: string;
+  detail: string | null;
+  createdAt: string;
+}
+
+export interface CaseDetailView {
+  summary: CaseSummaryView;
+  snapshot: Record<string, unknown>;
+  currentState: string;
+  targetOwnerId: number | null;
+  establishmentId: number | null;
+  authorityReference: string | null;
+  authoritySentAt: string | null;
+  reports: ModerationReportView[];
+  signals: SignalView[];
+  decisions: DecisionView[];
+  appeals: AppealView[];
+  allowedActions: Coded[];
+  viewerCanDecide: boolean;
+  viewerBlockedReason: string | null;
+}
+
+export interface DecisionRequest {
+  action: ModerationActionCode;
+  policyReason?: ReportReasonCode | null;
+  statement: string;
+}
+
+export interface AppealDecisionRequest {
+  outcome: 'MAINTAINED' | 'REVERSED';
+  action?: ModerationActionCode | null;
+  policyReason?: ReportReasonCode | null;
+  statement: string;
+}
+
+export interface MyReportView {
+  protocol: string;
+  target: TargetView;
+  reason: Coded;
+  status: 'RECEBIDA' | 'EM_RECURSO' | 'DECIDIDA';
+  statusLabel: string;
+  outcome: 'PROCEDENTE' | 'IMPROCEDENTE' | null;
+  outcomeLabel: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  caseId: number;
+  canAppeal: boolean;
+  appealDeadline: string | null;
+  appealStatus: AppealView['status'] | null;
+}
+
+/** Aviso ao autor (ECA Digital, art. 30): motivo, origem, como recorrer e prazos. */
+export interface MyDecisionView {
+  caseId: number;
+  protocol: string;
+  target: TargetView;
+  decision: DecisionView;
+  canAppeal: boolean;
+  appealDeadline: string | null;
+  appealResponseDays: number;
+  howToAppeal: string;
+  appeal: AppealView | null;
+  appealResult: DecisionView | null;
+}
+
+/** Alerta ao consumidor na página do lugar (o AlertView do post é o alerta sanitário). */
+export interface ConsumerAlertView {
+  id: number;
+  kind: Coded;
+  message: string;
+  freezeReviews: boolean;
+  startsAt: string;
+  endsAt: string | null;
+  liftedAt: string | null;
+  automated: boolean;
+  active: boolean;
+}
+
+/** GET /api/v1/establishments/{id}/integrity (público). */
+export interface IntegrityView {
+  establishmentId: number;
+  frozen: boolean;
+  frozenUntil: string | null;
+  active: ConsumerAlertView[];
+  history: ConsumerAlertView[];
+  howWeVerify: string;
+}
+
+export interface AlertRequest {
+  kind: 'AVALIACAO_PAGA' | 'ATIVIDADE_SUSPEITA' | 'ATENCAO_PUBLICA';
+  message?: string | null;
+  freezeDays?: number | null;
+}
+
+export interface CountView {
+  code: string;
+  label: string;
+  count: number;
+}
+
+export interface ModerationStatsView {
+  from: string;
+  to: string;
+  openCases: number;
+  inAppeal: number;
+  overdue: number;
+  reportsByReason: CountView[];
+  reportsBySource: CountView[];
+  decisionsByAction: CountView[];
+  decisionsByPolicy: CountView[];
+  appeals: CountView[];
+  authorityReferrals: CountView[];
+}
+
+export interface RolesView {
+  moderator: boolean;
+}
+
+// ---- RF19
+
+export interface RelatedUserView {
+  user: AuthorView;
+  since: string;
+}
+
+export interface SafetyView {
+  blocked: RelatedUserView[];
+  muted: RelatedUserView[];
+  words: string[];
+  defaultFilter: { enabled: boolean; locked: boolean; size: number };
+  maxWords: number;
+}
+
+export interface RelationView {
+  userId: number;
+  blocked: boolean;
+  muted: boolean;
+}
+
+// ============================================================ RF17 · idade verificada e conta do responsável
+// (application/age/AgeVerificationService.java · application/guardian/GuardianService.java)
+// Seção própria, para facilitar o merge com outros RFs.
+
+/** 403 de conteúdo de bebida para quem não verificou a idade (ApiExceptionHandler, RF17). */
+export interface Problem {
+  ageVerificationRequired?: boolean;
+}
+
+export type AgeStatus = 'UNVERIFIED' | 'PENDING' | 'VERIFIED_ADULT' | 'VERIFIED_MINOR' | 'FAILED';
+
+export interface AgeHistoryItem {
+  status: AgeStatus;
+  statusLabel: string;
+  method: string | null;
+  note: string | null;
+  occurredAt: string;
+}
+
+export type AgeAppealStatus = 'OPEN' | 'ACCEPTED' | 'REJECTED';
+
+export interface AgeAppealView {
+  id: number;
+  contested: AgeStatus;
+  reason: string;
+  status: AgeAppealStatus;
+  createdAt: string;
+  decidedAt: string | null;
+  decisionNote: string | null;
+}
+
+/** GET /api/v1/me/age-verification. */
+export interface AgeVerificationView {
+  status: AgeStatus;
+  statusLabel: string;
+  method: string | null;
+  verifiedAt: string | null;
+  validUntil: string | null;
+  /** Decide o conteúdo de bebida alcoólica (posts 18+ e lugares com foco em bebida). */
+  alcoholContentVisible: boolean;
+  declaredAdult: boolean;
+  canStart: boolean;
+  canAppeal: boolean;
+  providerAvailable: boolean;
+  /** Fornecedor simulado (dev): a tela mostra os botões de resultado em vez de redirecionar. */
+  simulated: boolean;
+  pending: { reference: string; expiresAt: string } | null;
+  appeal: AgeAppealView | null;
+  history: AgeHistoryItem[];
+}
+
+export interface AgeStartView {
+  reference: string;
+  redirectUrl: string;
+  instructions: string;
+  expiresAt: string;
+  simulated: boolean;
+}
+
+export type GuardianLinkStatus = 'NONE' | 'PENDING' | 'ACTIVE';
+export type ProtectionCode = 'PUBLIC_PROFILE' | 'SENSITIVE_CONTENT' | 'COMMENTS_FROM_EVERYONE' | 'NO_USAGE_REMINDER';
+export type GuardianRequestStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'CANCELLED';
+
+export interface ProtectionView {
+  code: ProtectionCode;
+  label: string;
+  description: string;
+  /** true = a proteção está desligada (liberada pelo responsável). */
+  allowed: boolean;
+}
+
+export interface GuardianRequestView {
+  id: number;
+  protection: ProtectionCode;
+  label: string;
+  status: GuardianRequestStatus;
+  createdAt: string;
+  decidedAt: string | null;
+}
+
+export interface GuardianActionView {
+  actor: 'MINOR' | 'GUARDIAN' | 'SYSTEM';
+  action: string;
+  label: string;
+  detail: string | null;
+  occurredAt: string;
+}
+
+/** GET /api/v1/me/guardian: o vínculo visto pelo menor. */
+export interface MinorLinkView {
+  /** Menor de 16: o vínculo é obrigatório (ECA Digital, art. 24). */
+  required: boolean;
+  /** Menor de 18: pode ter vínculo. */
+  eligible: boolean;
+  status: GuardianLinkStatus;
+  guardianEmail: string | null;
+  guardian: { id: number; name: string; handle: string } | null;
+  invitedAt: string | null;
+  inviteExpiresAt: string | null;
+  pendingDays: number;
+  overdue: boolean;
+  canUnlink: boolean;
+  sensitiveConsent: boolean;
+  protections: ProtectionView[];
+  requests: GuardianRequestView[];
+  history: GuardianActionView[];
+}
+
+export interface SupervisedView {
+  minorId: number;
+  name: string;
+  handle: string;
+  age: number;
+  linkedAt: string;
+  pendingRequests: number;
+}
+
+/** GET /api/v1/guardian/minors/{id}: painel de supervisão (ECA Digital, art. 18). */
+export interface SupervisionView {
+  minor: SupervisedView;
+  protectionsLocked: boolean;
+  protections: ProtectionView[];
+  sensitiveConsent: boolean;
+  sensitiveConsentAvailable: boolean;
+  requests: GuardianRequestView[];
+  history: GuardianActionView[];
+}
+
+// ============================================================ RF18 · central do titular
+// (application/privacy/PrivacyContact.java · DataExportService.java)
+
+export interface PrivacyRight {
+  code: string;
+  label: string;
+  article: string;
+  how: string;
+}
+
+/** GET /api/v1/legal/privacy-contact (público). Campos nulos = ainda a definir. */
+export interface PrivacyContactView {
+  controllerName: string | null;
+  dpoName: string | null;
+  dpoEmail: string | null;
+  dpoSubstituteName: string | null;
+  privacyEmail: string | null;
+  requestDeadlineDays: number;
+  exportLinkHours: number;
+  rights: PrivacyRight[];
+}
+
+export type DataExportStatus = 'REQUESTED' | 'PROCESSING' | 'READY' | 'EXPIRED' | 'FAILED';
+
+export interface DataExportView {
+  id: string;
+  status: DataExportStatus;
+  statusLabel: string;
+  requestedAt: string;
+  dueAt: string;
+  readyAt: string | null;
+  expiresAt: string | null;
+  sizeBytes: number | null;
+  /** URL pré-assinada; só com READY e dentro da validade. */
+  downloadUrl: string | null;
 }

@@ -11,7 +11,7 @@ test.describe('capturas de tela', () => {
   const telas: Array<{ nome: string; path: string; logado?: boolean; pronto: (page: import('@playwright/test').Page) => Promise<void> }> = [
     { nome: 'explorar', path: '/', pronto: (p) => expect(p.getByTestId('lista-lugares')).toBeVisible() },
     { nome: 'lugar-rated', path: '/lugares/1', logado: true, pronto: (p) => expect(p.getByTestId('lista-avaliacoes')).toBeVisible() },
-    { nome: 'cadastro', path: '/cadastro', pronto: (p) => expect(p.getByText('Versão 2026-10-25.1.')).toBeVisible() },
+    { nome: 'cadastro', path: '/cadastro', pronto: (p) => expect(p.getByText('Versão 2026-10-31.1.')).toBeVisible() },
     { nome: 'entrar', path: '/entrar', pronto: (p) => expect(p.getByRole('heading', { name: 'Entrar' })).toBeVisible() },
   ];
 

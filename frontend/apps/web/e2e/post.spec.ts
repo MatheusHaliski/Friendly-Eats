@@ -89,6 +89,36 @@ test.describe('Página do post (RF14) e interações (RF12)', () => {
     await expect(page).toHaveURL(/\/entrar\?voltar=/);
   });
 
+  test('comentar com páginas ainda por carregar não duplica: o novo chega no fim, na sua vez', async ({ page, api }) => {
+    api.login();
+    // a API real devolve os comentários em ordem crescente de id, de 1 em 1 aqui para haver páginas pendentes
+    api.on('GET', /\/posts\/[^/]+\/comments$/, (req) => {
+      const id = [...api.posts.comments.keys()].find((k) => k.endsWith('000000000001'))!;
+      const all = api.posts.comments.get(id) ?? [];
+      const after = Number(req.search.get('after') ?? 0);
+      const items = all.filter((c) => c.id > after).slice(0, 1);
+      const last = items.at(-1);
+      const more = last ? all.some((c) => c.id > last.id) : false;
+      return { status: 200, body: { items, nextAfter: more ? last!.id : null, total: all.length } };
+    });
+    await page.goto(PF);
+    const comentarios = page.getByTestId('comentarios');
+    await expect(comentarios.getByTestId('comentario')).toHaveCount(1);
+    await comentarios.getByLabel('Seu comentário').fill('Chego no fim da fila');
+    await comentarios.getByRole('button', { name: 'Enviar comentário' }).click();
+    await expect(page.getByTestId('status-comentarios')).toHaveText('Comentário publicado. 4 comentários.');
+    // ainda há páginas por carregar: o novo não entra fora de ordem
+    await expect(comentarios.getByTestId('comentario')).toHaveCount(1);
+    const mais = comentarios.getByRole('button', { name: 'Carregar mais comentários' });
+    for (const n of [2, 3, 4]) {
+      await mais.click();
+      await expect(comentarios.getByTestId('comentario')).toHaveCount(n);
+    }
+    await expect(mais).toHaveCount(0);
+    await expect(comentarios.getByTestId('comentario').last()).toContainText('Chego no fim da fila');
+    await expect(comentarios.getByText('Chego no fim da fila')).toHaveCount(1);
+  });
+
   test('alerta sanitário: sem curtir nem comentar, só compartilhar e salvar; sem moldura', async ({ page, api }) => {
     api.login();
     await page.goto(ALERTA);

@@ -52,7 +52,8 @@ pontual, não como o perfil inteiro.
    uma linha nova em `consent_event` (base legal, versão da política, canal e HMAC do IP); repetir o mesmo valor
    não grava nada. Finalidade desconhecida → 404; sem `granted` → 422; sem sessão → 401; escrita sem `X-XSRF-TOKEN` → 403.
 4. Menor de 16 não liga `LOCATION_TRACKING`, `PERSONALIZED_FEED` nem `MARKETING` (403, ECA Digital), e menor de 18
-   não liga `SENSITIVE_PROFILE_DATA` enquanto não houver o consentimento do responsável (403, LGPD Art. 14); desligar
+   não liga `SENSITIVE_PROFILE_DATA` enquanto não houver o consentimento do responsável vinculado (403, LGPD Art. 14,
+   dado pelo painel do [RF17](../RF17/README.md)); desligar
    continua livre. A tela mostra a chave travada pelo campo `lockedForMinor`.
 5. Revogar tem efeito na mesma transação: `SENSITIVE_PROFILE_DATA` apaga `dietary_styles` da conta e
    `LOCATION_TRACKING` apaga `last_saved_location`.
@@ -74,11 +75,13 @@ pontual, não como o perfil inteiro.
 | Preferências de privacidade | perfil privado, quem comenta e ano de nascimento em `user_preference` ([RF2](../RF2/README.md)); travadas para menor de 16 | ✅ |
 | Domínio | `ConsentPurpose`: rótulo, descrição, base legal, `sensitive` e `MinorRule` (16 ou 18 anos) de cada finalidade; o cadastro usa o mesmo enum (`ConsentService.recordDefaults`) | ✅ |
 | API | `GET /api/v1/me/consents` e `PUT /api/v1/me/consents/{purpose}` (`ConsentController` → `ConsentService`); `ConsentApiIT` | ✅ |
+| Segurança entre usuários | Configurações → Privacidade traz "Bloqueados, silenciados e palavras" (`SafetySection`, [RF19](../RF19/README.md)) entre "Quem vê e comenta" e os consentimentos; o filtro de ofensas fica travado ligado para menor de 16, como os outros padrões protetivos | ✅ |
 | Efeitos imediatos | revogar apaga os estilos alimentares e a última localização na mesma transação; `ConsentApiIT` | ✅ |
 | Menores | `LOCATION_TRACKING`, `PERSONALIZED_FEED` e `MARKETING` travados para menor de 16; `SENSITIVE_PROFILE_DATA` para menor de 18 (`AgePolicy`); `ConsentApiIT` | ✅ |
-| Responsável | consentimento do responsável para dado sensível de adolescente (Art. 14) | ⏳ |
+| Responsável | consentimento do responsável vinculado destrava `SENSITIVE_PROFILE_DATA` para o menor de 18 (Art. 14, §1º): `ConsentService.lockedForMinor` consulta `GuardianConsents`; revogar pelo responsável ou desvincular desliga o consentimento e apaga os estilos ([RF17](../RF17/README.md)); `GuardianApiIT` | ✅ |
 | Perfil | estilos alimentares exigem o consentimento sensível; trava `UserAccountRepository.lockById` contra corrida | ✅ |
 | Reconsentimento | nova `privacy-version` pede reconfirmação das finalidades ligadas | ⏳ |
 | Consumidores | feed personalizado e marketing conferem `ConsentService.granted` quando existirem | ⏳ |
 | Telas | app web `/configuracoes/privacidade`: preferências de privacidade e uma chave por finalidade (`ConsentSwitch`, `role=switch`, estado escrito "Ligado/Desligado"), base legal e selo "Dado sensível"; chave travada pelo `lockedForMinor` com "Disponível a partir dos 16/18 anos"; o cartão "Seu gosto" do perfil bloqueia os estilos alimentares sem o consentimento e recarrega o perfil depois de cada mudança; e2e `configuracoes.spec.ts` (ligar o sensível e salvar estilos) | ✅ |
+| Responsável | a chave travada do dado sensível diz "Disponível a partir dos 18 anos, ou antes com o consentimento do responsável vinculado" (`lockedText`); o consentimento é dado no painel do [RF17](../RF17/README.md) | ✅ |
 | Foco no aviso | Privacidade: o aviso de resultado recebe o foco depois de montado (`useDeferredFocus`) | ✅ |

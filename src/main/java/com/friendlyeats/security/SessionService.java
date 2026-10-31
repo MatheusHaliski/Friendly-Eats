@@ -1,9 +1,12 @@
 package com.friendlyeats.security;
 
+import com.friendlyeats.application.privacy.AccessLogService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.friendlyeats.infrastructure.persistence.postgres.UserRoleRepository;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,13 +17,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Sessões opacas no Valkey (Spring Session indexado pelo id do usuário):
- * cria a sessão completa depois do login (id novo — anti-fixação), lista, encerra uma, as outras ou todas.
+ * cria a sessão completa depois do login (id novo — anti-fixação) e grava o registro de acesso do Marco Civil
+ * (RF18), lista, encerra uma, as outras ou todas.
  *
  * <p>O id de sessão é o próprio segredo do cookie, então a API nunca o devolve: a lista usa um identificador
  * derivado (HMAC), que só serve para pedir o encerramento.
@@ -35,29 +40,43 @@ public class SessionService {
     private final FindByIndexNameSessionRepository<? extends Session> sessions;
     private final SecurityContextRepository contextRepository;
     private final AppSecrets secrets;
+    private final UserRoleRepository roles;
     private final Clock clock;
+    private final AccessLogService accessLog;
 
     public SessionService(FindByIndexNameSessionRepository<? extends Session> sessions,
-                          SecurityContextRepository contextRepository, AppSecrets secrets, Clock clock) {
+                          SecurityContextRepository contextRepository, AppSecrets secrets, UserRoleRepository roles,
+                          Clock clock, AccessLogService accessLog) {
         this.sessions = sessions;
         this.contextRepository = contextRepository;
         this.secrets = secrets;
+        this.roles = roles;
         this.clock = clock;
+        this.accessLog = accessLog;
     }
 
-    /** Login concluído (senha e, se houver, 2FA): troca o id da sessão e grava o usuário nela. */
+    /**
+     * Login concluído (senha e, se houver, 2FA): troca o id da sessão e grava o usuário nela, com {@code ROLE_USER} e os
+     * papéis da conta ({@code ROLE_MODERATOR}, RF13). Papel concedido depois vale no próximo login; papel retirado vale
+     * na hora, porque o serviço da moderação confere de novo no banco.
+     */
     public void establish(long userId, ClientInfo client, HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(true);
         request.changeSessionId();
         PendingLogin.clear(session);
         SecurityContext context = SecurityContextHolder.createEmptyContext();
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        roles.rolesOf(userId).forEach(r -> authorities.add(new SimpleGrantedAuthority("ROLE_" + r)));
         context.setAuthentication(UsernamePasswordAuthenticationToken.authenticated(
-                new FriendlyPrincipal(userId), null, List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+                new FriendlyPrincipal(userId), null, authorities));
         SecurityContextHolder.setContext(context);
         contextRepository.saveContext(context, request, response);
         session.setAttribute(AUTH_AT, clock.millis());
         session.setAttribute(DEVICE, client.device());
         session.setAttribute(CHANNEL, client.channel());
+        // Marco Civil, art. 15 (RF18): data, hora, IP e porta do login, cifrados e guardados por 6 meses
+        accessLog.login(userId, request.getRemoteAddr(), request.getRemotePort(), client.channel());
     }
 
     /** Logout desta sessão: invalida no servidor (o cookie velho deixa de valer em qualquer aba). */

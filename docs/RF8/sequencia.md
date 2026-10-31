@@ -9,9 +9,10 @@ sequenceDiagram
     participant API as EstablishmentController
     participant RS as ReviewService
     participant ES as EstablishmentService
+    participant IS as ReviewIntegrityService (RF13)
     participant DB as PostgreSQL
 
-    P->>API: PUT /api/v1/establishments/{id}/reviews/me {rating: 4, visitMode: DINE_IN, dimensions, spentPerPersonCents, body} + X-XSRF-TOKEN
+    P->>API: PUT /api/v1/establishments/{id}/reviews/me {rating: 4, visitMode: DINE_IN, dimensions, spentPerPersonCents, body, disclosure} + X-XSRF-TOKEN
     alt sem sessão
         API-->>P: 401
     end
@@ -26,8 +27,13 @@ sequenceDiagram
     end
     RS->>DB: review do autor neste lugar
     alt primeira avaliação
-        RS->>DB: INSERT review (PUBLISHED, REVIEW_UNVERIFIED)
-        API-->>P: 201 {rating: 4, ratingLabel: Bom, edited: false}
+        RS->>IS: requireNotFrozen(id)
+        alt lugar congelado
+            IS-->>P: 409 "pausadas até …"
+        end
+        RS->>DB: INSERT review (PUBLISHED, trust pelo vínculo, origin_hash = HMAC do IP)
+        RS->>IS: afterNewReview · rajada de contas novas e mesma origem
+        API-->>P: 201 {rating: 4, ratingLabel: Bom, edited: false, status: PUBLISHED ou UNDER_REVIEW}
     else já avaliou e a avaliação foi REMOVED
         RS-->>P: 409
     else já avaliou

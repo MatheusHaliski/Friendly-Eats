@@ -6,7 +6,7 @@
 flowchart TD
     G[GET /users/id/profile ou /users/id/posts] --> T{É o titular?}
     T -- sim --> FULL
-    T -- não --> A{Conta ACTIVE?}
+    T -- não --> A{Conta ACTIVE e sem bloqueio<br/>entre os dois? RF19}
     A -- não --> N404[404]
     A -- sim --> P{Perfil privado?<br/>sem preferências: menor de 16}
     P -- sim, profile --> MIN[200 · nome, @, bolinha, selo<br/>privateProfile true]
@@ -14,7 +14,7 @@ flowchart TD
     P -- não --> FULL[Perfil completo · cidade de atuação<br/>exceto comensal]
     FULL --> PO{Pediu os posts?}
     PO -- não --> OK1[200 · perfil]
-    PO -- sim --> AG{18+ ou o próprio autor?}
+    PO -- sim --> AG{18+ verificado · RF17<br/>ou o próprio autor?}
     AG -- sim --> ALL[PUBLISHED e ARCHIVED · todos]
     AG -- não --> LV[PUBLISHED e ARCHIVED · só LIVRE]
     ALL & LV --> PG[cursor created_at e id · size + 1]
@@ -27,7 +27,7 @@ flowchart TD
 flowchart TD
     F[GET /users?type&city&q&cursor&size] --> V{type, q e cursor válidos?}
     V -- não --> E400[400]
-    V -- sim --> Q[Conta ACTIVE e perfil público]
+    V -- sim --> Q[Conta ACTIVE e perfil público<br/>sem bloqueio com quem busca]
     Q --> O[Organização só com selo VERIFIED]
     O --> TY{type?}
     TY -- sim --> FT[user_type igual]

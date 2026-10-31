@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.net.URI;
@@ -33,6 +34,12 @@ import java.util.Optional;
  * igual no Garage e na AWS. A URL pré-assinada pode usar outro endereço ({@code presign-endpoint}): o app fala
  * com o bucket pela rede interna, e o celular, pelo endereço público.
  *
+ * <p>Dois buckets: os originais enviados pelo app ({@code uploads/…}, com EXIF/GPS e ainda sem dono conferido) e as
+ * cópias de dados do titular ({@code exports/…}, RF18) ficam num bucket <b>privado</b>, lidas só por URL
+ * pré-assinada; o bucket de mídias, servido publicamente pela CDN (ou pela leitura pública do Garage em dev), só
+ * recebe as versões limpas ({@code posts/}, {@code avatars/}, {@code backgrounds/}). Assim nada
+ * em {@code uploads/} é legível sem passar pela conferência de dono e pelo {@code ImageSanitizer}.
+ *
  * <p>Sem chave de acesso configurada, as credenciais vêm da cadeia padrão da AWS (papel da instância, variáveis
  * {@code AWS_*}); nada de segredo no yml.
  */
@@ -40,8 +47,11 @@ import java.util.Optional;
 public class S3MediaStorage implements MediaStorage {
 
     private static final List<String> UNSIGNED_FOR_CLIENT = List.of("host");
+    /** Prefixos que nunca podem ser servidos publicamente: originais enviados e exportações de dados. */
+    static final List<String> PRIVATE_PREFIXES = List.of("uploads/", "exports/");
 
     private final String bucket;
+    private final String uploadsBucket;
     private final S3Client s3;
     private final S3Presigner presigner;
 
@@ -49,9 +59,15 @@ public class S3MediaStorage implements MediaStorage {
                           @Value("${friendly-eats.storage.presign-endpoint:${friendly-eats.storage.endpoint}}") String presignEndpoint,
                           @Value("${friendly-eats.storage.region}") String region,
                           @Value("${friendly-eats.storage.bucket}") String bucket,
+                          @Value("${friendly-eats.storage.uploads-bucket}") String uploadsBucket,
                           @Value("${friendly-eats.storage.access-key:}") String accessKey,
                           @Value("${friendly-eats.storage.secret-key:}") String secretKey) {
+        if (bucket.equals(uploadsBucket)) {
+            throw new IllegalStateException("friendly-eats.storage.uploads-bucket precisa ser diferente do bucket público "
+                    + "de mídias: os originais em uploads/ e as exportações em exports/ não podem ficar legíveis.");
+        }
         this.bucket = bucket;
+        this.uploadsBucket = uploadsBucket;
         AwsCredentialsProvider credentials = accessKey.isBlank()
                 ? DefaultCredentialsProvider.builder().build()
                 : StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
@@ -81,7 +97,7 @@ public class S3MediaStorage implements MediaStorage {
     public PresignedUpload presignPut(String objectKey, String contentType, long sizeBytes, Duration ttl) {
         PresignedPutObjectRequest signed = presigner.presignPutObject(p -> p
                 .signatureDuration(ttl)
-                .putObjectRequest(r -> r.bucket(bucket).key(objectKey)
+                .putObjectRequest(r -> r.bucket(bucketFor(objectKey)).key(objectKey)
                         .contentType(contentType)
                         .contentLength(sizeBytes)));
         Map<String, String> headers = new LinkedHashMap<>();
@@ -97,7 +113,7 @@ public class S3MediaStorage implements MediaStorage {
     @Override
     public Optional<StoredObject> head(String objectKey) {
         try {
-            HeadObjectResponse head = s3.headObject(r -> r.bucket(bucket).key(objectKey));
+            HeadObjectResponse head = s3.headObject(r -> r.bucket(bucketFor(objectKey)).key(objectKey));
             return Optional.of(new StoredObject(head.contentType(), head.contentLength()));
         } catch (NoSuchKeyException e) {
             return Optional.empty();
@@ -111,20 +127,41 @@ public class S3MediaStorage implements MediaStorage {
 
     @Override
     public byte[] read(String objectKey) {
-        return s3.getObjectAsBytes(r -> r.bucket(bucket).key(objectKey)).asByteArray();
+        return s3.getObjectAsBytes(r -> r.bucket(bucketFor(objectKey)).key(objectKey)).asByteArray();
     }
 
     @Override
     public void write(String objectKey, byte[] bytes, String contentType) {
-        s3.putObject(r -> r.bucket(bucket).key(objectKey).contentType(contentType)
+        s3.putObject(r -> r.bucket(bucketFor(objectKey)).key(objectKey).contentType(contentType)
                         // a chave nunca muda: a CDN e o app guardam o arquivo por um ano
                         .cacheControl("public, max-age=31536000, immutable"),
                 RequestBody.fromBytes(bytes));
     }
 
     @Override
+    public void writePrivate(String objectKey, byte[] bytes, String contentType, String downloadName) {
+        s3.putObject(r -> r.bucket(bucketFor(objectKey)).key(objectKey).contentType(contentType)
+                        .cacheControl("private, no-store")
+                        .contentDisposition("attachment; filename=\"" + downloadName + "\""),
+                RequestBody.fromBytes(bytes));
+    }
+
+    @Override
+    public String presignGet(String objectKey, Duration ttl) {
+        PresignedGetObjectRequest signed = presigner.presignGetObject(p -> p
+                .signatureDuration(ttl)
+                .getObjectRequest(r -> r.bucket(bucketFor(objectKey)).key(objectKey)));
+        return signed.url().toString();
+    }
+
+    @Override
     public void delete(String objectKey) {
-        s3.deleteObject(r -> r.bucket(bucket).key(objectKey));
+        s3.deleteObject(r -> r.bucket(bucketFor(objectKey)).key(objectKey));
+    }
+
+    /** Originais e exportações no bucket privado; versões limpas no público. */
+    String bucketFor(String objectKey) {
+        return PRIVATE_PREFIXES.stream().anyMatch(objectKey::startsWith) ? uploadsBucket : bucket;
     }
 
     @PreDestroy

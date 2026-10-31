@@ -14,8 +14,8 @@ sequenceDiagram
     API-->>T: {theme: SYSTEM, appBackground: PLAIN, homeTab: FEED, …, minorProtectionsLocked}
     T->>API: PATCH /api/v1/me/preferences {homeTab: NEARBY, notifications: {foodAlerts: true}} + X-XSRF-TOKEN
     API->>S: update(titular, patch)
-    alt menor de 16 tentando afrouxar proteção
-        S-->>T: 403 "só o responsável pode alterar (ECA Digital)"
+    alt menor de 16 mudando para um valor menos protetor que o atual
+        S-->>T: 403 "só o responsável pode alterar · peça em Idade e responsável" (RF17)
     else valor fora da lista
         S-->>T: 400 / 422
     else ok

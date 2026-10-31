@@ -9,6 +9,7 @@ import { Notice } from '@/components/Form';
 import { IconDelete, IconEdit, IconLogin, IconSuccess } from '@/components/icons';
 import { canReview } from '@/lib/account-types';
 import { api } from '@/lib/api';
+import { formatWhen, useIntegrity } from '@/lib/moderation';
 import { myReviewKey, placeKey, useSession, useTaxonomy } from '@/lib/queries';
 import { DIMENSIONS } from '@/lib/review';
 import { loginHref } from '@/lib/safe-redirect';
@@ -27,6 +28,7 @@ export function MyReviewArea({ place }: { place: EstablishmentView }) {
   const queryClient = useQueryClient();
   const taxonomy = useTaxonomy();
   const dimensions = taxonomy.data?.reviewDimensions ?? [...DIMENSIONS];
+  const integrity = useIntegrity(id);
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -161,6 +163,15 @@ export function MyReviewArea({ place }: { place: EstablishmentView }) {
           </div>
         )}
       </div>
+    );
+  } else if (!mine.data && integrity.data?.frozen) {
+    // pico suspeito (RF13): novas avaliações congeladas; quem já avaliou continua editando
+    body = (
+      <Notice>
+        <p data-testid="avaliar-congelado">
+          Novas avaliações deste lugar estão pausadas até {formatWhen(integrity.data.frozenUntil)}, por atividade fora do padrão.
+        </p>
+      </Notice>
     );
   } else {
     body = (

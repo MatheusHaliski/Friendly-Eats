@@ -16,9 +16,29 @@
 //   bookmark-check (salvar), send (enviar comentário), archive e archive-restore (arquivar e restaurar),
 //   newspaper (Feed), square-plus (Publicar), trending-up (em alta; flame fica reservado), hourglass (encerrado),
 //   calendar-clock (vigência), eye-off (perfil privado), external-link (abre outro site), link (link do perfil).
+// Moderação e segurança (RF13 · RF19): flag (denunciar), ellipsis (mais ações), ban (bloquear), volume-x (silenciar),
+//   gavel (área da moderação), scale (recurso e contestação), octagon-alert (alerta ao consumidor; triangle-alert é do
+//   alerta sanitário), circle-pause (avaliações congeladas), life-buoy (apoio contra intimidação), list-checks
+//   (minhas denúncias).
+// Idade e titular (RF17 · RF18): id-card (verificar a idade), user-check (responsável e supervisão),
+//   file-down (exportar meus dados), book-user (direitos do titular e encarregado; scale é do recurso, RF13).
 import {
   Archive,
+  BookUser,
+  FileDown,
+  IdCard,
+  UserCheck,
   ArchiveRestore,
+  Ban,
+  CirclePause,
+  Ellipsis,
+  Flag,
+  Gavel,
+  LifeBuoy,
+  ListChecks,
+  OctagonAlert,
+  Scale,
+  VolumeX,
   BadgeCheck,
   BadgePercent,
   BookOpen,
@@ -157,6 +177,22 @@ export const IconExternal = decorative(ExternalLink);
 export const IconLink = decorative(LinkIcon);
 export const IconAlert = decorative(TriangleAlert);
 export const IconOfficialSource = decorative(ShieldAlert);
+// moderação e segurança (RF13 · RF19)
+export const IconReport = decorative(Flag);
+export const IconMore = decorative(Ellipsis);
+export const IconBlock = decorative(Ban);
+export const IconMute = decorative(VolumeX);
+export const IconModeration = decorative(Gavel);
+export const IconAppeal = decorative(Scale);
+export const IconConsumerAlert = decorative(OctagonAlert);
+export const IconFrozen = decorative(CirclePause);
+export const IconSupport = decorative(LifeBuoy);
+export const IconMyReports = decorative(ListChecks);
+// RF17 · RF18
+export const IconAgeVerify = decorative(IdCard);
+export const IconGuardian = decorative(UserCheck);
+export const IconExport = decorative(FileDown);
+export const IconRights = decorative(BookUser);
 
 /**
  * Ícone de cada tipo de post, pelo código. A API manda {@code camera} na foto de prato, mas camera é da conta

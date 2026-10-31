@@ -11,6 +11,7 @@ import com.friendlyeats.domain.model.PostKind;
 import com.friendlyeats.domain.model.ReactionKind;
 import com.friendlyeats.domain.model.UuidV7;
 import com.friendlyeats.domain.model.Establishment;
+import com.friendlyeats.domain.model.PlaceDetails;
 import com.friendlyeats.domain.model.Review;
 import com.friendlyeats.domain.model.UserAccount;
 import com.friendlyeats.domain.model.UserCategoryEnum;
@@ -28,6 +29,7 @@ import com.friendlyeats.infrastructure.persistence.postgres.PostCommentRepositor
 import com.friendlyeats.infrastructure.persistence.postgres.PostRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.ReviewRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserAccountRepository;
+import com.friendlyeats.infrastructure.persistence.postgres.UserRoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -55,7 +57,8 @@ import java.util.function.Consumer;
 /**
  * Dados de exemplo só no perfil {@code dev} (nunca em produção): contas, lugares em São Paulo, Belo Horizonte e
  * Recife, avaliações e um post de cada tipo com curtidas e comentários (RF9, RF12), para o app web ter o que mostrar
- * sem a moderação (RF13) — os selos já nascem conferidos.
+ * sem a moderação (RF13) — os selos já nascem conferidos. Duas contas de moderação (RF13) recebem o papel MODERATOR: uma
+ * decide e a outra revê o recurso.
  * Roda só com o banco vazio. As senhas são públicas de propósito: valem apenas na sua máquina.
  */
 @Component
@@ -74,10 +77,12 @@ public class DevSeed implements ApplicationRunner {
     private final PostRepository posts;
     private final PostCommentRepository comments;
     private final MediaStorage storage;
+    private final UserRoleRepository roles;
 
     public DevSeed(UserAccountRepository users, EstablishmentRepository establishments, ReviewRepository reviews,
                    PasswordEncoder passwords, PostRepository posts, PostCommentRepository comments,
-                   MediaStorage storage) {
+                   MediaStorage storage, UserRoleRepository roles) {
+        this.roles = roles;
         this.users = users;
         this.establishments = establishments;
         this.reviews = reviews;
@@ -175,9 +180,16 @@ public class DevSeed implements ApplicationRunner {
                 "alertas@friendlyeats.dev", UserCategoryEnum.OFICIAL, CategoryVerification.VERIFIED,
                 Map.of("agency", "Vigilância sanitária municipal (exemplo)", "city", "São Paulo", "state", "SP"), hash);
         seedPosts(now, ana, chef, owner, vigilancia, people, byName);
+        for (String n : List.of("", "2")) {
+            UserAccount mod = account("Moderação " + (n.isEmpty() ? "1" : n), "moderacao" + n,
+                    "moderacao" + n + "@friendlyeats.dev", UserCategoryEnum.COMENSAL, CategoryVerification.NOT_REQUIRED,
+                    Map.of(), hash);
+            roles.grant(mod.getId(), UserRoleRepository.MODERATOR, "seed");
+        }
         log.info("Seed de desenvolvimento: {} lugares e {} contas. Entre com ana@friendlyeats.dev, "
-                + "dono@friendlyeats.dev, lu@friendlyeats.dev, chef@friendlyeats.dev ou alertas@friendlyeats.dev "
-                + "(senha em DevSeed.PASSWORD).", places.size() + 1, users.count());
+                + "dono@friendlyeats.dev, lu@friendlyeats.dev, chef@friendlyeats.dev, alertas@friendlyeats.dev ou, "
+                + "na moderação, moderacao@friendlyeats.dev e moderacao2@friendlyeats.dev (senha em DevSeed.PASSWORD).",
+                places.size() + 1, users.count());
     }
 
     /** Um post de cada tipo (RF9), com curtidas e comentários (RF12). */
@@ -324,6 +336,20 @@ public class DevSeed implements ApplicationRunner {
         e.setDeclaredPrice(p.minCents(), p.maxCents(), false);
         e.setLocation(p.uf(), p.ibge(), p.city(), p.neighborhood(), p.street(), "100", null, null, p.lat(), p.lng(),
                 GeoPrecision.GEO_PIN_CONFIRMED, visibility);
+        // página do lugar (RF11): almoço e jantar de terça a domingo, Pix e cartão; o primeiro também com
+        // cobranças declaradas e botões de ação
+        java.util.Map<String, List<String>> week = new java.util.LinkedHashMap<>();
+        for (String day : List.of("TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")) {
+            week.put(day, day.equals("SUNDAY") ? List.of("11:30-16:00") : List.of("11:30-15:00", "18:00-23:30"));
+        }
+        e.setOpeningHours(new PlaceDetails.HoursData(week, List.of()));
+        e.setFacets(Map.of("PIX", "SIM", "CARTAO_CREDITO", "SIM", "CARTAO_DEBITO", "SIM", "SALAO", "SIM"));
+        if (p.name().equals("Sabor Mineiro")) {
+            e.declareCharges(new PlaceDetails.ChargesData(10, null,
+                    List.of(new PlaceDetails.PaymentAdjustmentData("PIX", "DESCONTO", 5))), Instant.now());
+            e.setActionLinks(new PlaceDetails.ActionsData(List.of(new PlaceDetails.ActionLinkData("IFOOD",
+                    "https://www.ifood.com.br/delivery/belo-horizonte-mg/sabor-mineiro-exemplo", true)), "5531999998888"));
+        }
         return establishments.save(e);
     }
 }

@@ -1,6 +1,7 @@
 package com.friendlyeats.application.account;
 
 import com.friendlyeats.application.consent.ConsentService;
+import com.friendlyeats.application.guardian.GuardianService;
 import com.friendlyeats.domain.model.TermsAcceptance;
 import com.friendlyeats.domain.model.UserCategoryEnum;
 import com.friendlyeats.domain.model.UserAccount;
@@ -22,7 +23,8 @@ import java.util.regex.Pattern;
 /**
  * Cadastro (RF1): dados mínimos + tipo de usuário escolhido + aceite dos Termos de Uso do Friendly Eats.
  * Na mesma transação: usuário (PENDING_VERIFICATION), aceite dos termos, consentimentos opcionais todos
- * desligados (Privacy by Default, RF3) e preferências padrão (protetivas para menor de 16).
+ * desligados (Privacy by Default, RF3), preferências padrão (protetivas para menor de 16) e, para menor de 16, o
+ * convite ao responsável (RF17).
  */
 @Service
 public class RegistrationService {
@@ -38,10 +40,12 @@ public class RegistrationService {
     private final AgePolicy age;
     private final EmailVerificationService verification;
     private final ConsentService consents;
+    private final GuardianService guardians;
 
     public RegistrationService(UserAccountRepository users, TermsAcceptanceRepository terms,
                                UserPreferenceRepository preferences, PasswordEncoder passwords, LegalDocuments legal,
-                               AgePolicy age, EmailVerificationService verification, ConsentService consents) {
+                               AgePolicy age, EmailVerificationService verification, ConsentService consents,
+                               GuardianService guardians) {
         this.users = users;
         this.terms = terms;
         this.preferences = preferences;
@@ -50,6 +54,7 @@ public class RegistrationService {
         this.age = age;
         this.verification = verification;
         this.consents = consents;
+        this.guardians = guardians;
     }
 
     public record Registration(String name, String handle, String email, String password, UserCategoryEnum userType,
@@ -116,6 +121,10 @@ public class RegistrationService {
                 client.channel(), client.ipHash()));
         consents.recordDefaults(user.getId(), client);
         preferences.save(UserPreference.defaultsFor(user.getId(), minor));
+        if (minor) {
+            // ECA Digital, art. 24: o convite ao responsável sai já no cadastro (RF17)
+            guardians.inviteOnRegistration(user, details.get("guardianEmail").toString());
+        }
         verification.issue(user);
         return user;
     }

@@ -2,6 +2,36 @@
 import { createClient, type ApiClient, type ClientOptions } from './client.ts';
 import type {
   AccountTypeCode,
+  AlertRequest,
+  ConsumerAlertView,
+  AppealDecisionRequest,
+  AppealView,
+  CaseDetailView,
+  CasePageView,
+  CaseStatusCode,
+  ContestRequest,
+  DecisionRequest,
+  IntegrityView,
+  ModerationStatsView,
+  MyDecisionView,
+  MyReportView,
+  PublicReportRequest,
+  ReasonView,
+  ReceiptView,
+  RelationView,
+  ReportRequest,
+  RolesView,
+  SafetyView,
+  AgeAppealView,
+  AgeStartView,
+  AgeVerificationView,
+  DataExportView,
+  GuardianRequestView,
+  MinorLinkView,
+  PrivacyContactView,
+  ProtectionCode,
+  SupervisedView,
+  SupervisionView,
   CommentCreatedView,
   CommentPageView,
   ConsentList,
@@ -9,6 +39,7 @@ import type {
   ConsentView,
   DeletionRequest,
   DeletionView,
+  EstablishmentDraft,
   EstablishmentView,
   FeedPageView,
   FeedParams,
@@ -125,6 +156,11 @@ export function createApi(client: ApiClient = createClient()) {
       search: (params: SearchParams, signal?: AbortSignal) =>
         client.get<SearchPage>('/api/v1/establishments', { query: { ...params }, signal }),
       get: (id: number | string) => client.get<EstablishmentView>(`/api/v1/establishments/${encodeURIComponent(String(id))}`),
+      /** Cadastro (RF6, RF11): 201 com a página do dono (published e publishBlockers). */
+      create: (draft: EstablishmentDraft) => client.post<EstablishmentView>('/api/v1/establishments', draft),
+      /** Edição pelo dono (RF6, RF11): bloco ausente não muda; 404 para quem não edita. */
+      update: (id: number | string, draft: EstablishmentDraft) =>
+        client.patch<EstablishmentView>(`/api/v1/establishments/${seg(id)}`, draft),
       reviews: (id: number | string, page = 0, size = 10) =>
         client.get<ReviewPage>(`/api/v1/establishments/${encodeURIComponent(String(id))}/reviews`, {
           query: { page, size },
@@ -182,11 +218,98 @@ export function createApi(client: ApiClient = createClient()) {
         client.get<FeedPageView>(`/api/v1/users/${seg(id)}/posts`, { query: { ...params } }),
     },
 
+    // ---- moderação (RF13): denúncia, recurso e integridade do lugar (ReportController) e a área da moderação
+    // (ModerationController, só com ROLE_MODERATOR)
+    reports: {
+      /** Motivos fechados (público). */
+      reasons: () => client.get<ReasonView[]>('/api/v1/reports/reasons'),
+      /** 201 com o protocolo; 409 já denunciado; 429 limite de ritmo. */
+      create: (body: ReportRequest) => client.post<ReceiptView>('/api/v1/reports', body),
+      /** Sem conta (STF: canal para não usuários). */
+      createPublic: (body: PublicReportRequest) => client.post<ReceiptView>('/api/v1/reports/public', body),
+      /** Contestação do dono (RC-SEG-08): a avaliação fica no ar até a decisão. */
+      contestReview: (placeId: number | string, reviewId: number, body: ContestRequest) =>
+        client.post<ReceiptView>(`/api/v1/establishments/${seg(placeId)}/reviews/${seg(reviewId)}/contest`, body),
+      integrity: (placeId: number | string) => client.get<IntegrityView>(`/api/v1/establishments/${seg(placeId)}/integrity`),
+      mine: () => client.get<MyReportView[]>('/api/v1/me/reports'),
+      myDecisions: () => client.get<MyDecisionView[]>('/api/v1/me/moderation/decisions'),
+      appeal: (caseId: number, reason: string) => client.post<AppealView>(`/api/v1/me/moderation/cases/${seg(caseId)}/appeal`, { reason }),
+      roles: () => client.get<RolesView>('/api/v1/me/roles'),
+    },
+
+    moderation: {
+      queue: (status: CaseStatusCode = 'OPEN', page = 0, size = 20) =>
+        client.get<CasePageView>('/api/v1/moderation/cases', { query: { status, page, size } }),
+      get: (id: number) => client.get<CaseDetailView>(`/api/v1/moderation/cases/${seg(id)}`),
+      decide: (id: number, body: DecisionRequest) => client.post<CaseDetailView>(`/api/v1/moderation/cases/${seg(id)}/decision`, body),
+      decideAppeal: (id: number, body: AppealDecisionRequest) =>
+        client.post<CaseDetailView>(`/api/v1/moderation/cases/${seg(id)}/appeal-decision`, body),
+      authorityReferral: (id: number, reference: string) =>
+        client.post<CaseDetailView>(`/api/v1/moderation/cases/${seg(id)}/authority-referral`, { reference }),
+      createAlert: (placeId: number, body: AlertRequest) => client.post<ConsumerAlertView>(`/api/v1/moderation/establishments/${seg(placeId)}/alerts`, body),
+      liftAlert: (placeId: number, alertId: number) =>
+        client.post<ConsumerAlertView>(`/api/v1/moderation/establishments/${seg(placeId)}/alerts/${seg(alertId)}/lift`),
+      stats: (days = 30) => client.get<ModerationStatsView>('/api/v1/moderation/stats', { query: { days } }),
+    },
+
+    // ---- segurança entre usuários (RF19, SafetyController): PUT/DELETE idempotentes
+    safety: {
+      mine: () => client.get<SafetyView>('/api/v1/me/safety'),
+      setDefaultFilter: (defaultFilter: boolean) => client.patch<SafetyView>('/api/v1/me/safety', { defaultFilter }),
+      setWords: (words: string[]) => client.put<SafetyView>('/api/v1/me/filtered-words', { words }).then((r) => r.data),
+      relation: (userId: number) => client.get<RelationView>(`/api/v1/me/relations/${seg(userId)}`),
+      block: (userId: number) => client.put<RelationView>(`/api/v1/me/blocks/${seg(userId)}`).then((r) => r.data),
+      unblock: (userId: number) => client.delJson<RelationView>(`/api/v1/me/blocks/${seg(userId)}`),
+      mute: (userId: number) => client.put<RelationView>(`/api/v1/me/mutes/${seg(userId)}`).then((r) => r.data),
+      unmute: (userId: number) => client.delJson<RelationView>(`/api/v1/me/mutes/${seg(userId)}`),
+    },
+
     backgrounds: {
       /** Catálogo do estúdio de moldura (RF16, ETag + max-age 1 h: o navegador revalida). */
       catalog: () => client.get<FrameCatalog>('/api/v1/backgrounds/catalog'),
       recommendations: (category: AccountTypeCode, feed: 'POST' | 'ALERT' = 'POST', media: 'TEXT' | 'IMAGE' = 'TEXT') =>
         client.get<FrameRecommendation[]>('/api/v1/backgrounds/recommendations', { query: { category, feed, media } }),
+    },
+
+    // ============================================================ RF17 · idade verificada e responsável
+    // (AgeVerificationController, GuardianController)
+    age: {
+      status: () => client.get<AgeVerificationView>('/api/v1/me/age-verification'),
+      /** 503 sem fornecedor; 403 para quem declarou menos de 18. */
+      start: () => client.post<AgeStartView>('/api/v1/me/age-verification/start'),
+      /** O servidor pergunta o resultado ao fornecedor; params = o que o fornecedor devolveu na volta. */
+      complete: (reference: string, params: Record<string, string> = {}) =>
+        client.post<AgeVerificationView>('/api/v1/me/age-verification/complete', { reference, params }),
+      appeal: (reason: string) => client.post<AgeAppealView>('/api/v1/me/age-verification/appeal', { reason }),
+    },
+
+    guardian: {
+      // lado do menor
+      status: () => client.get<MinorLinkView>('/api/v1/me/guardian'),
+      /** Sem e-mail: reenvia o convite pendente. */
+      invite: (guardianEmail?: string) => client.post<MinorLinkView>('/api/v1/me/guardian/invite', { guardianEmail: guardianEmail ?? null }),
+      request: (protection: ProtectionCode) => client.post<GuardianRequestView>('/api/v1/me/guardian/requests', { protection }),
+      unlink: () => client.delJson<MinorLinkView>('/api/v1/me/guardian'),
+      // lado do responsável
+      accept: (token: string) => client.post<SupervisedView>('/api/v1/guardian/links/accept', { token }),
+      minors: () => client.get<SupervisedView[]>('/api/v1/guardian/minors'),
+      panel: (minorId: number | string) => client.get<SupervisionView>(`/api/v1/guardian/minors/${seg(minorId)}`),
+      decide: (minorId: number | string, requestId: number, approve: boolean) =>
+        client.post<SupervisionView>(`/api/v1/guardian/minors/${seg(minorId)}/requests/${seg(requestId)}`, { approve }),
+      setProtection: (minorId: number | string, protection: ProtectionCode, allowed: boolean) =>
+        client.put<SupervisionView>(`/api/v1/guardian/minors/${seg(minorId)}/protections/${seg(protection)}`, { allowed }).then((r) => r.data),
+      setSensitiveConsent: (minorId: number | string, granted: boolean) =>
+        client.put<SupervisionView>(`/api/v1/guardian/minors/${seg(minorId)}/sensitive-consent`, { granted }).then((r) => r.data),
+      unlinkMinor: (minorId: number | string) => client.del(`/api/v1/guardian/minors/${seg(minorId)}`),
+    },
+
+    // ============================================================ RF18 · central do titular (PrivacyController)
+    privacy: {
+      /** Público: encarregado, direitos e prazos. */
+      contact: () => client.get<PrivacyContactView>('/api/v1/legal/privacy-contact'),
+      exports: () => client.get<DataExportView[]>('/api/v1/me/data-exports'),
+      /** Modo sudo; 429 = já pediu nas últimas 24 h. */
+      requestExport: (body: SudoRequest) => client.post<DataExportView>('/api/v1/me/data-exports', body),
     },
   };
 }

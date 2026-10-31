@@ -116,6 +116,10 @@ abstract class PostItBase {
             jdbc.update("INSERT INTO user_preference (user_id, profile_private, who_can_comment) VALUES (?, ?, ?)",
                     u.getId(), minor, minor ? "FOLLOWERS" : "EVERYONE");
         }
+        // RF17: os adultos que veem bebida nos testes têm a idade verificada; o restaurant (adulto) não tem
+        for (UserAccount u : List.of(ana, creator, chef, community)) {
+            com.friendlyeats.support.AgeFixtures.verifiedAdult(jdbc, u.getId());
+        }
         mineiro = place(restaurant, Map.of("name", "Sabor Mineiro", "primaryType", "RESTAURANTE_A_LA_CARTE",
                 "location", Map.of("uf", "MG", "municipalityIbge", "3106200", "city", "Belo Horizonte",
                         "street", "Rua Sergipe", "streetNumber", "1000"),

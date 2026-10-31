@@ -581,3 +581,503 @@ CREATE TABLE IF NOT EXISTS post_share (
 
 CREATE INDEX IF NOT EXISTS idx_post_share_user
     ON post_share (user_id);
+
+-- =============================================================================
+-- V4 · idade, responsável e central do titular (onda 1 de obrigações legais)
+--   RF17 verificação de idade efetiva (sem autodeclaração) para conteúdo de bebida alcoólica,
+--        contestação revisada por pessoa e conta de menor vinculada à do responsável
+--   RF18 central do titular: exportar meus dados, registros de acesso do Marco Civil (com o
+--        inventário de consultas) e registro de incidentes de segurança
+-- =============================================================================
+
+-- =============================================================================
+-- RF17 · Verificação de idade (ECA Digital, art. 9º, §1º · Decreto 12.880/2026, arts. 19, 24 e 27).
+-- Guarda só o resultado, o método, a data e o id da verificação no fornecedor: nunca a imagem nem a
+-- cópia do documento (Decreto, art. 24, §3º). Os dados servem só para verificar a idade.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS age_verification (
+    user_id             BIGINT        PRIMARY KEY REFERENCES user_account (id) ON DELETE CASCADE,
+    status              VARCHAR(16)   NOT NULL DEFAULT 'UNVERIFIED',
+    method              VARCHAR(40),                         -- ex.: DOCUMENTO_E_SELFIE, BASE_GOVERNAMENTAL
+    provider            VARCHAR(40),                         -- fornecedor que aferiu (fake-dev só em dev/it)
+    provider_ref        VARCHAR(120),                        -- id da verificação no fornecedor
+    pending_expires_at  TIMESTAMPTZ,                         -- sessão aberta no fornecedor (status PENDING)
+    verified_at         TIMESTAMPTZ,
+    updated_at          TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    CONSTRAINT chk_age_verification_status
+        CHECK (status IN ('UNVERIFIED','PENDING','VERIFIED_ADULT','VERIFIED_MINOR','FAILED'))
+);
+
+COMMENT ON TABLE age_verification IS 'RF17 · estado atual da verificação de idade; sem imagem de documento (Decreto 12.880, art. 24, §3º)';
+
+-- Histórico append-only de cada mudança de estado (início, resultado, contestação decidida)
+CREATE TABLE IF NOT EXISTS age_verification_event (
+    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id       BIGINT        NOT NULL REFERENCES user_account (id) ON DELETE CASCADE,
+    status        VARCHAR(16)   NOT NULL,
+    method        VARCHAR(40),
+    provider      VARCHAR(40),
+    provider_ref  VARCHAR(120),
+    note          VARCHAR(300),
+    occurred_at   TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    CONSTRAINT chk_age_verification_event_status
+        CHECK (status IN ('UNVERIFIED','PENDING','VERIFIED_ADULT','VERIFIED_MINOR','FAILED'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_age_verification_event_user ON age_verification_event (user_id, occurred_at DESC);
+
+-- Contestação da idade aferida (Decreto 12.880, art. 27): fila simples revisada por uma pessoa
+CREATE TABLE IF NOT EXISTS age_appeal (
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id        BIGINT         NOT NULL REFERENCES user_account (id) ON DELETE CASCADE,
+    contested      VARCHAR(16)    NOT NULL,                  -- estado contestado (VERIFIED_MINOR ou FAILED)
+    reason         VARCHAR(1000)  NOT NULL,
+    status         VARCHAR(10)    NOT NULL DEFAULT 'OPEN',
+    created_at     TIMESTAMPTZ    NOT NULL DEFAULT now(),
+    decided_at     TIMESTAMPTZ,
+    decided_by     VARCHAR(254),                             -- e-mail de quem revisou
+    decision_note  VARCHAR(500),
+    CONSTRAINT chk_age_appeal_status CHECK (status IN ('OPEN','ACCEPTED','REJECTED'))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_age_appeal_open ON age_appeal (user_id) WHERE status = 'OPEN';
+CREATE INDEX IF NOT EXISTS idx_age_appeal_queue ON age_appeal (created_at) WHERE status = 'OPEN';
+
+-- =============================================================================
+-- RF17 · Conta de menor vinculada à do responsável (ECA Digital, arts. 17, 18 e 24; LGPD, art. 14).
+-- O convite vai por e-mail com um token de uso único (só o HMAC fica aqui). Só um vínculo pendente
+-- ou ativo por menor.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS guardian_link (
+    id                      BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    minor_id                BIGINT        NOT NULL REFERENCES user_account (id) ON DELETE CASCADE,
+    guardian_id             BIGINT        REFERENCES user_account (id) ON DELETE SET NULL,
+    guardian_email          VARCHAR(254)  NOT NULL,
+    status                  VARCHAR(10)   NOT NULL DEFAULT 'PENDING',
+    invite_token_hash       CHAR(64),                       -- HMAC-SHA256 do token (AppSecrets)
+    invited_at              TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    invite_expires_at       TIMESTAMPTZ,
+    accepted_at             TIMESTAMPTZ,
+    ended_at                TIMESTAMPTZ,
+    ended_by                VARCHAR(10),
+    sensitive_consent_at    TIMESTAMPTZ,                    -- consentimento do responsável (LGPD, art. 14, §1º)
+    reminder_sent_at        TIMESTAMPTZ,
+    created_at              TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    CONSTRAINT chk_guardian_link_status CHECK (status IN ('PENDING','ACTIVE','ENDED')),
+    CONSTRAINT chk_guardian_link_ended_by CHECK (ended_by IS NULL OR ended_by IN ('MINOR','GUARDIAN','SYSTEM')),
+    CONSTRAINT chk_guardian_link_not_self CHECK (guardian_id IS NULL OR guardian_id <> minor_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_guardian_link_open ON guardian_link (minor_id) WHERE status IN ('PENDING','ACTIVE');
+CREATE UNIQUE INDEX IF NOT EXISTS uk_guardian_link_token ON guardian_link (invite_token_hash) WHERE invite_token_hash IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_guardian_link_guardian ON guardian_link (guardian_id) WHERE status = 'ACTIVE';
+CREATE INDEX IF NOT EXISTS idx_guardian_link_pending ON guardian_link (invited_at) WHERE status = 'PENDING';
+
+-- Pedido do menor para afrouxar uma proteção; o responsável aprova ou nega
+CREATE TABLE IF NOT EXISTS guardian_request (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    link_id     BIGINT       NOT NULL REFERENCES guardian_link (id) ON DELETE CASCADE,
+    protection  VARCHAR(30)  NOT NULL,
+    status      VARCHAR(10)  NOT NULL DEFAULT 'PENDING',
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    decided_at  TIMESTAMPTZ,
+    CONSTRAINT chk_guardian_request_protection
+        CHECK (protection IN ('PUBLIC_PROFILE','SENSITIVE_CONTENT','COMMENTS_FROM_EVERYONE','NO_USAGE_REMINDER')),
+    CONSTRAINT chk_guardian_request_status CHECK (status IN ('PENDING','APPROVED','DENIED','CANCELLED'))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_guardian_request_pending
+    ON guardian_request (link_id, protection) WHERE status = 'PENDING';
+
+-- Histórico append-only do vínculo: convite, aceite, decisões e mudanças feitas pelo responsável
+CREATE TABLE IF NOT EXISTS guardian_action (
+    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    link_id      BIGINT       NOT NULL REFERENCES guardian_link (id) ON DELETE CASCADE,
+    actor        VARCHAR(10)  NOT NULL,
+    action       VARCHAR(40)  NOT NULL,
+    detail       VARCHAR(300),
+    occurred_at  TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    CONSTRAINT chk_guardian_action_actor CHECK (actor IN ('MINOR','GUARDIAN','SYSTEM'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_guardian_action_link ON guardian_action (link_id, occurred_at DESC);
+
+-- =============================================================================
+-- RF18 · Exportar meus dados (LGPD, art. 18, V, e art. 19): um pedido por dia, gerado por um job,
+-- ZIP com JSON no bucket (exports/…), link pré-assinado por 72 h e prazo de atendimento de 15 dias.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS data_export (
+    id            UUID          PRIMARY KEY,                 -- UUIDv7 gerado na aplicação
+    user_id       BIGINT        NOT NULL REFERENCES user_account (id) ON DELETE CASCADE,
+    status        VARCHAR(12)   NOT NULL DEFAULT 'REQUESTED',
+    requested_at  TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    due_at        TIMESTAMPTZ   NOT NULL,                    -- requested_at + 15 dias (art. 19, II)
+    started_at    TIMESTAMPTZ,
+    ready_at      TIMESTAMPTZ,
+    expires_at    TIMESTAMPTZ,                               -- ready_at + 72 h: o link deixa de valer
+    object_key    VARCHAR(512),                              -- exports/{usuário}/{id}.zip
+    size_bytes    BIGINT,
+    attempts      SMALLINT      NOT NULL DEFAULT 0,
+    error         VARCHAR(300),
+    CONSTRAINT chk_data_export_status CHECK (status IN ('REQUESTED','PROCESSING','READY','EXPIRED','FAILED'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_data_export_user ON data_export (user_id, requested_at DESC);
+CREATE INDEX IF NOT EXISTS idx_data_export_queue ON data_export (requested_at) WHERE status IN ('REQUESTED','PROCESSING');
+CREATE INDEX IF NOT EXISTS idx_data_export_ready ON data_export (expires_at) WHERE status = 'READY';
+
+-- =============================================================================
+-- RF18 · Registros de acesso a aplicações (Marco Civil, art. 15; Decreto 8.771/2016, art. 13):
+-- data e hora (UTC) e o IP com a porta lógica de origem, cifrados com AES-256-GCM pela chave da
+-- aplicação (AppSecrets). Guardados por 6 meses, sob sigilo; a entrega exige ordem judicial.
+-- user_id sem chave estrangeira: o registro sobrevive à eliminação da conta pelo prazo legal.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS access_log (
+    id                BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id           BIGINT        NOT NULL,
+    event             VARCHAR(12)   NOT NULL,
+    occurred_at       TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    ip_cipher         BYTEA         NOT NULL,                -- "ip|porta" cifrado; nunca em claro
+    channel           VARCHAR(20)   NOT NULL,
+    legal_hold_until  TIMESTAMPTZ,                           -- guarda estendida a pedido de autoridade (art. 15, §2º)
+    CONSTRAINT chk_access_log_event CHECK (event IN ('LOGIN','ACCESS'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_access_log_user ON access_log (user_id, occurred_at);
+CREATE INDEX IF NOT EXISTS idx_access_log_age ON access_log (occurred_at);
+
+COMMENT ON TABLE access_log IS 'RF18 · Marco Civil art. 15: 6 meses, sob sigilo; consulta só com motivo e ordem (access_log_query)';
+
+-- Inventário de quem consultou os registros (Decreto 8.771, art. 13, III): append-only
+CREATE TABLE IF NOT EXISTS access_log_query (
+    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    requested_by    VARCHAR(254)  NOT NULL,
+    reason          VARCHAR(500)  NOT NULL,
+    legal_order     VARCHAR(120)  NOT NULL,                  -- número do processo ou da ordem judicial
+    target_user_id  BIGINT        NOT NULL,
+    period_from     TIMESTAMPTZ   NOT NULL,
+    period_to       TIMESTAMPTZ   NOT NULL,
+    rows_returned   INTEGER       NOT NULL,
+    queried_at      TIMESTAMPTZ   NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_access_log_query_target ON access_log_query (target_user_id, queried_at DESC);
+
+-- =============================================================================
+-- RF18 · Incidentes de segurança (LGPD, art. 48; Resolução CD/ANPD 15/2024): todo incidente é
+-- registrado, inclusive os que não exigem comunicação, e o registro fica por 5 anos.
+-- Runbook em docs/legal/INCIDENTES.md.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS security_incident (
+    id                       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    title                    VARCHAR(200)   NOT NULL,
+    description              VARCHAR(4000)  NOT NULL,
+    discovered_at            TIMESTAMPTZ    NOT NULL,
+    personal_data_aware_at   TIMESTAMPTZ,                     -- quando se soube que atingiu dado pessoal: o relógio
+    communication_deadline   TIMESTAMPTZ,                     -- 3 dias úteis depois de personal_data_aware_at
+    data_categories          JSONB          NOT NULL DEFAULT '[]',
+    affected_subjects        INTEGER,
+    measures                 VARCHAR(4000),
+    risk_relevant            BOOLEAN,
+    decision                 VARCHAR(14)    NOT NULL DEFAULT 'PENDING',
+    decision_reason          VARCHAR(1000),
+    anpd_notified_at         TIMESTAMPTZ,
+    subjects_notified_at     TIMESTAMPTZ,
+    recorded_by              VARCHAR(254)   NOT NULL,
+    created_at               TIMESTAMPTZ    NOT NULL DEFAULT now(),
+    retain_until             TIMESTAMPTZ    NOT NULL,         -- created_at + 5 anos
+    CONSTRAINT chk_security_incident_decision CHECK (decision IN ('PENDING','NOTIFY','NOT_REQUIRED')),
+    CONSTRAINT chk_security_incident_categories CHECK (jsonb_typeof(data_categories) = 'array')
+);
+
+CREATE INDEX IF NOT EXISTS idx_security_incident_open ON security_incident (communication_deadline) WHERE decision = 'PENDING';
+
+-- =============================================================================
+-- V5 · moderação e segurança entre usuários
+--   RF13 moderação: papel de moderador, denúncia com protocolo (usuário e formulário público), fila priorizada com
+--        prazo, decisão motivada com histórico imutável, recurso revisto por outra pessoa, integridade das avaliações
+--        (sinais de fraude, alerta ao consumidor e congelamento) e contestação pelo dono
+--   RF19 segurança entre usuários: bloquear, silenciar e palavras filtradas
+--
+-- Nada aqui guarda IP em claro: a origem da avaliação e o limite do formulário público usam o HMAC do AppSecrets.
+-- =============================================================================
+
+-- =============================================================================
+-- Papéis. Hoje só MODERATOR, concedido por configuração (friendly-eats.moderation.bootstrap-moderators) ou pelo
+-- DevSeed; vira a autoridade ROLE_MODERATOR da sessão e libera /api/v1/moderation/**.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS user_role (
+    user_id     BIGINT        NOT NULL REFERENCES user_account (id) ON DELETE CASCADE,
+    role        VARCHAR(16)   NOT NULL,
+    granted_by  VARCHAR(40)   NOT NULL,                 -- config, seed ou o id de quem concedeu
+    granted_at  TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, role),
+    CONSTRAINT chk_user_role_role CHECK (role IN ('MODERATOR'))
+);
+
+-- =============================================================================
+-- Conteúdo sob moderação. NULL = normal. PREVENTIVE: retirado na hora por denúncia de criança em risco (Decreto
+-- 12.880, arts. 41 a 44) ou por sinal automático, até a decisão; HIDDEN e REMOVED: decisão de moderação. Em todos os
+-- casos o conteúdo some para os outros, mas o texto fica guardado para o recurso e para a preservação (MCI, art. 15).
+-- =============================================================================
+
+ALTER TABLE post ADD COLUMN IF NOT EXISTS moderation_state VARCHAR(12);
+ALTER TABLE post ADD CONSTRAINT chk_post_moderation_state
+    CHECK (moderation_state IS NULL OR moderation_state IN ('PREVENTIVE','HIDDEN','REMOVED'));
+
+ALTER TABLE post_comment ADD COLUMN IF NOT EXISTS moderation_state VARCHAR(12);
+ALTER TABLE post_comment ADD CONSTRAINT chk_post_comment_moderation_state
+    CHECK (moderation_state IS NULL OR moderation_state IN ('PREVENTIVE','HIDDEN','REMOVED'));
+
+-- Avaliação (RF8): origem da escrita (HMAC do IP) para o sinal "mesma origem"
+ALTER TABLE review ADD COLUMN IF NOT EXISTS origin_hash VARCHAR(64);
+COMMENT ON COLUMN review.origin_hash IS 'HMAC-SHA256 do IP de quem escreveu (AppSecrets), nunca o IP; só para o sinal de mesma origem (RF13)';
+CREATE INDEX IF NOT EXISTS idx_review_origin
+    ON review (establishment_id, origin_hash, created_at) WHERE origin_hash IS NOT NULL;
+
+-- =============================================================================
+-- Integridade das avaliações (RF13 · RC-SEG-04 e 05)
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS review_signal (
+    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    review_id   BIGINT        NOT NULL REFERENCES review (id) ON DELETE CASCADE,
+    code        VARCHAR(24)   NOT NULL,
+    detail      VARCHAR(200),
+    created_at  TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    CONSTRAINT uk_review_signal UNIQUE (review_id, code),
+    CONSTRAINT chk_review_signal_code
+        CHECK (code IN ('BURST_NEW_ACCOUNTS','SAME_ORIGIN','INCENTIVE_DECLARED','CONFLICT_DECLARED'))
+);
+
+COMMENT ON TABLE review_signal IS 'Sinais de fraude de uma avaliação (RF13); critérios gerais, sem os pesos, vão para o autor';
+
+-- Alerta ao consumidor na página do lugar e congelamento de novas avaliações num pico ("review bombing")
+CREATE TABLE IF NOT EXISTS establishment_alert (
+    id                BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    establishment_id  BIGINT        NOT NULL REFERENCES establishment (id) ON DELETE CASCADE,
+    kind              VARCHAR(20)   NOT NULL,
+    message           VARCHAR(500)  NOT NULL,
+    freeze_reviews    BOOLEAN       NOT NULL DEFAULT FALSE,
+    starts_at         TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    ends_at           TIMESTAMPTZ,
+    lifted_at         TIMESTAMPTZ,
+    automated         BOOLEAN       NOT NULL DEFAULT FALSE,
+    created_by        BIGINT,                              -- moderador; NULL = automático
+    created_at        TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    CONSTRAINT chk_establishment_alert_kind CHECK (kind IN ('AVALIACAO_PAGA','ATIVIDADE_SUSPEITA','ATENCAO_PUBLICA')),
+    CONSTRAINT chk_establishment_alert_freeze_end CHECK (NOT freeze_reviews OR ends_at IS NOT NULL),
+    CONSTRAINT chk_establishment_alert_period CHECK (ends_at IS NULL OR ends_at > starts_at),
+    CONSTRAINT chk_establishment_alert_author CHECK (automated OR created_by IS NOT NULL)
+);
+
+COMMENT ON TABLE establishment_alert IS 'Alertas ao consumidor (RF13): texto factual, histórico público com início e fim';
+
+CREATE INDEX IF NOT EXISTS idx_establishment_alert ON establishment_alert (establishment_id, starts_at DESC);
+
+-- =============================================================================
+-- Fila de moderação (RF13 · RC-SEG-01 a 03). Um caso por alvo enquanto estiver aberto; as denúncias de várias
+-- pessoas sobre o mesmo alvo entram no mesmo caso, que fica com a maior prioridade e o menor prazo.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS moderation_case (
+    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    target_type          VARCHAR(16)   NOT NULL,
+    target_key           VARCHAR(40)   NOT NULL,          -- id do post (UUID) ou id numérico do resto
+    target_owner_id      BIGINT        REFERENCES user_account (id) ON DELETE SET NULL,
+    establishment_id     BIGINT,                          -- avaliação e página de lugar: o lugar envolvido
+    status               VARCHAR(12)   NOT NULL DEFAULT 'OPEN',
+    priority             SMALLINT      NOT NULL,          -- 0 crítica · 1 urgente · 2 alta · 3 normal · 4 baixa
+    top_reason           VARCHAR(32)   NOT NULL,
+    report_count         INTEGER       NOT NULL DEFAULT 0,
+    preventive           BOOLEAN       NOT NULL DEFAULT FALSE,
+    authority_referral   VARCHAR(10)   NOT NULL DEFAULT 'NONE',
+    authority_reference  VARCHAR(200),
+    authority_sent_at    TIMESTAMPTZ,
+    snapshot             JSONB         NOT NULL DEFAULT '{}',
+    due_at               TIMESTAMPTZ   NOT NULL,
+    created_at           TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    updated_at           TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    decided_at           TIMESTAMPTZ,
+    CONSTRAINT chk_moderation_case_target CHECK (target_type IN ('POST','COMMENT','REVIEW','PROFILE','ESTABLISHMENT')),
+    CONSTRAINT chk_moderation_case_status CHECK (status IN ('OPEN','DECIDED','IN_APPEAL','FINAL')),
+    CONSTRAINT chk_moderation_case_priority CHECK (priority BETWEEN 0 AND 4),
+    CONSTRAINT chk_moderation_case_authority CHECK (authority_referral IN ('NONE','PENDING','SENT')),
+    CONSTRAINT chk_moderation_case_snapshot CHECK (jsonb_typeof(snapshot) = 'object')
+);
+
+COMMENT ON COLUMN moderation_case.snapshot IS 'Cópia do conteúdo denunciado na abertura do caso (prova e recurso; MCI art. 15)';
+COMMENT ON COLUMN moderation_case.authority_referral
+    IS 'Indício de abuso sexual infantil: PENDING até a moderação registrar a comunicação às autoridades (nada automático)';
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_moderation_case_open
+    ON moderation_case (target_type, target_key) WHERE status = 'OPEN';
+CREATE INDEX IF NOT EXISTS idx_moderation_case_queue ON moderation_case (status, priority, due_at);
+CREATE INDEX IF NOT EXISTS idx_moderation_case_owner ON moderation_case (target_owner_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_moderation_case_establishment ON moderation_case (establishment_id, created_at);
+
+CREATE TABLE IF NOT EXISTS moderation_report (
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    case_id             BIGINT        NOT NULL REFERENCES moderation_case (id) ON DELETE CASCADE,
+    source              VARCHAR(16)   NOT NULL,
+    reporter_id         BIGINT        REFERENCES user_account (id) ON DELETE SET NULL,
+    reporter_name       VARCHAR(120),                     -- só no formulário público (não usuário)
+    reporter_email      VARCHAR(254),
+    reason              VARCHAR(32)   NOT NULL,
+    details             VARCHAR(1000),
+    child_sexual_abuse  BOOLEAN       NOT NULL DEFAULT FALSE,
+    low_trust           BOOLEAN       NOT NULL DEFAULT FALSE,
+    ip_hash             VARCHAR(64),                      -- HMAC do IP: limite de ritmo do formulário público
+    status              VARCHAR(10)   NOT NULL DEFAULT 'OPEN',
+    created_at          TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    resolved_at         TIMESTAMPTZ,
+    CONSTRAINT chk_moderation_report_source CHECK (source IN ('USER','PUBLIC_FORM','OWNER_CONTEST','SYSTEM')),
+    CONSTRAINT chk_moderation_report_reason
+        CHECK (reason IN ('CRIANCA_EM_RISCO','DESINFORMACAO_SANITARIA','ASSEDIO','ODIO','CONTEUDO_SEXUAL',
+                          'DADO_PESSOAL','GOLPE_FRAUDE','AVALIACAO_FALSA','CONFLITO_INTERESSE','OFENSA_OU_CRIME',
+                          'DIREITO_AUTORAL','SPAM','FORA_DO_TEMA','OUTRO')),
+    CONSTRAINT chk_moderation_report_status CHECK (status IN ('OPEN','UPHELD','DISMISSED')),
+    -- canal de não usuários (STF, item 9): identificado, nunca anônimo (ECA Digital, art. 29, §2º)
+    CONSTRAINT chk_moderation_report_public
+        CHECK (source <> 'PUBLIC_FORM' OR (reporter_name IS NOT NULL AND reporter_email IS NOT NULL))
+);
+
+-- uma denúncia aberta por pessoa e alvo (o caso aberto é único por alvo)
+CREATE UNIQUE INDEX IF NOT EXISTS uk_moderation_report_open
+    ON moderation_report (case_id, reporter_id) WHERE status = 'OPEN' AND reporter_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_moderation_report_reporter ON moderation_report (reporter_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_moderation_report_ip
+    ON moderation_report (ip_hash, created_at DESC) WHERE source = 'PUBLIC_FORM';
+
+-- Decisões: histórico append-only (o trigger recusa UPDATE e DELETE). moderator_id sem FK de propósito.
+CREATE TABLE IF NOT EXISTS moderation_decision (
+    id             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    case_id        BIGINT        NOT NULL REFERENCES moderation_case (id) ON DELETE CASCADE,
+    stage          VARCHAR(10)   NOT NULL,
+    action         VARCHAR(10)   NOT NULL,
+    policy_reason  VARCHAR(32),
+    statement      VARCHAR(2000) NOT NULL,
+    automated      BOOLEAN       NOT NULL DEFAULT FALSE,
+    moderator_id   BIGINT,
+    created_at     TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    CONSTRAINT chk_moderation_decision_stage CHECK (stage IN ('PREVENTIVE','FIRST','APPEAL')),
+    CONSTRAINT chk_moderation_decision_action CHECK (action IN ('KEEP','HIDE','REMOVE','WARN')),
+    CONSTRAINT chk_moderation_decision_motive CHECK (action = 'KEEP' OR policy_reason IS NOT NULL),
+    CONSTRAINT chk_moderation_decision_who CHECK (automated OR moderator_id IS NOT NULL)
+);
+
+CREATE INDEX IF NOT EXISTS idx_moderation_decision_case ON moderation_decision (case_id, id);
+CREATE INDEX IF NOT EXISTS idx_moderation_decision_created ON moderation_decision (created_at);
+
+CREATE OR REPLACE FUNCTION moderation_decision_append_only()
+    RETURNS trigger
+    LANGUAGE plpgsql
+AS $$
+BEGIN
+    RAISE EXCEPTION 'moderation_decision é só de inclusão: o histórico de decisões não muda (RF13)';
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_moderation_decision_append_only ON moderation_decision;
+CREATE TRIGGER trg_moderation_decision_append_only
+    BEFORE UPDATE OR DELETE ON moderation_decision
+    FOR EACH ROW EXECUTE FUNCTION moderation_decision_append_only();
+
+-- Recurso (ECA Digital, art. 30): do autor contra a retirada ou o aviso, ou de quem denunciou contra o arquivamento.
+CREATE TABLE IF NOT EXISTS moderation_appeal (
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    case_id             BIGINT        NOT NULL REFERENCES moderation_case (id) ON DELETE CASCADE,
+    decision_id         BIGINT        NOT NULL REFERENCES moderation_decision (id) ON DELETE CASCADE,
+    appellant_id        BIGINT        REFERENCES user_account (id) ON DELETE SET NULL,
+    appellant_role      VARCHAR(10)   NOT NULL,
+    reason              VARCHAR(2000) NOT NULL,
+    status              VARCHAR(10)   NOT NULL DEFAULT 'OPEN',
+    result_decision_id  BIGINT        REFERENCES moderation_decision (id) ON DELETE CASCADE,
+    created_at          TIMESTAMPTZ   NOT NULL DEFAULT now(),
+    resolved_at         TIMESTAMPTZ,
+    CONSTRAINT uk_moderation_appeal UNIQUE (decision_id, appellant_id),
+    CONSTRAINT chk_moderation_appeal_role CHECK (appellant_role IN ('AUTHOR','REPORTER')),
+    CONSTRAINT chk_moderation_appeal_status CHECK (status IN ('OPEN','MAINTAINED','REVERSED'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_moderation_appeal_case ON moderation_appeal (case_id, status);
+
+-- =============================================================================
+-- Segurança entre usuários (RF19 · RC-SEG-09). Bloquear vale nos dois sentidos e é sigiloso; silenciar só esconde
+-- para quem silenciou. Palavras filtradas escondem comentários nos posts de quem filtrou (o autor do comentário
+-- ainda vê o seu). Sem linha em user_safety_setting, o filtro padrão vem ligado para menor de 16 (ECA Digital).
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS user_block (
+    blocker_id  BIGINT       NOT NULL REFERENCES user_account (id) ON DELETE CASCADE,
+    blocked_id  BIGINT       NOT NULL REFERENCES user_account (id) ON DELETE CASCADE,
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    PRIMARY KEY (blocker_id, blocked_id),
+    CONSTRAINT chk_user_block_self CHECK (blocker_id <> blocked_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_block_blocked ON user_block (blocked_id);
+
+CREATE TABLE IF NOT EXISTS user_mute (
+    muter_id    BIGINT       NOT NULL REFERENCES user_account (id) ON DELETE CASCADE,
+    muted_id    BIGINT       NOT NULL REFERENCES user_account (id) ON DELETE CASCADE,
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    PRIMARY KEY (muter_id, muted_id),
+    CONSTRAINT chk_user_mute_self CHECK (muter_id <> muted_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_filtered_word (
+    user_id     BIGINT       NOT NULL REFERENCES user_account (id) ON DELETE CASCADE,
+    word        VARCHAR(40)  NOT NULL,                     -- já normalizada (minúsculas, sem acento)
+    created_at  TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, word),
+    CONSTRAINT chk_user_filtered_word CHECK (length(word) BETWEEN 2 AND 40)
+);
+
+CREATE TABLE IF NOT EXISTS user_safety_setting (
+    user_id              BIGINT       PRIMARY KEY REFERENCES user_account (id) ON DELETE CASCADE,
+    default_word_filter  BOOLEAN      NOT NULL,
+    updated_at           TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+-- =============================================================================
+-- V6 · página do estabelecimento (RF11)
+--   horários por dia (várias faixas, virada da meia-noite), datas especiais e "fechado temporariamente";
+--   cobranças declaradas (taxa de serviço opcional, couvert, desconto ou acréscimo por forma de pagamento);
+--   facetas declaradas pelo dono (atendimento, ambiente, acessibilidade e pagamento) e botões de ação (links).
+-- Os vocabulários e os limites são validados na aplicação (docs/RF11); aqui ficam o formato dos JSON e os CHECKs
+-- dos valores fechados. "Fechou de vez" continua sendo status = 'CLOSED' (RF6).
+-- =============================================================================
+
+ALTER TABLE establishment
+    -- {"weekly": {"MONDAY": ["11:30-15:00", "18:00-02:00"]} | null, "special": [{"date": "2026-12-25", ...}]}
+    ADD COLUMN IF NOT EXISTS opening_hours        JSONB,
+    ADD COLUMN IF NOT EXISTS temporarily_closed   BOOLEAN      NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS reopens_on           DATE,
+    -- {"serviceFeePercent": 10, "couvert": {...}, "paymentAdjustments": [...]}
+    ADD COLUMN IF NOT EXISTS charges              JSONB,
+    ADD COLUMN IF NOT EXISTS charges_declared_at  TIMESTAMPTZ,
+    -- {"WIFI": "SIM", "PET_FRIENDLY": "SO_AREA_EXTERNA"}: só o que o dono declarou; ausente = sem informação
+    ADD COLUMN IF NOT EXISTS facets               JSONB        NOT NULL DEFAULT '{}',
+    -- {"links": [{"provider": "IFOOD", "url": "https://www.ifood.com.br/...", "preferred": true}], "whatsapp": "55..."}
+    ADD COLUMN IF NOT EXISTS action_links         JSONB;
+
+ALTER TABLE establishment
+    ADD CONSTRAINT chk_establishment_opening_hours_json
+        CHECK (opening_hours IS NULL OR jsonb_typeof(opening_hours) = 'object'),
+    ADD CONSTRAINT chk_establishment_reopens_on CHECK (reopens_on IS NULL OR temporarily_closed),
+    ADD CONSTRAINT chk_establishment_charges_json CHECK (charges IS NULL OR jsonb_typeof(charges) = 'object'),
+    ADD CONSTRAINT chk_establishment_facets_json CHECK (jsonb_typeof(facets) = 'object'),
+    ADD CONSTRAINT chk_establishment_action_links_json
+        CHECK (action_links IS NULL OR jsonb_typeof(action_links) = 'object');
+
+COMMENT ON COLUMN establishment.opening_hours IS 'Horário no fuso do município (derivado da UF); faixa que passa da meia-noite pertence ao dia em que começa';
+COMMENT ON COLUMN establishment.temporarily_closed IS 'Fechado temporariamente (RF11), com data de volta opcional; CLOSED no status é "fechou de vez"';
+COMMENT ON COLUMN establishment.charges IS 'Cobranças declaradas: a taxa de serviço é sempre opcional (Lei 13.419/2017); consumação mínima não é aceita';
+COMMENT ON COLUMN establishment.action_links IS 'Só links (reserva, delivery, WhatsApp): domínios permitidos por provedor; nada de pagamento no app';

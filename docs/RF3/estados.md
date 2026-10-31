@@ -11,6 +11,7 @@ stateDiagram-v2
     Reconsentir --> Revogado : recusa
     NaoConcedido --> Travado : idade abaixo da MinorRule (16 ou 18)
     Travado --> NaoConcedido : completa a idade
+    Travado --> NaoConcedido : responsável vinculado consente (só o dado sensível, RF17)
     note right of Revogado
         Cada transição é uma linha nova em consent_event.
         Repetir o mesmo valor não grava nada.

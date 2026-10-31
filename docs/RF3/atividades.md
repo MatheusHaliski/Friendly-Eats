@@ -8,7 +8,7 @@ flowchart TD
     V -- não --> E422[422]
     V -- sim --> L[(SELECT … FOR UPDATE na conta)]
     L --> C{Ligar ou desligar?}
-    C -- ligar --> B{Idade abaixo da MinorRule?<br/>16: localização · feed · marketing<br/>18: dado sensível}
+    C -- ligar --> B{Idade abaixo da MinorRule?<br/>16: localização · feed · marketing<br/>18: dado sensível sem o<br/>consentimento do responsável · RF17}
     B -- sim --> E403[403 · ECA Digital]
     B -- não --> S{Mudou o valor?}
     C -- desligar --> S

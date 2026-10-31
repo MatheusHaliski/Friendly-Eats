@@ -72,7 +72,7 @@ class AuthApiIT {
     @Test
     void registerWithChosenTypeAndTermsStartsASessionThatAnIncognitoWindowDoesNotSee() {
         ApiClient browser = new ApiClient(port);
-        assertThat(browser.get("/api/v1/legal/terms").getBody()).containsEntry("version", "2026-10-25.1");
+        assertThat(browser.get("/api/v1/legal/terms").getBody()).containsEntry("version", "2026-10-31.1");
 
         ResponseEntity<Map> created = browser.post("/api/v1/auth/register", registration("ana@example.com", "ana.ribeiro", "COMENSAL",
                 "2000-05-20", Map.of("city", "Curitiba")));
@@ -96,7 +96,7 @@ class AuthApiIT {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM consent_event WHERE user_id = ? AND NOT granted", Integer.class, id))   // 5 finalidades, todas desligadas
                 .isEqualTo(5);
         assertThat(jdbc.queryForObject("SELECT version FROM terms_acceptance WHERE user_id = ?", String.class, id))
-                .isEqualTo("2026-10-25.1");
+                .isEqualTo("2026-10-31.1");
 
         // verificação de e-mail
         assertThat(browser.post("/api/v1/me/verify-email", Map.of("code", "000000")).getStatusCode().value()).isEqualTo(422);
@@ -402,7 +402,7 @@ class AuthApiIT {
         r.put("userType", type);
         r.put("dateOfBirth", birth);
         r.put("acceptTerms", true);
-        r.put("termsVersion", "2026-10-25.1");
+        r.put("termsVersion", "2026-10-31.1");
         r.put("typeDetails", details);
         return r;
     }

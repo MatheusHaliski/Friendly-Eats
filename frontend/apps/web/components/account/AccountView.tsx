@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 import { AccountBadge, VerifiedSeal, verificationText } from '@/components/AccountBadge';
 import { Notice } from '@/components/Form';
-import { IconInfo, IconLogout, IconSettings, IconSuccess } from '@/components/icons';
+import { IconEdit, IconInfo, IconLogout, IconPublish, IconSettings, IconSuccess } from '@/components/icons';
 import { ownsPlaces } from '@/lib/account-types';
 import { api } from '@/lib/api';
 import { useRequireSession } from '@/lib/queries';
@@ -21,7 +21,10 @@ const STATUS_TEXT: Record<string, string> = {
   ANONYMOUS_LGPD_DELETED: 'Eliminada',
 };
 
-/** Minha conta (RF4): dados da sessão, sair e "Meus lugares" (RF6) para Estabelecimento e Varejo. */
+/**
+ * Minha conta (RF4): dados da sessão, sair e "Meus lugares" (RF6) para Estabelecimento e Varejo, com o atalho para
+ * cadastrar e editar cada página (RF11).
+ */
 export function AccountView() {
   const session = useRequireSession('/conta');
   const leave = useLeaveAccount();
@@ -143,9 +146,15 @@ function MyPlaces() {
   const places = useQuery({ queryKey: ['meus-lugares'], queryFn: () => api.me.establishments() });
   return (
     <section aria-labelledby="titulo-lugares" className="grid gap-4">
-      <h2 id="titulo-lugares" className="text-xl font-bold">
-        Meus lugares
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 id="titulo-lugares" className="text-xl font-bold">
+          Meus lugares
+        </h2>
+        <Link href="/lugares/novo" className="fe-btn fe-btn-primary fe-btn-sm">
+          <IconPublish size={16} />
+          Cadastrar lugar
+        </Link>
+      </div>
       {places.isPending && <p className="text-muted">Carregando…</p>}
       {places.isError && (
         <Notice tone="error">
@@ -183,7 +192,14 @@ function PlaceRow({ place }: { place: EstablishmentView }) {
       </div>
       <p className="text-sm text-muted">
         {place.primaryType.label}
-        {place.status === 'CLOSED' ? ' · Fechado' : ''}
+        {place.status === 'CLOSED' ? ' · Fechou de vez' : ''}
+        {place.hours?.temporaryClosure.closed ? ' · Fechado temporariamente' : ''}
+      </p>
+      <p>
+        <Link href={`/lugares/${place.id}/editar`} className="fe-btn fe-btn-sm">
+          <IconEdit size={16} />
+          Editar<span className="sr-only"> {place.name}</span>
+        </Link>
       </p>
       {!published && place.publishBlockers && place.publishBlockers.length > 0 && (
         <div className="text-sm">

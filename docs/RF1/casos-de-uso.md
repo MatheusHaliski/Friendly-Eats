@@ -13,7 +13,7 @@ flowchart LR
     UC8(["Cadastrar negócio informal<br/>só com CPF"])
     UC4(["Ler e aceitar os Termos de Uso"])
     UC5(["Confirmar e-mail com código"])
-    UC6(["Informar e-mail do responsável"])
+    UC6(["Informar e-mail do responsável<br/>o convite sai no cadastro · RF17"])
     UC7(["Conferir selo de estabelecimento,<br/>varejo e órgão oficial<br/>(CPF: identidade e alvará) ⏳"]):::planned
 
     MOD["Moderação"]:::actor

@@ -24,7 +24,17 @@ server:
 friendly-eats:
   jobs:
     enabled: false            # o job de exclusão é chamado direto nos testes
+  integrity:
+    signals-enabled: false    # todos os testes saem de 127.0.0.1 com contas novas; o ModerationApiIT liga
   security:
     login:
       per-ip-minute: 10000    # todos os testes saem de 127.0.0.1; o limite por conta continua valendo
       per-ip-hour: 10000
+  # RF17: quem revisa as contestações de idade nos testes
+  age-verification:
+    reviewers: revisor@example.com
+  # RF18: encarregado de exemplo para GET /api/v1/legal/privacy-contact
+  legal:
+    controller-name: Friendly Eats de Teste Ltda
+    dpo-name: Encarregada de Teste
+    dpo-email: dpo@example.com

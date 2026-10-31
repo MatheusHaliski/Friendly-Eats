@@ -1,7 +1,7 @@
 package com.friendlyeats.application.establishment;
 
 import com.friendlyeats.application.account.AccountViews.CategoryView;
-import com.friendlyeats.application.account.AgePolicy;
+import com.friendlyeats.application.age.AgeGate;
 import com.friendlyeats.application.common.CommonExceptions;
 import com.friendlyeats.application.establishment.EstablishmentDrafts.ClassificationDraft;
 import com.friendlyeats.application.establishment.EstablishmentDrafts.EstablishmentDraft;
@@ -19,6 +19,7 @@ import com.friendlyeats.application.establishment.EstablishmentViews.OwnerView;
 import com.friendlyeats.application.establishment.EstablishmentViews.PriceView;
 import com.friendlyeats.application.establishment.EstablishmentViews.RatingView;
 import com.friendlyeats.domain.model.AccountStatus;
+import com.friendlyeats.domain.model.PlaceTimeZone;
 import com.friendlyeats.domain.model.CategoryVerification;
 import com.friendlyeats.domain.model.Establishment;
 import com.friendlyeats.domain.model.Review;
@@ -38,21 +39,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
- * Cadastro (RF6) e classificação (RF7) do estabelecimento, e a página com nota e faixa de preço derivadas (RF8).
+ * Cadastro (RF6) e classificação (RF7) do estabelecimento, e a página com nota e faixa de preço derivadas (RF8),
+ * horários, "aberto agora", cobranças, facetas e botões de ação (RF11).
  *
  * <ul>
  *   <li>Só conta ESTABELECIMENTO ou VAREJO, ativa, é dona de lugar; negócio com CPF tem um único ponto.</li>
  *   <li>A página só é pública com o selo da conta dona conferido ({@code VERIFIED}) e a conta ativa; antes disso o
  *       dono vê tudo e os motivos ({@code publishBlockers}).</li>
- *   <li>Lugar com foco em bebida alcoólica pede login e só aparece para maiores de 18.</li>
+ *   <li>Lugar com foco em bebida alcoólica pede login e só aparece para maior de 18 com a idade verificada (RF17,
+ *       {@link AgeGate}).</li>
+ *   <li>Quem edita é decidido pelo {@link PlaceEditors} (hoje, o dono; a equipe do RF20 entra lá).</li>
  * </ul>
  */
 @Service
@@ -65,13 +73,14 @@ public class EstablishmentService {
     private final UserAccountRepository users;
     private final PriceScale priceScale;
     private final RatingCalculator ratings;
-    private final AgePolicy age;
+    private final AgeGate ageGate;
+    private final PlaceEditors editors;
     private final Clock clock;
     private final int minPriceReports;
 
     public EstablishmentService(EstablishmentRepository establishments, ReviewRepository reviews,
                                 UserAccountRepository users, PriceScale priceScale, RatingCalculator ratings,
-                                AgePolicy age, Clock clock,
+                                AgeGate ageGate, PlaceEditors editors, Clock clock,
                                 @org.springframework.beans.factory.annotation.Value("${friendly-eats.price.min-reports:5}")
                                 int minPriceReports) {
         this.establishments = establishments;
@@ -79,7 +88,8 @@ public class EstablishmentService {
         this.users = users;
         this.priceScale = priceScale;
         this.ratings = ratings;
-        this.age = age;
+        this.ageGate = ageGate;
+        this.editors = editors;
         this.clock = clock;
         this.minPriceReports = minPriceReports;
     }
@@ -108,6 +118,9 @@ public class EstablishmentService {
         Price price = types == null ? null : EstablishmentRules.price(types.primary().getGroup(), d.price(), errors);
         Classification classification = types == null ? null
                 : EstablishmentRules.classification(types.primary().getGroup(), d.classification(), errors);
+        Consumer<Establishment> details = details(d, types == null ? null : types.primary().getGroup(),
+                location == null ? PlaceTimeZone.DEFAULT : PlaceTimeZone.of(location.uf(), location.municipalityIbge()),
+                null, Map.of(), true, errors);
         if (!errors.isEmpty()) {
             throw new CommonExceptions.Invalid(errors);
         }
@@ -117,16 +130,21 @@ public class EstablishmentService {
         apply(e, location);
         e.setDeclaredPrice(price.minCents(), price.maxCents(), price.notApplicable());
         apply(e, classification);
+        details.accept(e);
         return view(establishments.save(e), Optional.of(owner));
     }
 
-    /** PATCH: campo nulo não mexe; tipos, local e preço trocam por inteiro. Dono pode marcar CLOSED e reabrir. */
+    /**
+     * PATCH: campo nulo não mexe; tipos, local, preço e cada bloco do RF11 trocam por inteiro. Dono pode marcar CLOSED
+     * (fechou de vez) e reabrir; a pausa com data de volta é o {@code temporaryClosure}.
+     */
     @Transactional
     public EstablishmentView update(long viewerId, long id, EstablishmentDraft d) {
         UserAccount owner = requireOwnerAccount(viewerId);
-        Establishment e = requireOwned(id, viewerId);
+        Establishment e = requireEditable(id, viewerId);
         String informal = informalFormat(owner);
         List<String> errors = new ArrayList<>();
+        boolean typesChanged = false;
         if (d.name() != null) {
             String name = EstablishmentRules.text(d.name(), "name", 120, errors);
             if (name == null) errors.add("O nome não pode ficar vazio.");
@@ -142,6 +160,7 @@ public class EstablishmentService {
                     errors);
             if (t != null && errors.isEmpty()) {
                 e.setTypes(t.primary(), t.secondary());
+                typesChanged = true;
                 // a classificação atual precisa continuar válida no grupo novo (restaurante exige culinária ou formato)
                 if (d.classification() == null) {
                     EstablishmentRules.classification(e.getTypeGroup(), draftOf(e), errors);
@@ -164,6 +183,8 @@ public class EstablishmentService {
             Classification c = EstablishmentRules.classification(e.getTypeGroup(), d.classification(), errors);
             if (errors.isEmpty()) apply(e, c);
         }
+        Consumer<Establishment> details = details(d, e.getTypeGroup(), PlaceDetailsViews.zone(e), e.getCharges(),
+                e.getFacets(), typesChanged, errors);
         if (d.status() != null) {
             switch (d.status()) {
                 case "ACTIVE", "CLOSED" -> {
@@ -178,14 +199,55 @@ public class EstablishmentService {
         if (!errors.isEmpty()) {
             throw new CommonExceptions.Invalid(errors);
         }
+        details.accept(e);
         return view(establishments.save(e), Optional.of(owner));
+    }
+
+    /**
+     * Valida os blocos do RF11 que vieram no pedido e devolve como aplicá-los (depois de não haver erro). Facetas
+     * primeiro: as cobranças conferem a coerência com elas (couvert artístico × música ao vivo, desconto no Pix ×
+     * aceita Pix). No cadastro, facetas ausentes = nenhuma. Trocar o tipo revalida as facetas atuais no grupo novo.
+     */
+    private Consumer<Establishment> details(EstablishmentDraft d, com.friendlyeats.domain.taxonomy.EstablishmentGroup group,
+                                            ZoneId zone, com.friendlyeats.domain.model.PlaceDetails.ChargesData currentCharges,
+                                            Map<String, String> currentFacets, boolean revalidate, List<String> errors) {
+        Instant now = clock.instant();
+        LocalDate today = now.atZone(zone).toLocalDate();
+        List<Consumer<Establishment>> steps = new ArrayList<>();
+        Map<String, String> facets = currentFacets;
+        if (d.facets() != null) {
+            Map<String, String> f = PlaceDetailsRules.facets(d.facets(), group, errors);
+            facets = f;
+            steps.add(x -> x.setFacets(f));
+        } else if (revalidate) {
+            PlaceDetailsRules.facets(currentFacets, group, errors);
+        }
+        if (d.hours() != null) {
+            var h = PlaceDetailsRules.hours(d.hours(), today, errors);
+            steps.add(x -> x.setOpeningHours(h));
+        }
+        if (d.temporaryClosure() != null) {
+            var c = PlaceDetailsRules.temporaryClosure(d.temporaryClosure(), today, errors);
+            steps.add(x -> x.setTemporaryClosure(c.closed(), c.reopensOn()));
+        }
+        if (d.charges() != null) {
+            var c = PlaceDetailsRules.charges(d.charges(), facets, errors);
+            steps.add(x -> x.declareCharges(c, now));
+        } else if (d.facets() != null && currentCharges != null) {
+            PlaceDetailsRules.charges(PlaceDetailsRules.draftOf(currentCharges), facets, errors);
+        }
+        if (d.actions() != null) {
+            var a = PlaceDetailsRules.actions(d.actions(), errors);
+            steps.add(x -> x.setActionLinks(a));
+        }
+        return x -> steps.forEach(step -> step.accept(x));
     }
 
     /** PUT da classificação inteira (RF7). */
     @Transactional
     public EstablishmentView classify(long viewerId, long id, ClassificationDraft d) {
         UserAccount owner = requireOwnerAccount(viewerId);
-        Establishment e = requireOwned(id, viewerId);
+        Establishment e = requireEditable(id, viewerId);
         List<String> errors = new ArrayList<>();
         Classification c = EstablishmentRules.classification(e.getTypeGroup(), d, errors);
         if (!errors.isEmpty()) {
@@ -211,7 +273,7 @@ public class EstablishmentService {
 
     /**
      * Página visível? O dono sempre vê a sua (inclusive fora do ar). Os demais só com status ACTIVE/CLOSED, conta
-     * dona ativa e selo conferido; com foco em bebida alcoólica, só logado e com 18+. Não revela qual regra barrou.
+     * dona ativa e selo conferido; com foco em bebida alcoólica, só logado e com 18+ verificado (RF17). Não revela qual regra barrou.
      */
     @Transactional(readOnly = true)
     public Establishment requireVisible(long id, Optional<UserAccount> viewer) {
@@ -223,13 +285,7 @@ public class EstablishmentService {
             throw notFound();
         }
         if (e.isAlcoholFocused()) {
-            if (viewer.isEmpty()) {
-                throw new CommonExceptions.Unauthenticated("Entre na sua conta para ver: conteúdo de bebida alcoólica "
-                        + "é só para maiores de 18.");
-            }
-            if (!age.adult(viewer.get().getUserDateOfBirth())) {
-                throw notFound();
-            }
+            ageGate.requireAlcoholAccess(viewer.orElse(null), this::notFound);
         }
         return e;
     }
@@ -261,9 +317,10 @@ public class EstablishmentService {
         return u;
     }
 
-    private Establishment requireOwned(long id, long viewerId) {
+    /** Quem não pode editar recebe 404, como se o lugar não existisse para ele. */
+    private Establishment requireEditable(long id, long viewerId) {
         Establishment e = establishments.findById(id).orElseThrow(this::notFound);
-        if (!Objects.equals(e.getOwnerId(), viewerId)) {
+        if (!editors.canEdit(e, viewerId)) {
             throw notFound();
         }
         return e;
@@ -305,12 +362,21 @@ public class EstablishmentService {
         boolean isOwner = viewer.isPresent() && Objects.equals(viewer.get().getId(), e.getOwnerId());
         List<Review> counting = reviews.findCounting(e.getId(), AccountStatus.ACTIVE);
         List<String> blockers = isOwner ? publishBlockers(e, owner) : null;
+        Instant now = clock.instant();
         return new EstablishmentView(e.getId(), e.getName(), e.getDescription(), type(e.getPrimaryType()),
                 e.getSecondaryTypes().stream().map(EstablishmentService::type).toList(),
                 new Coded(e.getTypeGroup().name(), e.getTypeGroup().getLabel(), null),
                 classification(e), price(e, counting), location(e, isOwner, owner), rating(counting),
                 owner.map(EstablishmentService::ownerView).orElse(null), e.isAlcoholFocused(), e.getStatus(),
-                isOwner ? blockers.isEmpty() : null, blockers, e.getCreatedAt(), e.getUpdatedAt());
+                isOwner ? blockers.isEmpty() : null, blockers, e.getCreatedAt(), e.getUpdatedAt(),
+                PlaceDetailsViews.openStatus(e, now), PlaceDetailsViews.hours(e, now), PlaceDetailsViews.charges(e),
+                PlaceDetailsViews.facets(e), PlaceDetailsViews.actions(e, now),
+                viewer.isPresent() && editors.canEdit(e, viewer.get().getId()));
+    }
+
+    /** "Aberto agora" do lugar, para o card da busca (RF10). */
+    EstablishmentViews.OpenStatusView openStatus(Establishment e) {
+        return PlaceDetailsViews.openStatus(e, clock.instant());
     }
 
     RatingView rating(List<Review> counting) {

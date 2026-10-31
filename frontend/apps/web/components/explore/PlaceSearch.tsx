@@ -4,6 +4,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useOptimistic, useState, useTransition } from 'react';
 import type { EstablishmentCard as Card } from '@friendly-eats/api';
+import { AlcoholHiddenNotice } from '@/components/age/AlcoholNotice';
 import { EstablishmentCard } from '@/components/EstablishmentCard';
 import { Notice } from '@/components/Form';
 import { IconSearch } from '@/components/icons';
@@ -162,6 +163,7 @@ export function PlaceSearch({ basePath, keep }: Props) {
                   : ''}
             </p>
           </div>
+          <AlcoholHiddenNotice />
 
           {results.isError && (
             <Notice tone="error" live>

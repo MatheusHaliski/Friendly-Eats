@@ -5,11 +5,15 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { BrowserContext, Page, Route } from '@playwright/test';
+import { ModerationState } from './mock-moderation';
 import { PostsState } from './mock-posts';
+import { TitularState } from './mock-titular';
 import type {
   ConsentList,
   ConsentView,
+  EstablishmentDraft,
   EstablishmentView,
+  FacetView,
   MfaSetupView,
   PreferencesPatch,
   PreferencesView,
@@ -90,8 +94,14 @@ export class MockApi {
   csrfToken = `csrf-${Math.random().toString(36).slice(2)}`;
   readonly myReviews = new Map<string, ReviewView>();
   private accountState: AccountState | null = null;
+  /** Lugares do dono logado (RF6 · RF11): nascem de meus-lugares.json e mudam com o POST e o PATCH. */
+  private ownedPlaces: Map<string, EstablishmentView> | null = null;
   /** Posts, comentários, perfis e moldura (RF9 · RF12 · RF14 · RF15 · RF16). */
   readonly posts: PostsState = this.makePosts();
+  /** Moderação e segurança entre usuários (RF13 · RF19). */
+  readonly moderation: ModerationState = this.makeModeration();
+  /** Idade verificada, responsável, encarregado e "Seus dados" (RF17 · RF18). */
+  readonly titular: TitularState = this.makeTitular();
   private overrides: Array<{ method: string; pattern: RegExp; handler: Handler }> = [];
 
   constructor(
@@ -107,12 +117,38 @@ export class MockApi {
         return host.session;
       },
       uploads: () => (host.session ? host.account.uploads : null),
+      alcoholVisible: () => host.titular.alcoholVisible(),
+    });
+  }
+
+  private makeTitular(): TitularState {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- o estado do titular lê a sessão atual
+    const host = this;
+    return new TitularState(fixture, {
+      get session() {
+        return host.session;
+      },
+      sudo: (password, code) => host.sudo(password, code),
+    });
+  }
+
+  private makeModeration(): ModerationState {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- o estado da moderação lê a sessão atual
+    const host = this;
+    return new ModerationState(fixture, {
+      get session() {
+        return host.session;
+      },
     });
   }
 
   async install(): Promise<void> {
     await this.page.route('**/api/v1/**', (route) => this.handle(route));
     await this.page.route(`${BUCKET_ORIGIN}/**`, (route) => this.bucket(route));
+    // tiles do mapa (Leaflet + OpenStreetMap, RF11): nenhum pedido sai para a internet
+    await this.page.route('https://tile.openstreetmap.org/**', (route) =>
+      route.fulfill({ status: 200, headers: { 'Content-Type': 'image/png' }, body: readFileSync(AVATAR_PNG) }),
+    );
     await this.page.route(`**${MEDIA_PUBLIC}**`, (route) =>
       route.fulfill({
         status: 200,
@@ -125,6 +161,7 @@ export class MockApi {
   login(kind: 'comensal' | 'estabelecimento' = 'comensal', patch: Partial<SessionUserView> = {}): SessionUserView {
     this.session = { ...fixture<SessionUserView>(`sessao-${kind}`), ...patch };
     this.accountState = null;
+    this.titular.reset();
     return this.session;
   }
 
@@ -292,17 +329,29 @@ export class MockApi {
     if (m === 'GET' && p === '/api/v1/taxonomy') return { status: 200, body: fixture('taxonomia'), headers: { 'Cache-Control': 'max-age=3600, public' } };
 
     if (m === 'GET' && p === '/api/v1/establishments') return { status: 200, body: this.search(rec.search) };
+    if (m === 'POST' && p === '/api/v1/establishments') return this.savePlace(null, rec.body as EstablishmentDraft);
+    const ownedMatch = /^\/api\/v1\/establishments\/(\d+)$/.exec(p);
+    if (ownedMatch && m === 'PATCH') return this.savePlace(ownedMatch[1]!, rec.body as EstablishmentDraft);
+    if (ownedMatch && m === 'GET' && this.owned().has(ownedMatch[1]!)) return { status: 200, body: this.owned().get(ownedMatch[1]!) };
+
+    const moderationReply = this.moderation.handle(rec);
+    if (moderationReply) return moderationReply;
 
     const postsReply = this.posts.handle(rec);
     if (postsReply) return postsReply;
+    const titularReply = this.titular.handle(rec);
+    if (titularReply) return titularReply;
 
     if (placeMatch) {
       const [, id, reviews, me] = placeMatch;
       const place = this.place(id!);
       if (!place) return problem(404, 'Estabelecimento não encontrado.');
       if (place.adultsOnly) {
-        if (!this.session) return problem(401, 'Entre na sua conta para ver: conteúdo de bebida alcoólica é só para maiores de 18.');
+        if (!this.session) return problem(401, 'Entre na sua conta e verifique a idade para ver: conteúdo de bebida alcoólica é só para maiores de 18.');
         if (this.session.minor) return problem(404, 'Estabelecimento não encontrado.');
+        if (!this.titular.alcoholVisible()) {
+          return problem(403, 'Conteúdo de bebida alcoólica aparece só depois de verificar a idade.', { ageVerificationRequired: true });
+        }
       }
       if (!reviews && m === 'GET') return { status: 200, body: place };
       if (reviews && !me && m === 'GET') {
@@ -328,13 +377,13 @@ export class MockApi {
     }
     if (m === 'GET' && p === '/api/v1/me/establishments') {
       if (!this.session) return problem(401, 'Entre na sua conta para continuar.');
-      return { status: 200, body: ['ESTABELECIMENTO', 'VAREJO'].includes(this.session.category.code) ? fixture('meus-lugares') : [] };
+      return { status: 200, body: [...this.owned().values()] };
     }
     return problem(404, `Rota não simulada: ${m} ${p}`);
   }
 
   /** Modo sudo (StepUp): senha e, com 2FA, o código do app ou um de recuperação. */
-  private sudo(password: unknown, code: unknown): Reply | null {
+  sudo(password: unknown, code: unknown): Reply | null {
     const mfa = this.account.mfa;
     const okCode = !mfa.enabled || code === CODIGO_2FA || (typeof code === 'string' && mfa.codes.includes(code));
     if (password === SENHA_CERTA && okCode) return null;
@@ -584,8 +633,115 @@ export class MockApi {
           streetNumber: card.location.approximate ? null : base.location.streetNumber,
         },
         classification: { ...base.classification, chip: card.chip, primaryCuisine: card.primaryCuisine, primaryFormat: card.primaryFormat },
+        openStatus: card.openStatus,
       };
     }
+  }
+
+  /** Lugares da conta logada (Estabelecimento ou Varejo), com viewerCanEdit. */
+  owned(): Map<string, EstablishmentView> {
+    if (!this.session || !['ESTABELECIMENTO', 'VAREJO'].includes(this.session.category.code)) return new Map();
+    this.ownedPlaces ??= new Map(fixture<EstablishmentView[]>('meus-lugares').map((p) => [String(p.id), p]));
+    return this.ownedPlaces;
+  }
+
+  /**
+   * POST e PATCH do lugar (RF6 · RF11), simplificados: confere a conta, o domínio dos links (como a API) e devolve a
+   * página do dono com os blocos montados a partir do corpo.
+   */
+  private savePlace(id: string | null, d: EstablishmentDraft): Reply {
+    if (!this.session) return problem(401, 'Entre na sua conta para continuar.');
+    if (!['ESTABELECIMENTO', 'VAREJO'].includes(this.session.category.code)) {
+      return problem(403, 'Só contas de Estabelecimento ou de Varejo & Marca cadastram lugares. Para indicar um lugar, avalie ou publique sobre ele.');
+    }
+    const owned = this.owned();
+    if (id && !owned.has(id)) return problem(404, 'Estabelecimento não encontrado.');
+    const tax = fixture<TaxonomyCatalog>('taxonomia');
+    const errors: string[] = [];
+    for (const l of d.actions?.links ?? []) {
+      const provider = tax.actionProviders.find((x) => x.code === l.provider);
+      const host = /^https:\/\/([^/:?#]+)/i.exec(l.url)?.[1]?.toLowerCase();
+      if (!provider || !host || !provider.domains.some((dm) => host === dm || host.endsWith(`.${dm}`))) {
+        errors.push(`Link do ${provider?.label ?? l.provider}: endereço HTTPS de ${provider?.domains.join(' ou ')} (ex.: https://www.${provider?.domains[0]}/...).`);
+      }
+    }
+    if (errors.length) return problem(422, errors[0]!, { title: 'Revise os dados', errors });
+    const base: EstablishmentView = id
+      ? owned.get(id)!
+      : {
+          ...fixture<EstablishmentView>('lugar-2'),
+          id: 50,
+          published: false,
+          publishBlockers: ['Aguardando a conferência do selo da conta (CNPJ ou CPF e documentos).'],
+          viewerCanEdit: true,
+          owner: { id: this.session.id, name: this.session.name, handle: this.session.handle, category: this.session.category, verified: false },
+        };
+    const type = tax.establishmentTypes.find((t) => t.code === d.primaryType);
+    const facetItems: FacetView[] = Object.entries(d.facets ?? {}).map(([code, value]) => {
+      const f = tax.facets.find((x) => x.code === code)!;
+      return { code, label: f.label, value, valueLabel: f.values.find((v) => v.code === value)?.label ?? value, lucideIcon: f.lucideIcon, origin: 'DECLARADO_DONO', originLabel: 'Declarado pelo estabelecimento' };
+    });
+    const sections = base.facets.map((s) => ({ ...s, items: s.items.filter((i) => i.origin === 'LEI') })).filter((s) => s.items.length);
+    for (const item of facetItems) {
+      const code = tax.facets.find((x) => x.code === item.code)!.section;
+      const sec = sections.find((s) => s.code === code);
+      if (sec) sec.items.unshift(item);
+      else sections.push({ code, label: tax.facets.find((x) => x.code === item.code)!.sectionLabel, items: [item] });
+    }
+    const days: Array<[EstablishmentView['hours']['weekly'][number]['day'], string]> = [
+      ['MONDAY', 'Segunda'], ['TUESDAY', 'Terça'], ['WEDNESDAY', 'Quarta'], ['THURSDAY', 'Quinta'], ['FRIDAY', 'Sexta'], ['SATURDAY', 'Sábado'], ['SUNDAY', 'Domingo'],
+    ];
+    const weekly = d.hours?.weekly;
+    const fee = d.charges?.serviceFeePercent ?? null;
+    const view: EstablishmentView = {
+      ...base,
+      name: d.name ?? base.name,
+      description: d.description === undefined ? base.description : d.description || null,
+      primaryType: type ? { code: type.code, label: type.label, group: type.group } : base.primaryType,
+      status: d.status ?? base.status,
+      location: d.location ? { ...base.location, ...d.location, approximate: false } : base.location,
+      hours: d.hours
+        ? {
+            ...base.hours,
+            informed: !!weekly,
+            weekly: weekly ? days.map(([day, label]) => ({ day, label, today: false, closed: !weekly[day]?.length, ranges: (weekly[day] ?? []).map((r) => ({ ...r, overnight: r.closes < r.opens && r.closes !== '00:00' })) })) : [],
+            special: d.hours.special.map((x) => ({ date: x.date, label: x.date.split('-').reverse().slice(0, 2).join('/'), closed: x.closed, ranges: x.ranges.map((r) => ({ ...r, overnight: false })), note: x.note })),
+            temporaryClosure: d.temporaryClosure ?? base.hours.temporaryClosure,
+          }
+        : base.hours,
+      openStatus: d.temporaryClosure?.closed
+        ? { ...base.openStatus, state: 'TEMPORARILY_CLOSED', open: false, label: 'Fechado temporariamente' }
+        : weekly
+          ? { ...base.openStatus, state: 'CLOSED', open: false, label: 'Fechado agora · abre amanhã às 11:30' }
+          : base.openStatus,
+      charges: d.charges
+        ? {
+            ...base.charges,
+            serviceFeePercent: fee,
+            lines: fee ? [{ code: 'TAXA_SERVICO', label: 'Taxa de serviço', text: `Taxa de serviço de ${fee}% (opcional)`, detail: 'É gorjeta: você paga só se quiser (Lei 13.419/2017).' }] : [],
+            declaredAt: fee ? '2026-10-31T12:00:00Z' : null,
+            declaredLabel: fee ? 'Declarado pelo estabelecimento em 31/10/2026' : null,
+          }
+        : base.charges,
+      facets: d.facets ? sections : base.facets,
+      actions: d.actions
+        ? [
+            ...d.actions.links.map((l) => {
+              const pr = tax.actionProviders.find((x) => x.code === l.provider)!;
+              const reserve = pr.kind === 'RESERVA';
+              return {
+                kind: pr.kind, provider: pr.code, providerLabel: pr.label, label: `${reserve ? 'Reservar' : 'Pedir'} pelo ${pr.label}`, url: l.url, preferred: l.preferred,
+                exitNotice: reserve ? `Você vai sair do Friendly Eats. A reserva é feita com ${pr.label}.` : `Você vai sair do Friendly Eats. Pedido e pagamento são com ${pr.label}.`, phone: null,
+              };
+            }),
+            ...(d.actions.whatsapp
+              ? [{ kind: 'WHATSAPP' as const, provider: 'WHATSAPP', providerLabel: 'WhatsApp', label: 'Conversar no WhatsApp', url: `https://wa.me/55${d.actions.whatsapp.replace(/\D/g, '')}`, preferred: false, exitNotice: 'Abre o WhatsApp numa conversa com o estabelecimento; o Friendly Eats não vê a conversa.', phone: `+55${d.actions.whatsapp.replace(/\D/g, '')}` }]
+              : []),
+          ]
+        : base.actions,
+    };
+    owned.set(String(view.id), view);
+    return { status: id ? 200 : 201, body: view };
   }
 
   private search(sp: URLSearchParams): SearchPage {
@@ -593,7 +749,7 @@ export class MockApi {
     const q = sp.get('q')?.toLowerCase();
     let items = page.items;
     if (q) items = items.filter((c) => c.name.toLowerCase().includes(q));
-    if (!this.session || this.session.minor) items = items.filter((c) => !c.adultsOnly);
+    if (!this.titular.alcoholVisible()) items = items.filter((c) => !c.adultsOnly);
     const lat = sp.get('lat');
     if (lat) items = items.map((c, i) => ({ ...c, distanceKm: Math.round((0.4 + i * 1.3) * 10) / 10 }));
     const removed = page.items.length - items.length;
@@ -629,7 +785,8 @@ export class MockApi {
         dimensions: draft.dimensions ?? {},
         spentPerPersonCents: draft.spentPerPersonCents,
         body: draft.body,
-        trust: 'REVIEW_UNVERIFIED',
+        trust: draft.disclosure === 'COURTESY' || draft.disclosure === 'INVITATION' ? 'REVIEW_INCENTIVIZED' : draft.disclosure === 'RELATIONSHIP' ? 'REVIEW_CONFLICT' : 'REVIEW_UNVERIFIED',
+        status: 'PUBLISHED',
         edited: !!current,
         author: { name: this.session.name, handle: this.session.handle, category: this.session.category },
         createdAt: current?.createdAt ?? now,

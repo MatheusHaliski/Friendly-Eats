@@ -8,16 +8,19 @@ flowchart TD
     X -- não --> N404[404]
     X -- sim --> A{Quem pede é o autor?}
     A -- sim --> OK
-    A -- não --> AC{Autor ACTIVE?}
+    A -- não --> MO{Retirado pela moderação<br/>ou bloqueio entre os dois? RF13 · RF19}
+    MO -- sim --> N404
+    MO -- não --> AC{Autor ACTIVE?}
     AC -- não --> N404
     AC -- sim --> PR{Perfil do autor privado?<br/>sem preferências: menor de 16}
     PR -- sim --> N404
     PR -- não --> R{Post AGE_18?}
     R -- não --> OK
     R -- sim --> L{Tem sessão?}
-    L -- não --> N401[401 · entre, 18+]
-    L -- sim --> AD{18 anos ou mais?}
-    AD -- não --> N404
+    L -- não --> N401[401 · entre e verifique a idade]
+    L -- sim --> AD{AgeGate · RF17<br/>18+ declarado e verificado?}
+    AD -- "menor ou VERIFIED_MINOR" --> N404
+    AD -- "adulto sem verificação" --> N403[403 · ageVerificationRequired]
     AD -- sim --> OK[200 · página completa]
     OK --> P{Lugar citado no ar para quem vê?}
     P -- sim --> PL[establishment preenchido]
@@ -32,8 +35,8 @@ flowchart TD
     V -- PROFILE ou outro --> E400[400]
     V -- ok --> C{cursor válido?}
     C -- não --> E400
-    C -- sim --> Q[SQL VISIBLE · PUBLISHED · não encerrado<br/>autor ativo e perfil público ou o próprio]
-    Q --> AG{Quem vê tem 18+?}
+    C -- sim --> Q[SQL VISIBLE · PUBLISHED · não encerrado<br/>autor ativo e perfil público ou o próprio<br/>sem moderação, sem bloqueio nos dois sentidos, sem silenciado]
+    Q --> AG{Quem vê tem 18+ verificado?<br/>AgeGate · RF17}
     AG -- não --> LV[só LIVRE]
     AG -- sim --> ALL[LIVRE e AGE_18]
     LV & ALL --> ORD[ORDER BY created_at DESC, id DESC<br/>LIMIT size + 1]

@@ -47,7 +47,7 @@ paths:
 |---|---|
 | **Base legal (LGPD)** | Art. 7º, V (execução de contrato) para os dados do cadastro e o aceite dos Termos, inclusive o CPF do negócio informal, usado só para conferir o selo e nunca exibido (Art. 6º, III); Art. 7º, I (consentimento) para os usos opcionais, que começam desligados ([RF3](../RF3/README.md)) |
 | **Termos de Uso** | [`docs/legal/TERMOS_DE_USO.md`](../legal/TERMOS_DE_USO.md), com marcadores `{{…}}` para os dados da empresa; aceite obrigatório, caixa desmarcada |
-| **ECA Digital** | Mínimo 13 anos; menor de 16 informa o e-mail do responsável e nasce com proteções travadas; qualquer tipo que não seja comensal exige 18+ |
+| **ECA Digital** | Mínimo 13 anos; menor de 16 informa o e-mail do responsável, que recebe o convite para vincular a conta ([RF17](../RF17/README.md)), e nasce com proteções travadas; qualquer tipo que não seja comensal exige 18+ |
 | **Status** | 🟡 Parcial: API, regras, verificação de e-mail e testes prontos; envio real de e-mail, consulta automática de CNPJ e telas ainda não |
 
 ## Critérios de aceite
@@ -74,7 +74,8 @@ paths:
 4. Idade: menos de 13 é recusado; menos de 16 exige `guardianEmail` e preferências protetivas; tipo diferente de
    comensal exige 18+.
 5. Na mesma transação: conta `PENDING_VERIFICATION`, linha em `terms_acceptance` (versão, canal, HMAC do IP),
-   **5 consentimentos com `granted = false`** e preferências padrão.
+   **5 consentimentos com `granted = false`** e preferências padrão; para menor de 16, o vínculo `PENDING` com o
+   responsável e o convite por e-mail ([RF17](../RF17/README.md)).
 6. O cadastro já abre a sessão; um código de 6 dígitos vai por e-mail (30 min, 5 tentativas, reenvio 1/min) e
    confirmar leva a conta a `ACTIVE`. Sem confirmar, a pessoa lê mas não interage (`403`).
 7. Todos os erros de validação voltam juntos (`422` com `errors[]`).
@@ -114,3 +115,4 @@ O preto da conta Oficial dá 1,06:1 sobre o fundo escuro; o anel de 2 px `#D6D0C
 | Pendências | e-mail transacional real; eliminar cadastro não confirmado em 7 dias; consulta de CNPJ e CNAE (BrasilAPI/Receita) | ⏳ |
 | Tela | app web: `/cadastro` (7 tipos com cor + glifo + rótulo, campos do tipo, "Não tenho CNPJ" com CPF, Termos desmarcados), `/confirmar-email` e `/termos` (gerada de `docs/legal/TERMOS_DE_USO.md`); e2e `cadastro.spec.ts` com axe | ✅ |
 | Foco nos erros | `/cadastro` e `/confirmar-email`: o resumo de erros e os avisos recebem o foco **depois** de montados (`useDeferredFocus`, em `components/Form.tsx`); antes, o foco pedido por `requestAnimationFrame` se perdia com a máquina ocupada; e2e `cadastro.spec.ts` | ✅ |
+| Responsável | `RegistrationService` chama `GuardianService.inviteOnRegistration` na mesma transação; `GuardianApiIT` registra um menor de 14 e confere o convite ([RF17](../RF17/README.md)) | ✅ |

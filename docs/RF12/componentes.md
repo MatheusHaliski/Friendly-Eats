@@ -10,6 +10,7 @@ flowchart LR
     IS --> RD["PostReader · RF14<br/>post visível"]
     IS --> AD["AuthorDirectory · RF14<br/>preferências do autor"]
     IS --> PL["PublicLinks.postShareUrl · RF2"]
+    IS --> SG["SafetyGuard · RF19<br/>bloqueio, silêncio e palavras"]
     IS --> TS["TrendingService · RF14"]
     IS --> PR["PostRepository · RF9<br/>reações, compartilhamentos e contadores"]
     IS --> CR["PostCommentRepository"]

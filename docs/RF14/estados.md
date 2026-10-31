@@ -13,8 +13,8 @@ stateDiagram-v2
     ForaDoFeed --> NoFeed : autor reativado ou perfil público
     NoFeed --> [*] : apagado ou conta eliminada
     note right of NoFeed
-        Visitante e menor de 18
-        veem só os LIVRE.
+        Visitante, menor de 18 e adulto sem a
+        idade verificada (RF17) veem só os LIVRE.
     end note
     note right of ForaDoFeed
         Arquivado e encerrado abrem

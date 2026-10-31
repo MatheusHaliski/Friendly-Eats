@@ -25,7 +25,7 @@ sequenceDiagram
     alt perfil privado e não é o titular
         API-->>V: 403
     else ok
-        S->>DB: posts do autor (só LIVRE para quem não tem 18+)
+        S->>DB: posts do autor (só LIVRE para quem não tem 18+ verificado, RF17)
         API-->>V: 200 {items, nextCursor}
     end
 ```

@@ -71,3 +71,38 @@ export function useRequireSession(path: string) {
   }, [session.isSuccess, user, router, path]);
   return session;
 }
+
+// ------------------------------------------------------------ RF17 · idade e responsável · RF18 · seus dados
+
+export const AGE_KEY = ['eu', 'idade'] as const;
+export const GUARDIAN_KEY = ['eu', 'responsavel'] as const;
+export const SUPERVISED_KEY = ['responsavel', 'menores'] as const;
+export const supervisionKey = (minorId: string | number) => ['responsavel', 'menores', String(minorId)] as const;
+export const EXPORTS_KEY = ['eu', 'exportacoes'] as const;
+export const PRIVACY_CONTACT_KEY = ['privacidade', 'contato'] as const;
+
+/** Estado da verificação de idade; só com sessão (o visitante vê sempre a versão sem bebida). */
+export function useAgeVerification(enabled = true) {
+  return useQuery({ queryKey: AGE_KEY, queryFn: () => api.age.status(), enabled, staleTime: 60_000 });
+}
+
+export function useGuardianLink(enabled = true) {
+  return useQuery({ queryKey: GUARDIAN_KEY, queryFn: () => api.guardian.status(), enabled });
+}
+
+export function useSupervisedMinors(enabled = true) {
+  return useQuery({ queryKey: SUPERVISED_KEY, queryFn: () => api.guardian.minors(), enabled });
+}
+
+export function useDataExports() {
+  return useQuery({
+    queryKey: EXPORTS_KEY,
+    queryFn: () => api.privacy.exports(),
+    // enquanto o arquivo é preparado, confere de novo a cada 5 s
+    refetchInterval: (q) => (q.state.data?.some((e) => e.status === 'REQUESTED' || e.status === 'PROCESSING') ? 5_000 : false),
+  });
+}
+
+export function usePrivacyContact() {
+  return useQuery({ queryKey: PRIVACY_CONTACT_KEY, queryFn: () => api.privacy.contact(), staleTime: 60 * 60_000 });
+}

@@ -24,6 +24,7 @@ classDiagram
         -GeoPrecision geoPrecision
         -AddressVisibility addressVisibility
         -Status status
+        -campos do RF11 · horários · cobranças · facetas · botões
         +setTypes(EstablishmentType, List) void
         +setLocation(...) void
         +setDeclaredPrice(Integer, Integer, boolean) void
@@ -101,6 +102,9 @@ classDiagram
         +get(Optional viewerId, id) EstablishmentView
         +requireVisible(id, Optional viewer) Establishment
     }
+    class PlaceEditors {
+        +canEdit(Establishment, viewerId) boolean
+    }
     class EstablishmentDrafts {
         <<records>>
         EstablishmentDraft
@@ -123,6 +127,7 @@ classDiagram
     EstablishmentService --> EstablishmentRules
     EstablishmentService --> PriceScale
     EstablishmentService --> EstablishmentRepository
+    EstablishmentService --> PlaceEditors
     EstablishmentService ..> EstablishmentDrafts : recebe
     EstablishmentService ..> EstablishmentViews : devolve
     EstablishmentRules --> Uf

@@ -12,6 +12,7 @@ import { mapSudoError } from '@/lib/field-errors';
 import { formatDate } from '@/lib/format';
 import { useSession } from '@/lib/queries';
 import { useLeaveAccount } from '@/lib/use-leave';
+import { DataExportCard } from './DataExportCard';
 import { SectionHeading } from './SectionHeading';
 import { checkSudo, SudoFields, sudoBody, type SudoValues } from './SudoFields';
 
@@ -22,7 +23,7 @@ export function deletionDate(now: Date = new Date()): Date {
   return new Date(now.getTime() + GRACE_DAYS * 24 * 60 * 60 * 1000);
 }
 
-/** Configurações → Conta (RF4 · RF5): sair e excluir a conta. */
+/** Configurações → Conta (RF4 · RF5 · RF18): seus dados, sair e excluir a conta. */
 export function AccountSection() {
   const uid = useId();
   const session = useSession();
@@ -39,7 +40,9 @@ export function AccountSection() {
 
   return (
     <>
-      <SectionHeading description="Sair deste aparelho ou excluir a conta.">Conta</SectionHeading>
+      <SectionHeading description="Baixar uma cópia dos seus dados, sair deste aparelho ou excluir a conta.">Conta</SectionHeading>
+
+      <DataExportCard withCode={user.mfaEnabled} />
 
       <section aria-labelledby={`${uid}-sair`} className="fe-card grid gap-3 p-5">
         <h2 id={`${uid}-sair`} className="text-xl font-bold">
@@ -215,12 +218,12 @@ export function DeleteAccountDialog({
           <div className="grid gap-1">
             <p className="font-bold">O que continua existindo:</p>
             <ul className="list-disc pl-5">
-              <li>registros de acesso (data, hora e IP) por 6 meses, em sigilo — Marco Civil da Internet, art. 15.</li>
+              <li>registros de acesso (data, hora, IP e porta) por 6 meses, cifrados e em sigilo — Marco Civil da Internet, art. 15.</li>
             </ul>
           </div>
           <p className="flex items-start gap-1.5 text-sm text-muted">
             <IconInfo size={16} className="mt-0.5 flex-none" />
-            Exportar uma cópia dos seus dados ainda não está disponível pelo app; peça pelo suporte antes de excluir.
+            Quer guardar uma cópia? Antes de excluir, peça em Seus dados, nesta mesma página.
           </p>
 
           <ErrorSummary ref={summaryRef} items={summary} />

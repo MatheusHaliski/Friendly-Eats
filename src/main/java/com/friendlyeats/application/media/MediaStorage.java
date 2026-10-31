@@ -22,6 +22,15 @@ public interface MediaStorage {
 
     void write(String objectKey, byte[] bytes, String contentType);
 
+    /**
+     * Objeto privado (exportação de dados, RF18): sem cache público e baixado com {@code downloadName}. Só se lê
+     * por {@link #presignGet}.
+     */
+    void writePrivate(String objectKey, byte[] bytes, String contentType, String downloadName);
+
+    /** URL de {@code GET} válida por {@code ttl} (exportação de dados, RF18). */
+    String presignGet(String objectKey, Duration ttl);
+
     /** Apagar é idempotente: objeto que não existe não é erro. */
     void delete(String objectKey);
 

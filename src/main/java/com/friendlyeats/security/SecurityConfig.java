@@ -1,5 +1,6 @@
 package com.friendlyeats.security;
 
+import com.friendlyeats.application.privacy.AccessLogService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -32,14 +34,19 @@ import java.util.Map;
  *   <li>CSRF no padrão SPA: cookie {@code XSRF-TOKEN} + cabeçalho {@code X-XSRF-TOKEN} em toda escrita.</li>
  *   <li>Leitura pública dos documentos legais, da taxonomia, das páginas de estabelecimento com as avaliações, dos
  *       posts com os comentários, do "em alta", dos perfis públicos e do catálogo de molduras; o resto exige sessão.
- *       Regras por estado da conta (ativa, pendente, suspensa), de 18+ e de perfil privado ficam nos serviços.</li>
+ *       Regras por estado da conta (ativa, pendente, suspensa), de 18+ verificado (RF17) e de perfil privado ficam
+ *       nos serviços.</li>
+ *   <li>Moderação (RF13): {@code /api/v1/moderation/**} só com {@code ROLE_MODERATOR}. São públicos o catálogo de
+ *       motivos, o formulário de denúncia sem conta (STF: canal para não usuários) e a integridade da página do lugar
+ *       (alertas ao consumidor e congelamento).</li>
+ *   <li>Registro de acesso do Marco Civil (RF18) para quem está logado ({@link AccessLogFilter}).</li>
  * </ul>
  */
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain api(HttpSecurity http, Clock clock,
+    SecurityFilterChain api(HttpSecurity http, Clock clock, AccessLogService accessLog,
                             @Value("${friendly-eats.security.session-absolute-timeout:24h}") Duration absoluteTimeout)
             throws Exception {
         http
@@ -47,6 +54,7 @@ public class SecurityConfig {
                 .securityContext(c -> c.securityContextRepository(securityContextRepository()))
                 .sessionManagement(s -> s.sessionFixation(f -> f.changeSessionId()))
                 .authorizeHttpRequests(auth -> auth
+                        // documentos legais e o contato do encarregado (RF18) são públicos
                         .requestMatchers(HttpMethod.GET, "/api/v1/legal/**", "/api/v1/taxonomy").permitAll()
                         // páginas e avaliações de estabelecimentos são públicas; a regra de 18+ fica no serviço
                         .requestMatchers(HttpMethod.GET, "/api/v1/establishments", "/api/v1/establishments/*",
@@ -59,6 +67,11 @@ public class SecurityConfig {
                         .permitAll()
                         // catálogo e recomendações de moldura do post (RF16)
                         .requestMatchers(HttpMethod.GET, "/api/v1/backgrounds/**").permitAll()
+                        // moderação (RF13): fila só para moderador; denúncia sem conta e integridade do lugar públicas
+                        .requestMatchers("/api/v1/moderation/**").hasRole("MODERATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reports/reasons", "/api/v1/establishments/*/integrity")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/reports/public").permitAll()
                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e
@@ -71,7 +84,9 @@ public class SecurityConfig {
                 .headers(h -> h
                         .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'; frame-ancestors 'none'"))
                         .referrerPolicy(r -> r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)))
-                .addFilterAfter(new AbsoluteSessionTimeoutFilter(absoluteTimeout, clock), SecurityContextHolderFilter.class);
+                .addFilterAfter(new AbsoluteSessionTimeoutFilter(absoluteTimeout, clock), SecurityContextHolderFilter.class)
+                // registro de acesso do Marco Civil (RF18): depois da autorização, só para quem está logado
+                .addFilterAfter(new AccessLogFilter(accessLog), AuthorizationFilter.class);
         return http.build();
     }
 
