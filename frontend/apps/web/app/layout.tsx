@@ -43,6 +43,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/seguranca" className="inline-flex min-h-6 items-center underline">
               Segurança e denúncias
             </Link>
+            <Link href="/privacidade" className="inline-flex min-h-6 items-center underline">
+              Privacidade e seus dados
+            </Link>
           </div>
         </footer>
       </body>

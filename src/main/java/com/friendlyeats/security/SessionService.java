@@ -1,5 +1,6 @@
 package com.friendlyeats.security;
 
+import com.friendlyeats.application.privacy.AccessLogService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -23,7 +24,8 @@ import java.util.Map;
 
 /**
  * Sessões opacas no Valkey (Spring Session indexado pelo id do usuário):
- * cria a sessão completa depois do login (id novo — anti-fixação), lista, encerra uma, as outras ou todas.
+ * cria a sessão completa depois do login (id novo — anti-fixação) e grava o registro de acesso do Marco Civil
+ * (RF18), lista, encerra uma, as outras ou todas.
  *
  * <p>O id de sessão é o próprio segredo do cookie, então a API nunca o devolve: a lista usa um identificador
  * derivado (HMAC), que só serve para pedir o encerramento.
@@ -40,15 +42,17 @@ public class SessionService {
     private final AppSecrets secrets;
     private final UserRoleRepository roles;
     private final Clock clock;
+    private final AccessLogService accessLog;
 
     public SessionService(FindByIndexNameSessionRepository<? extends Session> sessions,
                           SecurityContextRepository contextRepository, AppSecrets secrets, UserRoleRepository roles,
-                          Clock clock) {
+                          Clock clock, AccessLogService accessLog) {
         this.sessions = sessions;
         this.contextRepository = contextRepository;
         this.secrets = secrets;
         this.roles = roles;
         this.clock = clock;
+        this.accessLog = accessLog;
     }
 
     /**
@@ -71,6 +75,8 @@ public class SessionService {
         session.setAttribute(AUTH_AT, clock.millis());
         session.setAttribute(DEVICE, client.device());
         session.setAttribute(CHANNEL, client.channel());
+        // Marco Civil, art. 15 (RF18): data, hora, IP e porta do login, cifrados e guardados por 6 meses
+        accessLog.login(userId, request.getRemoteAddr(), request.getRemotePort(), client.channel());
     }
 
     /** Logout desta sessão: invalida no servidor (o cookie velho deixa de valer em qualquer aba). */

@@ -39,7 +39,7 @@ paths:
 |---|---|
 | **Base legal (LGPD)** | Os dados do estabelecimento não são dado pessoal (Art. 5º, I). A exceção é a cozinha caseira com CPF, em que o endereço é a casa do titular: o público vê só o bairro e um ponto arredondado (Art. 6º, III, necessidade) |
 | **Consumidor (CDC)** | A faixa de preço é informação ao consumidor (art. 6º, III). Com 5 relatos ou mais, a faixa vem das avaliações e não do dono, o que dificulta a faixa enganosa (art. 37, §1º) |
-| **Termos de Uso / ECA Digital** | Página de tipo com foco em bebida alcoólica é só para maiores de 18: o visitante precisa entrar e, para menor, ela não existe (`404`) |
+| **Termos de Uso / ECA Digital** | Página de tipo com foco em bebida alcoólica é só para maiores de 18 com a idade **verificada** ([RF17](../RF17/README.md)): o visitante precisa entrar, o adulto sem verificação recebe `403` com `ageVerificationRequired` e, para menor, ela não existe (`404`) |
 | **Taxonomia** | [`TAXONOMIA_FRIENDLY_EATS.md`](../TAXONOMIA_FRIENDLY_EATS.md): conta dona (2.4), tipo e grupo (7), preço (9) e local (11) |
 | **Status** | 🟡 Parcial: API, regras, página pública com selo, 18+, endereço protegido, preço derivado e o formulário do dono no app (com o pino no mapa) prontos; verificação automática de CNPJ e CNAE e moderação ainda não |
 
@@ -88,8 +88,10 @@ paths:
    removido). Para os demais, os dois campos vêm nulos.
 9. **18+.** Os 8 tipos com foco em bebida alcoólica (`BAR`, `BOTECO`, `GASTROBAR`, `BAR_COQUETELARIA`, `BAR_VINHOS`,
    `CERVEJARIA`, `VINICOLA_DESTILARIA` e `ADEGA`), quando são o **tipo principal**, marcam a página `adultsOnly`. O
-   visitante anônimo recebe `401` com a mensagem "Entre na sua conta para ver: conteúdo de bebida alcoólica é só para
-   maiores de 18." e quem tem menos de 18 recebe `404`. A mesma regra vale para a lista de avaliações (RF8).
+   visitante anônimo recebe `401` com a mensagem "Entre na sua conta e verifique a idade para ver: conteúdo de bebida
+   alcoólica é só para maiores de 18.", quem declarou 18+ mas não tem a idade verificada recebe `403` com
+   `ageVerificationRequired: true` ([RF17](../RF17/README.md), `AgeGate`) e quem tem menos de 18 (declarado ou
+   verificado) recebe `404`. A mesma regra vale para a lista de avaliações (RF8).
 10. **Editar.** `PATCH /api/v1/establishments/{id}` é só de quem o `PlaceEditors` aceita — hoje, o dono (para os
     outros, `404`); a equipe do RF20 entra por ali:
     - campo nulo não muda nada; tipos, local e preço são trocados por inteiro;
@@ -122,7 +124,7 @@ paths:
 | Camada | Artefato | Situação |
 |---|---|---|
 | Domínio | `Establishment` (`setTypes` com o grupo derivado, `setLocation`, `setDeclaredPrice`, `isAlcoholFocused`, `Status`), `EstablishmentType` (48 tipos, grupo, 18+, CNAE típico), `EstablishmentGroup`, `Uf` (código IBGE), `GeoPrecision`, `AddressVisibility`, `PriceLevel` (`Source`) | ✅ |
-| Regras | `EstablishmentRules.types/location/price/publicCoordinate`, `PriceScale` (limites, `levelOf`, `rangeLabel`), `EstablishmentService` (dono, CPF com um ponto, `requireVisible`, `requireEditable` com o `PlaceEditors`, `publishBlockers`, preço derivado, endereço por visibilidade) | ✅ |
+| Regras | `EstablishmentRules.types/location/price/publicCoordinate`, `PriceScale` (limites, `levelOf`, `rangeLabel`), `EstablishmentService` (dono, CPF com um ponto, `requireVisible` com o 18+ verificado pelo `AgeGate` do [RF17](../RF17/README.md), `requireEditable` com o `PlaceEditors`, `publishBlockers`, preço derivado, endereço por visibilidade) | ✅ |
 | Persistência | `V2__estabelecimento_e_avaliacao.sql`: tabela `establishment` com CHECKs, `point` gerado (`geography(Point,4326)`) e índices GiST, GIN e trigrama; `EstablishmentRepository` (`countByOwnerId`, `deleteAllOwnedBy`) | ✅ |
 | API | `POST /api/v1/establishments`, `GET` e `PATCH /api/v1/establishments/{id}`, `GET /api/v1/me/establishments`; GET público no `SecurityConfig` ([RF4](../RF4/README.md)). O `GET /api/v1/establishments` (busca) é do [RF10](../RF10/README.md), que monta os cards com `price`, `rating`, `location` e `classification` deste serviço: o card mostra o mesmo que a página | ✅ |
 | Moderação | `EstablishmentController.review` passa o HMAC do IP (`ClientInfo`) para os sinais de fraude; `ReviewDraft.disclosure` e `ReviewView.status` ([RF8](../RF8/README.md), [RF13](../RF13/README.md)); a página `/lugares/[id]` mostra o alerta ao consumidor e o congelamento (`IntegrityBanner`) e tem o menu "…" com "Denunciar"; o dono contesta avaliações na lista; a moderação tira a página do ar com `REMOVED` (decisão `REMOVE`) e devolve no recurso | ✅ |
@@ -130,3 +132,4 @@ paths:
 | Testes | `TaxonomyRulesTest.vocabulariesHaveTheResearchedSizeAndEveryCuisineDescendsFromItsMacroGeneric`, `TaxonomyRulesTest.typesFollowTheAccountKindAndPolosAreNeverSecondary`, `TaxonomyRulesTest.locationUsesTheIbgeCodeKeepsPinsInBrazilAndHidesTheHomeKitchenStreet`, `TaxonomyRulesTest.priceScaleDoublesFromTheReferenceMealAndRoundsToFiveReais`; `EstablishmentApiIT.establishmentPageIsPublicOnlyWithTheOwnerSealAndHidesTheHomeKitchenStreet` (inclui 6 cadastros simultâneos com CPF e a conta que vira cozinha caseira depois), `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice` (preço pelas avaliações), `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults` (18+), `EstablishmentApiIT.accountEliminationRemovesReviewsAndOwnedEstablishments` | ✅ |
 | Pendências | verificação automática de CNPJ e CNAE (BrasilAPI, matriz R8); revisão do selo pela moderação (RF13 ⏳); auditoria de troca de tipo principal (R10); preço pelo cardápio (`PRICE_SRC_MENU`) e cardápio por item (RF9); CEP pelo ViaCEP, município pelo nome (hoje o dono digita o código IBGE) e geocodificação; contêiner `dentro_de → POLO` (R5); equipe da página no `PlaceEditors` (RF20) | ⏳ |
 | Tela | app web: página `/lugares/[id]` (tipo, grupo, preço com origem, local com "Localização aproximada" e o mapa do [RF11](../RF11/README.md), selo do dono, aviso 18+, "Editar a página" para quem edita, "Denunciar" no menu "…" ([RF13](../RF13/README.md)) e a seção "Posts deste lugar", `PlacePosts`, com o feed `GET /establishments/{id}/posts` do [RF14](../RF14/README.md)); formulário do dono `PlaceForm` (`lib/place-form`, `PlaceMap` com o pino); e2e `lugar.spec.ts` e `lugar-dono.spec.ts` com axe | ✅ |
+| Idade verificada | `PlaceView`: o `403` com `ageVerificationRequired` mostra "Verifique a sua idade para ver" com o botão para `/configuracoes/idade`; o `401` leva a "Entrar e verificar a idade" ([RF17](../RF17/README.md)); e2e `titular.spec.ts` e `lugar.spec.ts` | ✅ |

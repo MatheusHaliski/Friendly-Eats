@@ -1,0 +1,20 @@
+{
+  "minor": { "minorId": 77, "name": "Duda Andrade", "handle": "duda", "age": 14, "linkedAt": "2026-10-22T15:00:00Z", "pendingRequests": 1 },
+  "protectionsLocked": true,
+  "protections": [
+    { "code": "PUBLIC_PROFILE", "label": "Perfil público", "description": "Qualquer pessoa vê as publicações no perfil.", "allowed": false },
+    { "code": "SENSITIVE_CONTENT", "label": "Mostrar conteúdo sensível", "description": "Fotos e textos que podem incomodar aparecem sem aviso.", "allowed": false },
+    { "code": "COMMENTS_FROM_EVERYONE", "label": "Comentários de todo mundo", "description": "Qualquer conta comenta, não só quem segue.", "allowed": false },
+    { "code": "NO_USAGE_REMINDER", "label": "Sem lembrete de tempo de uso", "description": "O lembrete de 60 minutos de uso fica desligado.", "allowed": false }
+  ],
+  "sensitiveConsent": false,
+  "sensitiveConsentAvailable": true,
+  "requests": [
+    { "id": 5, "protection": "PUBLIC_PROFILE", "label": "Perfil público", "status": "PENDING", "createdAt": "2026-10-30T18:00:00Z", "decidedAt": null }
+  ],
+  "history": [
+    { "actor": "MINOR", "action": "REQUESTED", "label": "Pedido para afrouxar uma proteção", "detail": "Perfil público", "occurredAt": "2026-10-30T18:00:00Z" },
+    { "actor": "GUARDIAN", "action": "ACCEPTED", "label": "Vínculo aceito pelo responsável", "detail": null, "occurredAt": "2026-10-22T15:00:00Z" },
+    { "actor": "MINOR", "action": "INVITED", "label": "Convite enviado ao responsável", "detail": null, "occurredAt": "2026-10-21T12:00:00Z" }
+  ]
+}

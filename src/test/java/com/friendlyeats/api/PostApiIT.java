@@ -237,9 +237,14 @@ class PostApiIT extends PostItBase {
         assertThat(titles(get("/api/v1/posts", minor17).getBody())).doesNotContain("Qual cerveja?");
         ResponseEntity<Map> anonymous = get("/api/v1/posts/" + beer, null);
         assertThat(status(anonymous)).isEqualTo(401);
-        assertThat((String) anonymous.getBody().get("detail")).contains("maiores de 18");
+        assertThat((String) anonymous.getBody().get("detail")).contains("verifique a idade").contains("maiores de 18");
         assertThat(status(get("/api/v1/posts/" + beer, minor17))).isEqualTo(404);
         assertThat(get("/api/v1/posts/" + beer, ana).getBody()).containsEntry("ageRating", "AGE_18");
+        // RF17: maior pela data declarada, mas sem a idade verificada: fora do feed e 403 com o pedido de verificação
+        assertThat(titles(get("/api/v1/posts", restaurant).getBody())).doesNotContain("Qual cerveja?").contains("Primeiro");
+        ResponseEntity<Map> unverified = get("/api/v1/posts/" + beer, restaurant);
+        assertThat(status(unverified)).isEqualTo(403);
+        assertThat(unverified.getBody()).containsEntry("ageVerificationRequired", true);
 
         // perfil privado: o post da Duda só aparece para ela
         assertThat(titles(get("/api/v1/posts", ana).getBody())).doesNotContain("Da Duda");

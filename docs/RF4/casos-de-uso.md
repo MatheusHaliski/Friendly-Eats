@@ -19,11 +19,13 @@ flowchart LR
     P(["Trocar senha"])
     X(["Ler os Termos como visitante"])
     XT(["Ler a taxonomia, a página do estabelecimento<br/>e as avaliações como visitante"])
-    X18(["Entrar para ver lugar 18+"])
+    X18(["Entrar e verificar a idade para ver lugar 18+ · RF17"])
+    RA(["Ter o acesso registrado · RF18<br/>data, hora, IP e porta cifrados por 6 meses"])
 
     APP["App autenticador"]:::actor
 
     U --- L & O & S & F & D & P
+    RA -. «include» .-> L
     A --- X & XT
     X18 -. «extend» tipo principal com bebida alcoólica .-> XT
     M -. «extend» 2FA ativo .-> L

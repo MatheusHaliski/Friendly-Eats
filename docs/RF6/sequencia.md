@@ -65,8 +65,10 @@ sequenceDiagram
     alt não existe, REMOVED, dono não ACTIVE ou selo diferente de VERIFIED
         S-->>V: 404
     else tipo principal 18+ e sem sessão
-        S-->>V: 401 · Entre na sua conta para ver, só para maiores de 18
-    else tipo principal 18+ e menor de 18
+        S-->>V: 401 · Entre e verifique a idade para ver, só para maiores de 18
+    else tipo principal 18+ e adulto sem a idade verificada (RF17, AgeGate)
+        S-->>V: 403 · ageVerificationRequired
+    else tipo principal 18+ e menor de 18 (declarado ou verificado)
         S-->>V: 404
     else visível
         S->>DB: avaliações PUBLISHED de autores ACTIVE

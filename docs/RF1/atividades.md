@@ -31,5 +31,9 @@ flowchart TD
     V -- não --> E
     V -- sim --> S2[selo PENDING]
     S1 & S2 --> OK[(Grava conta, aceite, 5 consentimentos<br/>desligados e preferências)]
+    OK --> MG{Menor de 16?}
+    MG -- sim --> GL[(guardian_link PENDING · RF17<br/>convite com token ao responsável)]
+    MG -- não --> COD
+    GL --> COD
     OK --> COD[Envia código de 6 dígitos · abre a sessão]
 ```

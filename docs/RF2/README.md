@@ -51,7 +51,7 @@ paths:
 | | |
 |---|---|
 | **Base legal (LGPD)** | Art. 18, III (correção). Foto sem EXIF/GPS: o local e o aparelho não vão junto (Art. 6º, III, necessidade) |
-| **ECA Digital** | Menor de 16: perfil privado, comentários só de seguidores e lembrete de uso travados (`403`); tema e fundo livres |
+| **ECA Digital** | Menor de 16: perfil privado, comentários só de seguidores, conteúdo sensível limitado e lembrete de uso travados (`403` ao afrouxar; repetir o valor que o responsável liberou pelo painel do [RF17](../RF17/README.md) passa); tema e fundo livres |
 | **Status** | 🟡 Parcial: perfil, gosto (culinárias favoritas e estilos alimentares), preferências e foto com testes; troca de e-mail e auditoria ainda não |
 
 ## Critérios de aceite
@@ -91,7 +91,7 @@ paths:
 |---|---|---|
 | Domínio | `UserAccount` (perfil público, `favoriteCuisines`, `dietaryStyles`), `UserPreference` (`Theme`, `AppBackground`, `HomeTab`, `CommentAudience`, `SensitiveContent`) | ✅ |
 | Aplicação / API | `ProfileService`, `PreferencesService`; `GET/PATCH /api/v1/me/profile`, `GET/PATCH /api/v1/me/preferences`, `PUT/DELETE /api/v1/me/photo` | ✅ |
-| Foto | `MediaUploadController`, `MediaUploads` (`Fit.AVATAR`), `ImageSanitizer`, `MediaJanitor`, `S3MediaStorage` (AWS SDK v2) | ✅ |
+| Foto | `MediaUploadController`, `MediaUploads` (`Fit.AVATAR`), `ImageSanitizer`, `MediaJanitor`, `S3MediaStorage` (AWS SDK v2; `writePrivate` e `presignGet` servem à exportação de dados do [RF18](../RF18/README.md)) | ✅ |
 | Links públicos | `PublicLinks`: `profileShareUrl` (`/@handle`, usado no perfil público do [RF15](../RF15/README.md)), `postShareUrl` (`/p/{id}`, compartilhar do [RF12](../RF12/README.md)) e `mediaUrl`; a mesma limpeza de foto serve ao post (`Fit.POST`, [RF9](../RF9/README.md)) | ✅ |
 | Ambiente | Garage no Compose e nos testes (`infra/garage/`, `support/GarageContainer`). **Dois buckets**: o original enviado (`uploads/…`, com EXIF/GPS e dono ainda não conferido) e as exportações do titular (`exports/…`) vão para o bucket **privado** `friendly-eats.storage.uploads-bucket`; o de mídias, com leitura pública, só recebe as versões limpas (`avatars/`, `posts/`). `S3MediaStorage.bucketFor` escolhe pelo prefixo e recusa subir com os dois iguais. Em dev, `uploads/` expira em 1 dia e o CORS de `PUT` da origem web fica no bucket privado; `S3MediaStorageTest` e `ProfilePhotoApiIT` (a URL de envio aponta para o bucket privado) | ✅ |
 | Gosto | `ProfilePatch`/`ProfileView` com `favoriteCuisines` e `dietaryStyles`; estilos conferem `ConsentService.granted` com a conta travada (`UserAccountRepository.lockById`); `ConsentApiIT` | ✅ |
@@ -100,4 +100,5 @@ paths:
 | Pendências | troca de e-mail; auditoria | ⏳ |
 | Moderação e segurança | Configurações ganha a seção **Denúncias e decisões** (`/configuracoes/denuncias`, [RF13](../RF13/README.md)) no menu (`settings-sections.ts`, `SettingsNav`) e nos atalhos de `/conta`; os tipos e as rotas do RF13 e do RF19 entram no `packages/api` em seção própria (`types.ts`, `endpoints.ts`) | ✅ |
 | Telas | app web `/configuracoes` (lista no celular, menu lateral no computador), **Perfil** (nome, @, bio, pronomes, links, local, contato, campos do tipo, foto com envio direto ao bucket e o cartão "Seu gosto" com até 5 culinárias e os estilos alimentares) e **Exibição** (tema e tamanho do texto aplicados ao app inteiro — o `fontScale` salvo vira o `font-size` da raiz ao carregar as preferências e a cada salvamento (`AccountDisplay` em `Providers`, `lib/font-scale.ts`) —, fundo, movimento, aba inicial e lembrete de uso travado para menor de 16); erros do 422 por campo (`mapProfileErrors`); e2e `configuracoes.spec.ts` (troca de foto, gosto, menor com proteções travadas) com axe nos dois temas | ✅ |
+| Seções novas | a lista e o menu de `/configuracoes` ganham **Idade e responsável** ([RF17](../RF17/README.md)), com o ícone `id-card` e o item ativo também nas subpáginas (painel de supervisão); `packages/api` tem uma seção própria para o RF17 e o RF18 (tipos e `api.age`, `api.guardian`, `api.privacy`) | ✅ |
 | Foco nos erros | Perfil e Exibição: o resumo de erros e o aviso "Perfil salvo" recebem o foco depois de montados (`useDeferredFocus`); era a falha intermitente do e2e `configuracoes.spec.ts` (Perfil, 422 e 409), que passou 6 vezes seguidas com a correção; `field-errors.ts` e `photo.ts` ganharam `mapPostErrors` e `uploadPostPhoto` para o [RF9](../RF9/README.md), sem mudar as funções do perfil | ✅ |

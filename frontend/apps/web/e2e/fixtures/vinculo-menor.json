@@ -1,0 +1,24 @@
+{
+  "required": true,
+  "eligible": true,
+  "status": "PENDING",
+  "guardianEmail": "mae@example.com",
+  "guardian": null,
+  "invitedAt": "2026-10-21T12:00:00Z",
+  "inviteExpiresAt": "2026-11-04T12:00:00Z",
+  "pendingDays": 10,
+  "overdue": true,
+  "canUnlink": false,
+  "sensitiveConsent": false,
+  "protections": [
+    { "code": "PUBLIC_PROFILE", "label": "Perfil público", "description": "Qualquer pessoa vê as publicações no perfil.", "allowed": false },
+    { "code": "SENSITIVE_CONTENT", "label": "Mostrar conteúdo sensível", "description": "Fotos e textos que podem incomodar aparecem sem aviso.", "allowed": false },
+    { "code": "COMMENTS_FROM_EVERYONE", "label": "Comentários de todo mundo", "description": "Qualquer conta comenta, não só quem segue.", "allowed": false },
+    { "code": "NO_USAGE_REMINDER", "label": "Sem lembrete de tempo de uso", "description": "O lembrete de 60 minutos de uso fica desligado.", "allowed": false }
+  ],
+  "requests": [],
+  "history": [
+    { "actor": "SYSTEM", "action": "REMINDER", "label": "Aviso: vínculo pendente", "detail": null, "occurredAt": "2026-10-28T13:40:00Z" },
+    { "actor": "MINOR", "action": "INVITED", "label": "Convite enviado ao responsável", "detail": null, "occurredAt": "2026-10-21T12:00:00Z" }
+  ]
+}

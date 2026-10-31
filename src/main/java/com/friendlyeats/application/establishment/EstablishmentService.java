@@ -1,7 +1,7 @@
 package com.friendlyeats.application.establishment;
 
 import com.friendlyeats.application.account.AccountViews.CategoryView;
-import com.friendlyeats.application.account.AgePolicy;
+import com.friendlyeats.application.age.AgeGate;
 import com.friendlyeats.application.common.CommonExceptions;
 import com.friendlyeats.application.establishment.EstablishmentDrafts.ClassificationDraft;
 import com.friendlyeats.application.establishment.EstablishmentDrafts.EstablishmentDraft;
@@ -58,7 +58,8 @@ import java.util.function.Consumer;
  *   <li>Só conta ESTABELECIMENTO ou VAREJO, ativa, é dona de lugar; negócio com CPF tem um único ponto.</li>
  *   <li>A página só é pública com o selo da conta dona conferido ({@code VERIFIED}) e a conta ativa; antes disso o
  *       dono vê tudo e os motivos ({@code publishBlockers}).</li>
- *   <li>Lugar com foco em bebida alcoólica pede login e só aparece para maiores de 18.</li>
+ *   <li>Lugar com foco em bebida alcoólica pede login e só aparece para maior de 18 com a idade verificada (RF17,
+ *       {@link AgeGate}).</li>
  *   <li>Quem edita é decidido pelo {@link PlaceEditors} (hoje, o dono; a equipe do RF20 entra lá).</li>
  * </ul>
  */
@@ -72,14 +73,14 @@ public class EstablishmentService {
     private final UserAccountRepository users;
     private final PriceScale priceScale;
     private final RatingCalculator ratings;
-    private final AgePolicy age;
+    private final AgeGate ageGate;
     private final PlaceEditors editors;
     private final Clock clock;
     private final int minPriceReports;
 
     public EstablishmentService(EstablishmentRepository establishments, ReviewRepository reviews,
                                 UserAccountRepository users, PriceScale priceScale, RatingCalculator ratings,
-                                AgePolicy age, PlaceEditors editors, Clock clock,
+                                AgeGate ageGate, PlaceEditors editors, Clock clock,
                                 @org.springframework.beans.factory.annotation.Value("${friendly-eats.price.min-reports:5}")
                                 int minPriceReports) {
         this.establishments = establishments;
@@ -87,7 +88,7 @@ public class EstablishmentService {
         this.users = users;
         this.priceScale = priceScale;
         this.ratings = ratings;
-        this.age = age;
+        this.ageGate = ageGate;
         this.editors = editors;
         this.clock = clock;
         this.minPriceReports = minPriceReports;
@@ -272,7 +273,7 @@ public class EstablishmentService {
 
     /**
      * Página visível? O dono sempre vê a sua (inclusive fora do ar). Os demais só com status ACTIVE/CLOSED, conta
-     * dona ativa e selo conferido; com foco em bebida alcoólica, só logado e com 18+. Não revela qual regra barrou.
+     * dona ativa e selo conferido; com foco em bebida alcoólica, só logado e com 18+ verificado (RF17). Não revela qual regra barrou.
      */
     @Transactional(readOnly = true)
     public Establishment requireVisible(long id, Optional<UserAccount> viewer) {
@@ -284,13 +285,7 @@ public class EstablishmentService {
             throw notFound();
         }
         if (e.isAlcoholFocused()) {
-            if (viewer.isEmpty()) {
-                throw new CommonExceptions.Unauthenticated("Entre na sua conta para ver: conteúdo de bebida alcoólica "
-                        + "é só para maiores de 18.");
-            }
-            if (!age.adult(viewer.get().getUserDateOfBirth())) {
-                throw notFound();
-            }
+            ageGate.requireAlcoholAccess(viewer.orElse(null), this::notFound);
         }
         return e;
     }

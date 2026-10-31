@@ -1,0 +1,20 @@
+{
+  "controllerName": "Friendly Eats de Exemplo Ltda",
+  "dpoName": "Encarregada de Exemplo",
+  "dpoEmail": "dpo@friendlyeats.example",
+  "dpoSubstituteName": null,
+  "privacyEmail": "privacidade@friendlyeats.example",
+  "requestDeadlineDays": 15,
+  "exportLinkHours": 72,
+  "rights": [
+    { "code": "CONFIRMATION", "label": "Confirmar se tratamos seus dados", "article": "Art. 18, I", "how": "Na hora, pela conta (Configurações) ou por e-mail ao encarregado." },
+    { "code": "ACCESS", "label": "Acessar e receber uma cópia", "article": "Art. 18, II e V", "how": "Configurações → Conta → Seus dados → Exportar (arquivo pronto em até 15 dias, em geral no mesmo dia)." },
+    { "code": "CORRECTION", "label": "Corrigir dados", "article": "Art. 18, III", "how": "Configurações → Perfil." },
+    { "code": "ANONYMIZATION", "label": "Anonimizar, bloquear ou eliminar o desnecessário", "article": "Art. 18, IV", "how": "Por e-mail ao encarregado." },
+    { "code": "DELETION", "label": "Eliminar os dados tratados com consentimento", "article": "Art. 18, VI", "how": "Configurações → Conta → Excluir conta (30 dias para reativar)." },
+    { "code": "SHARING", "label": "Saber com quem compartilhamos", "article": "Art. 18, VII", "how": "Por e-mail ao encarregado." },
+    { "code": "CONSENT", "label": "Saber o que acontece se não consentir e revogar o consentimento", "article": "Art. 18, VIII e IX", "how": "Configurações → Privacidade: cada uso opcional começa desligado e desliga com um toque." },
+    { "code": "REVIEW", "label": "Pedir revisão de decisão automatizada", "article": "Art. 20", "how": "Por e-mail ao encarregado; a contestação da idade aferida é revisada por uma pessoa." },
+    { "code": "COMPLAINT", "label": "Reclamar à ANPD", "article": "Art. 18, §1º", "how": "Pelo site da Autoridade Nacional de Proteção de Dados." }
+  ]
+}

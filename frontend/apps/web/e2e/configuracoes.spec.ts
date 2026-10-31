@@ -3,7 +3,7 @@ import { CODIGO_2FA, fixture, problem, SENHA_CERTA } from './support/mock-api';
 import { expect, expectAccessibleInBothThemes, test } from './support/test';
 
 const AVATAR = fileURLToPath(new URL('./fixtures/avatar.png', import.meta.url));
-const SECOES = ['perfil', 'exibicao', 'privacidade', 'seguranca', 'denuncias', 'conta'] as const;
+const SECOES = ['perfil', 'exibicao', 'privacidade', 'idade', 'seguranca', 'denuncias', 'conta'] as const;
 
 test.describe('Configurações: casca', () => {
   test('sem sessão, cada seção vai para o login com voltar', async ({ page }) => {
@@ -20,7 +20,15 @@ test.describe('Configurações: casca', () => {
     await expect(page).toHaveURL(/\/configuracoes$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Configurações' })).toBeFocused();
     const lista = page.getByRole('main').getByRole('navigation', { name: 'Seções das configurações' });
-    await expect(lista.getByRole('link')).toHaveText([/^Perfil/, /^Exibição/, /^Privacidade/, /^Senha e segurança/, /^Denúncias e decisões/, /^Conta/]);
+    await expect(lista.getByRole('link')).toHaveText([
+      /^Perfil/,
+      /^Exibição/,
+      /^Privacidade/,
+      /^Idade e responsável/,
+      /^Senha e segurança/,
+      /^Denúncias e decisões/,
+      /^Conta/,
+    ]);
     await expectAccessibleInBothThemes(page, 'Configurações (lista)');
 
     await lista.getByRole('link', { name: /^Privacidade/ }).click();
@@ -54,7 +62,7 @@ test.describe('Configurações: casca', () => {
     api.login();
     await page.goto('/conta');
     const atalhos = page.getByRole('region', { name: 'Configurações' });
-    await expect(atalhos.getByRole('link')).toHaveCount(6);
+    await expect(atalhos.getByRole('link')).toHaveCount(7);
     await atalhos.getByRole('link', { name: /^Conta/ }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Conta' })).toBeVisible();
   });
@@ -215,7 +223,7 @@ test.describe('Menor de 16 (RF2, RF3)', () => {
     const local = page.getByRole('switch', { name: 'Salvar minha localização' });
     await expect(local).toBeDisabled();
     await expect(local).toHaveAccessibleDescription(/Disponível a partir dos 16 anos/);
-    await expect(page.getByRole('switch', { name: 'Dados sensíveis do perfil' })).toHaveAccessibleDescription(/Disponível a partir dos 18 anos/);
+    await expect(page.getByRole('switch', { name: 'Dados sensíveis do perfil' })).toHaveAccessibleDescription(/Disponível a partir dos 18 anos, ou antes com o consentimento do responsável/);
     await expect(page.getByRole('switch', { name: 'Compartilhar com parceiros' })).toBeEnabled();
     await expectAccessibleInBothThemes(page, 'Privacidade (menor)');
 
@@ -354,7 +362,7 @@ test.describe('Excluir conta (RF5)', () => {
     await expect(dialogo).toHaveAccessibleDescription(new RegExp(`Sua conta será excluída em 30 dias \\(em ${dataFinal()}\\)`));
     await expect(dialogo.getByRole('button', { name: 'Cancelar' })).toBeFocused();
     await expect(dialogo).toContainText('Depois do prazo, vamos apagar');
-    await expect(dialogo).toContainText('registros de acesso (data, hora e IP) por 6 meses');
+    await expect(dialogo).toContainText('registros de acesso (data, hora, IP e porta) por 6 meses');
     await expect(dialogo.getByLabel('Código do app')).toHaveCount(0);
 
     // foco preso: dar a volta com Tab não sai do diálogo

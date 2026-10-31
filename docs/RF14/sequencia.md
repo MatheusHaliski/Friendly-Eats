@@ -43,7 +43,9 @@ sequenceDiagram
     alt inexistente, removido, autor inativo ou perfil privado
         R-->>V: 404
     else post AGE_18 sem sessão
-        R-->>V: 401 · entre, só para maiores de 18
+        R-->>V: 401 · entre e verifique a idade, só para maiores de 18
+    else post AGE_18 e adulto sem a idade verificada (AgeGate, RF17)
+        R-->>V: 403 · ageVerificationRequired
     else visível
         R->>DB: autor, lugar, reações, preferências do autor
         API-->>V: 200 {kind, allergens, price, interactions, background, ...}

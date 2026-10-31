@@ -4,6 +4,7 @@ import type { AccountTypeCode, PostKindCode } from '@friendly-eats/api';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useId } from 'react';
+import { AlcoholHiddenNotice } from '@/components/age/AlcoholNotice';
 import { AccountDot } from '@/components/AccountBadge';
 import { PlaceSearch } from '@/components/explore/PlaceSearch';
 import { Notice } from '@/components/Form';
@@ -117,6 +118,7 @@ function PostsPanel({ kindParam, accountParam, go }: { kindParam: string | null;
             );
           })}
         </div>
+        <AlcoholHiddenNotice />
         <PostList
           query={feed}
           label={kindLabel ? `Posts: ${kindLabel}` : 'Posts'}

@@ -160,7 +160,7 @@ test.describe('Página do lugar (RF6, RF7, RF8)', () => {
   test('lugar 18+: 401 para visitante com botão de entrar, 404 para menor', async ({ page, api }) => {
     await page.goto('/lugares/18');
     await expect(page.getByRole('heading', { level: 1, name: 'Conteúdo para maiores de 18 anos' })).toBeVisible();
-    await expect(page.getByText('Entre na sua conta para ver: conteúdo de bebida alcoólica é só para maiores de 18.')).toBeVisible();
+    await expect(page.getByText('Entre na sua conta e verifique a idade para ver: conteúdo de bebida alcoólica é só para maiores de 18.')).toBeVisible();
     await expect(page.getByRole('link', { name: 'Entrar' }).last()).toHaveAttribute('href', '/entrar?voltar=%2Flugares%2F18');
 
     api.login('comensal', { minor: true });

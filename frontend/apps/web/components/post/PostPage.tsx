@@ -3,6 +3,7 @@
 import { isApiError, type PostDetailView } from '@friendly-eats/api';
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { VerifyAgeRequired } from '@/components/age/AlcoholNotice';
 import { Notice } from '@/components/Form';
 import { ContentActions } from '@/components/moderation/ContentActions';
 import { IconLogin } from '@/components/icons';
@@ -53,11 +54,15 @@ export function PostPage({ id }: { id: string }) {
           <p>
             <Link href={loginHref(`/posts/${id}`)} className="fe-btn fe-btn-primary">
               <IconLogin size={18} />
-              Entrar
+              Entrar e verificar a idade
             </Link>
           </p>
         </div>
       );
+    }
+    if (isApiError(e, 403) && e.problem.ageVerificationRequired) {
+      // RF17: adulto sem a idade verificada
+      return <VerifyAgeRequired detail={e.detail} />;
     }
     if (isApiError(e, 404)) {
       return (

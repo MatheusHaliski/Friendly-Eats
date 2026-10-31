@@ -14,7 +14,7 @@ flowchart TD
     P -- não --> FULL[Perfil completo · cidade de atuação<br/>exceto comensal]
     FULL --> PO{Pediu os posts?}
     PO -- não --> OK1[200 · perfil]
-    PO -- sim --> AG{18+ ou o próprio autor?}
+    PO -- sim --> AG{18+ verificado · RF17<br/>ou o próprio autor?}
     AG -- sim --> ALL[PUBLISHED e ARCHIVED · todos]
     AG -- não --> LV[PUBLISHED e ARCHIVED · só LIVRE]
     ALL & LV --> PG[cursor created_at e id · size + 1]

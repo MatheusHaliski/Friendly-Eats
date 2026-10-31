@@ -42,5 +42,8 @@ stateDiagram-v2
         Avaliações escritas e estabelecimentos
         apagados, com as avaliações deles. Posts
         e comentários sem conteúdo, fotos fora do bucket.
+        Idade, vínculos com responsável e exportações
+        apagados (RF17, RF18). Registros de acesso ficam
+        os 6 meses do Marco Civil.
     end note
 ```

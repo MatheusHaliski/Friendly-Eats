@@ -20,7 +20,7 @@ flowchart LR
 
     FEED["Feed, post, comentários,<br/>perfil e busca"]:::actor
     MOD["Moderação · RF13"]:::actor
-    RESP["Responsável ⏳ RF17"]:::actor
+    RESP["Responsável · RF17<br/>⏳ afrouxar o filtro"]:::actor
 
     PES --- UC1 & UC2 & UC3 & UC4 & UC5
     MEN --- UC8

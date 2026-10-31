@@ -1,8 +1,11 @@
 package com.friendlyeats.application.account;
 
 import com.friendlyeats.application.account.AccountViews.DeletionView;
+import com.friendlyeats.application.age.AgeVerificationService;
+import com.friendlyeats.application.guardian.GuardianService;
 import com.friendlyeats.application.media.MediaJanitor;
 import com.friendlyeats.application.post.PostContentEraser;
+import com.friendlyeats.application.privacy.DataExportService;
 import com.friendlyeats.domain.model.AccountStatus;
 import com.friendlyeats.domain.model.UserAccount;
 import com.friendlyeats.infrastructure.persistence.postgres.EstablishmentRepository;
@@ -50,13 +53,17 @@ public class AccountService {
     private final EstablishmentRepository establishments;
     private final PostContentEraser postEraser;
     private final SafetyRepository safety;
+    private final AgeVerificationService ages;
+    private final GuardianService guardians;
+    private final DataExportService exports;
 
     public AccountService(UserAccountRepository users, UserMfaRepository mfa, RecoveryCodeRepository recovery,
                           UserPreferenceRepository preferences, PasswordEncoder passwords, SessionService sessions,
                           MediaJanitor media, AccountNotifier notifier, Clock clock,
                           @Value("${friendly-eats.account.deletion-grace:30d}") Duration grace,
                           ReviewRepository reviews, EstablishmentRepository establishments,
-                          PostContentEraser postEraser, SafetyRepository safety) {
+                          PostContentEraser postEraser, SafetyRepository safety, AgeVerificationService ages,
+                          GuardianService guardians, DataExportService exports) {
         this.users = users;
         this.mfa = mfa;
         this.recovery = recovery;
@@ -71,6 +78,9 @@ public class AccountService {
         this.establishments = establishments;
         this.postEraser = postEraser;
         this.safety = safety;
+        this.ages = ages;
+        this.guardians = guardians;
+        this.exports = exports;
     }
 
     /** Senha nova (já com o modo sudo confirmado): sai de todos os outros aparelhos. */
@@ -126,11 +136,17 @@ public class AccountService {
         preferences.deleteById(userId);
         // bloqueios, silenciados e palavras filtradas (RF19), nos dois sentidos
         safety.deleteAllOf(userId);
+        // RF17 e RF18: verificação de idade, vínculos com responsável e exportações; os registros de acesso do Marco
+        // Civil ficam pelos 6 meses da lei (sem chave estrangeira para a conta)
+        ages.eraseFor(userId);
+        guardians.eraseFor(userId);
+        List<String> exportKeys = exports.eraseFor(userId);
         user.anonymizeForLgpdDeletion(passwords.encode(UUID.randomUUID().toString()));
         users.save(user);
         sessions.revokeAll(userId, null);
         // a foto de perfil sai do bucket só depois do commit (o banco já não aponta para ela)
         media.deleteAfterCommit(Collections.singletonList(photoKey));   // nulo é ignorado
+        media.deleteAfterCommit(exportKeys);
         // Próximos passos da saga: Cassandra e DEK.
         log.info("Conta {} eliminada", userId);
     }

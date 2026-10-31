@@ -43,7 +43,7 @@ paths:
 |---|---|
 | **Origem** | RF24 e RF25 da Orange Social (página do post, cursor `(created_at, id)`, 404 sem dizer o motivo) e o Trending Score no Valkey (ADR-03 de lá) |
 | **Base legal (LGPD)** | Art. 7º, V. O autor aparece com nome, @, bolinha e selo; conta eliminada vira "Conta excluída", sem link. Perfil privado não entra no feed |
-| **ECA Digital / Termos** | Post 18+ (bebida alcoólica) não aparece para o visitante nem para o menor de 18, a mesma regra da página do lugar ([RF6](../RF6/README.md)) |
+| **ECA Digital / Termos** | Post 18+ (bebida alcoólica) não aparece para o visitante, para o menor de 18 nem para o adulto sem a idade verificada ([RF17](../RF17/README.md)), a mesma regra da página do lugar ([RF6](../RF6/README.md)) |
 | **Status** | 🟡 Parcial: página do post, feed com cursor e filtros, posts do lugar, "em alta" com recálculo, telas do feed (abas e segmentos) e da página do post e testes prontos; timeline no Cassandra, feed de quem eu sigo, descoberta local por distância e visualizações únicas ainda não |
 
 ## Critérios de aceite
@@ -51,7 +51,9 @@ paths:
 1. **Página do post** (`GET /api/v1/posts/{id}`, pública). Abre com status `PUBLISHED` ou `ARCHIVED`, autor com a
    conta `ACTIVE` e o perfil público; o autor sempre vê o próprio post. Fora disso (inexistente, removido, rascunho
    de outro, autor suspenso ou em exclusão, perfil privado), `404` sem dizer qual. Post `AGE_18`: o visitante recebe
-   `401` ("Entre na sua conta para ver: conteúdo de bebida alcoólica é só para maiores de 18.") e o menor, `404`.
+   `401` ("Entre na sua conta e verifique a idade para ver: conteúdo de bebida alcoólica é só para maiores de 18."),
+   o adulto sem a idade verificada, `403` com `ageVerificationRequired: true` ([RF17](../RF17/README.md)), e o
+   menor, `404`.
 2. **O que a página mostra** (`PostDetailView`): tipo com ícone e forma da borda, foto com `altText`, lugar citado
    (só se a página dele estiver no ar para quem vê), culinária, formato, estilos, alergênicos com nível, advertências e
    o aviso `allergenNotice`, classificação com rótulo, chip Publicidade, vigência, preço com o texto pronto ("De R$
@@ -60,7 +62,7 @@ paths:
    [RF16](../RF16/README.md)).
 3. **Feed** (`GET /api/v1/posts?feed=POST|ALERT&kind=&establishmentId=&cursor=&size=`, público): só `PUBLISHED`, sem
    os encerrados (`expires_at` no passado), de autores ativos com perfil público (o próprio autor se vê), e para o
-   visitante e o menor de 18 só `LIVRE`. Mais novos primeiro, paginação por cursor opaco `(created_at, id)`:
+   visitante, o menor de 18 e o adulto sem a idade verificada só `LIVRE`. Mais novos primeiro, paginação por cursor opaco `(created_at, id)`:
    `nextCursor` nulo é o fim; cursor inválido dá `400`. `feed` padrão `POST`; `PROFILE` dá `400` (fica no
    [RF15](../RF15/README.md)); `size` de 1 a 50 (padrão 20). O card (`PostCardView`) não traz o texto corrido (só
    `excerpt`, até 160 caracteres) nem a receita.
@@ -113,7 +115,7 @@ paths:
 | Camada | Artefato | Situação |
 |---|---|---|
 | Domínio | `FeedType` (`PROFILE`, `POST`, `ALERT`) | ✅ |
-| Regras | `PostReader` (quem vê, 401/404 do 18+, lugar no ar, montagem da página e dos cards sem N+1), `AuthorDirectory` (conta ativa, perfil privado com os padrões do cadastro, `AuthorView`), `FeedCursor`, `PostQueryService` (feed, lugar, em alta) | ✅ |
+| Regras | `PostReader` (quem vê, 401/403/404 do 18+ pelo `AgeGate` do RF17, lugar no ar, montagem da página e dos cards sem N+1), `AuthorDirectory` (conta ativa, `adult` = 18+ verificado, perfil privado com os padrões do cadastro, `AuthorView`), `FeedCursor`, `PostQueryService` (feed, lugar, em alta) | ✅ |
 | Persistência | `PostFeedQueries` (SQL com a regra de visibilidade em `VISIBLE`, que exclui o moderado, o bloqueio nos dois sentidos e o silenciado, e índices `idx_post_feed` e `idx_post_establishment` da V3) | ✅ |
 | Moderação e segurança | `PostReader.requireVisible` com `Post.isModerated` e `SafetyGuard.blockedEitherWay` ([RF13](../RF13/README.md), [RF19](../RF19/README.md)); `ModerationApiIT.reportDecisionAndAppealByAnotherModerator`, `SafetyApiIT.blockWorksBothWaysOnFeedPostCommentsAndProfiles`, `SafetyApiIT.muteHidesOnlyForWhoMutedAndIsSilent`; menu "…" na página do post (`PostPage`) e do lugar (`PlaceView`), link "Moderação" (`SiteHeader`), tipos e rotas do RF13 e do RF19 em `packages/api` | ✅ |
 | Cache | `TrendingScoreCalculator` (fórmula da Orange), `TrendingScoreRepository` (ZSET por feed e por tipo de conta, TTL 72 h), `TrendingService` (depois do commit, melhor esforço), `TrendingJob` (10 min, desligável com `friendly-eats.jobs.enabled`) | ✅ |
@@ -121,3 +123,4 @@ paths:
 | Testes | `FeedCursorTest` (cursor e preço em reais), `TrendingScoreTest` (fórmula e chaves); `PostApiIT.feedPagesByCursorAndHidesExpiredAdultPrivateAndInactiveContent`, `PostApiIT.trendingRanksByInteractionsAndOnlyShowsWhatTheViewerCanSee`, `PostApiIT.frameFromTheCatalogIsValidatedAndResolvedButAlertsNeverHaveOne` (moldura no card e na página) | ✅ |
 | Pendências | timeline no Cassandra (o perfil `dev` sobe sem ele); feed de quem eu sigo e mistura 70/30 com a descoberta local; alertas da região fixados no topo; distância e diversidade (MMR) no ranking; visualizações únicas (HyperLogLog); "por que estou vendo isto?" | ⏳ |
 | Tela | app web `/feed` com as abas **Posts** (segmentado por tipo de post, na URL como `?tipo=`), **Alertas sanitários** (faixa hazard, sem moldura), **Perfis** e **Restaurantes** (busca do [RF10](../RF10/README.md) com o modal do lugar); "Em alta" com filtro por tipo de conta (`?conta=`); card de post com moldura, selo do tipo, preço, alergênicos, 18+, publicidade e expirado; página `/posts/[id]` (401 convida a entrar, 404); "Posts deste lugar" na página do lugar, que o [RF11](../RF11/README.md) enriqueceu com horários, cobranças, facetas e botões sem mudar a seção de posts (o `packages/api` ganhou a seção própria do RF11, sem tocar nos tipos de post); links Feed e Publicar no cabeçalho; e2e `feed.spec.ts` com axe nos dois temas | ✅ |
+| Bebida oculta | o feed de posts mostra o aviso `AlcoholHiddenNotice` para visitante e adulto sem a idade verificada; a página do post 18+ trata o `403` com `ageVerificationRequired` (`VerifyAgeRequired`) ([RF17](../RF17/README.md)); e2e `titular.spec.ts` | ✅ |

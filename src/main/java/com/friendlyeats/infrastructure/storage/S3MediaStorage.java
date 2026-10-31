@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.net.URI;
@@ -34,8 +35,9 @@ import java.util.Optional;
  * com o bucket pela rede interna, e o celular, pelo endereço público.
  *
  * <p>Dois buckets: os originais enviados pelo app ({@code uploads/…}, com EXIF/GPS e ainda sem dono conferido) e as
- * cópias de dados do titular ({@code exports/…}, RF18) ficam num bucket <b>privado</b>; o bucket de mídias, servido publicamente pela CDN (ou pela leitura pública do
- * Garage em dev), só recebe as versões limpas ({@code posts/}, {@code avatars/}, {@code backgrounds/}). Assim nada
+ * cópias de dados do titular ({@code exports/…}, RF18) ficam num bucket <b>privado</b>, lidas só por URL
+ * pré-assinada; o bucket de mídias, servido publicamente pela CDN (ou pela leitura pública do Garage em dev), só
+ * recebe as versões limpas ({@code posts/}, {@code avatars/}, {@code backgrounds/}). Assim nada
  * em {@code uploads/} é legível sem passar pela conferência de dono e pelo {@code ImageSanitizer}.
  *
  * <p>Sem chave de acesso configurada, as credenciais vêm da cadeia padrão da AWS (papel da instância, variáveis
@@ -134,6 +136,22 @@ public class S3MediaStorage implements MediaStorage {
                         // a chave nunca muda: a CDN e o app guardam o arquivo por um ano
                         .cacheControl("public, max-age=31536000, immutable"),
                 RequestBody.fromBytes(bytes));
+    }
+
+    @Override
+    public void writePrivate(String objectKey, byte[] bytes, String contentType, String downloadName) {
+        s3.putObject(r -> r.bucket(bucketFor(objectKey)).key(objectKey).contentType(contentType)
+                        .cacheControl("private, no-store")
+                        .contentDisposition("attachment; filename=\"" + downloadName + "\""),
+                RequestBody.fromBytes(bytes));
+    }
+
+    @Override
+    public String presignGet(String objectKey, Duration ttl) {
+        PresignedGetObjectRequest signed = presigner.presignGetObject(p -> p
+                .signatureDuration(ttl)
+                .getObjectRequest(r -> r.bucket(bucketFor(objectKey)).key(objectKey)));
+        return signed.url().toString();
     }
 
     @Override

@@ -164,9 +164,12 @@ class SearchApiIT {
         assertThat(map(card, "chip")).containsEntry("code", "VEGETAL");
         assertThat(map(card, "rating")).containsEntry("averageLabel", "4,6");
 
-        // 18+: o boteco só aparece para adulto logado
-        assertThat(names(loggedIn("adulto@example.com", LocalDate.of(1990, 1, 1))
-                .get("/api/v1/establishments?type=BOTECO").getBody())).containsExactly("Boteco da Sé");
+        // 18+: o boteco só aparece para adulto logado com a idade verificada (RF17)
+        assertThat(names(loggedIn("semverificar@example.com", LocalDate.of(1990, 1, 1))
+                .get("/api/v1/establishments?type=BOTECO").getBody())).isEmpty();
+        ApiClient adult = loggedIn("adulto@example.com", LocalDate.of(1990, 1, 1));
+        com.friendlyeats.support.AgeFixtures.verifiedAdult(jdbc, users.findByEmail("adulto@example.com").orElseThrow().getId());
+        assertThat(names(adult.get("/api/v1/establishments?type=BOTECO").getBody())).containsExactly("Boteco da Sé");
         assertThat(names(loggedIn("teen@example.com", LocalDate.now().minusYears(16))
                 .get("/api/v1/establishments?type=BOTECO").getBody())).isEmpty();
     }

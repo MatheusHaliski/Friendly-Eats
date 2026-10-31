@@ -20,8 +20,14 @@
 //   gavel (área da moderação), scale (recurso e contestação), octagon-alert (alerta ao consumidor; triangle-alert é do
 //   alerta sanitário), circle-pause (avaliações congeladas), life-buoy (apoio contra intimidação), list-checks
 //   (minhas denúncias).
+// Idade e titular (RF17 · RF18): id-card (verificar a idade), user-check (responsável e supervisão),
+//   file-down (exportar meus dados), book-user (direitos do titular e encarregado; scale é do recurso, RF13).
 import {
   Archive,
+  BookUser,
+  FileDown,
+  IdCard,
+  UserCheck,
   ArchiveRestore,
   Ban,
   CirclePause,
@@ -182,6 +188,11 @@ export const IconConsumerAlert = decorative(OctagonAlert);
 export const IconFrozen = decorative(CirclePause);
 export const IconSupport = decorative(LifeBuoy);
 export const IconMyReports = decorative(ListChecks);
+// RF17 · RF18
+export const IconAgeVerify = decorative(IdCard);
+export const IconGuardian = decorative(UserCheck);
+export const IconExport = decorative(FileDown);
+export const IconRights = decorative(BookUser);
 
 /**
  * Ícone de cada tipo de post, pelo código. A API manda {@code camera} na foto de prato, mas camera é da conta

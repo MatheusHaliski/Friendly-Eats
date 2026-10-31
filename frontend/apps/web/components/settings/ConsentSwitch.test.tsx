@@ -58,7 +58,7 @@ describe('ConsentSwitch', () => {
     expect(sw).toHaveAccessibleDescription(/Disponível a partir dos 16 anos/);
     await userEvent.click(sw);
     expect(onToggle).not.toHaveBeenCalled();
-    expect(lockedText({ sensitive: true })).toBe('Disponível a partir dos 18 anos');
+    expect(lockedText({ sensitive: true })).toBe('Disponível a partir dos 18 anos, ou antes com o consentimento do responsável vinculado');
   });
 
   it('enquanto salva fica ocupado e ignora outro toque', async () => {

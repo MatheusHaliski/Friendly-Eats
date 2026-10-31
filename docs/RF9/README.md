@@ -78,8 +78,10 @@ paths:
    glúten/lactose".
 6. **Classificação etária** (`ageRating`: `LIVRE` ou `AGE_18`). Fica `AGE_18` sozinho quando o formato é alcoólico
    (`CERVEJA`, `VINHO`, `COQUETEIS_DESTILADOS`) ou o lugar tem foco em bebida alcoólica. Menor de 18 não publica 18+
-   (`422`). O alerta sanitário é sempre `LIVRE` (um recall de cachaça precisa chegar a todos). Quem vê o post 18+ está
-   no [RF14](../RF14/README.md).
+   (`422`). O alerta sanitário é sempre `LIVRE` (um recall de cachaça precisa chegar a todos). Publicar segue a data
+   declarada; **ver** o post 18+ exige a idade verificada ([RF17](../RF17/README.md), regras no
+   [RF14](../RF14/README.md)). Citar um lugar com foco em bebida segue a página do lugar: o adulto sem a idade
+   verificada recebe `403` com `ageVerificationRequired`.
 7. **Moldura** (`background`, [RF16](../RF16/README.md)): objeto opcional validado pelo `BackgroundValidator` e gravado
    na forma canônica (só ids do catálogo); `null` = moldura padrão. Alerta sanitário com moldura dá `422` (também há
    um CHECK na V3).

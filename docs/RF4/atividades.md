@@ -36,6 +36,7 @@ flowchart TD
     OKP --> PA{Serviço: post 18+ ou<br/>autor com perfil privado? · RF14}
     PA -- "18+ sem sessão" --> A401
     PA -- "18+ e menor, ou perfil privado" --> N404
+    PA -- "18+ sem idade verificada · RF17" --> V403[403 · ageVerificationRequired]
     PA -- não --> PP[200]
     M -- "/api/v1/auth/** ou /error" --> OK
     M -- "qualquer outra" --> S{Sessão válida?}
@@ -45,5 +46,7 @@ flowchart TD
     AL -- não --> PG[200 se a página está no ar, senão 404]
     AL -- "sim, sem sessão" --> A401[401 · entre na sua conta, 18+]
     AL -- "sim, menor de 18" --> N404[404]
-    AL -- "sim, 18+" --> PG
+    AL -- "sim, 18+ sem verificação · RF17" --> V403
+    AL -- "sim, 18+ verificado" --> PG
+    SRV --> LOGA[AccessLogFilter · RF18<br/>registro de acesso cifrado, 1 por hora por IP]
 ```

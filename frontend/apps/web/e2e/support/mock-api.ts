@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import type { BrowserContext, Page, Route } from '@playwright/test';
 import { ModerationState } from './mock-moderation';
 import { PostsState } from './mock-posts';
+import { TitularState } from './mock-titular';
 import type {
   ConsentList,
   ConsentView,
@@ -99,6 +100,8 @@ export class MockApi {
   readonly posts: PostsState = this.makePosts();
   /** Moderação e segurança entre usuários (RF13 · RF19). */
   readonly moderation: ModerationState = this.makeModeration();
+  /** Idade verificada, responsável, encarregado e "Seus dados" (RF17 · RF18). */
+  readonly titular: TitularState = this.makeTitular();
   private overrides: Array<{ method: string; pattern: RegExp; handler: Handler }> = [];
 
   constructor(
@@ -114,6 +117,18 @@ export class MockApi {
         return host.session;
       },
       uploads: () => (host.session ? host.account.uploads : null),
+      alcoholVisible: () => host.titular.alcoholVisible(),
+    });
+  }
+
+  private makeTitular(): TitularState {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- o estado do titular lê a sessão atual
+    const host = this;
+    return new TitularState(fixture, {
+      get session() {
+        return host.session;
+      },
+      sudo: (password, code) => host.sudo(password, code),
     });
   }
 
@@ -146,6 +161,7 @@ export class MockApi {
   login(kind: 'comensal' | 'estabelecimento' = 'comensal', patch: Partial<SessionUserView> = {}): SessionUserView {
     this.session = { ...fixture<SessionUserView>(`sessao-${kind}`), ...patch };
     this.accountState = null;
+    this.titular.reset();
     return this.session;
   }
 
@@ -323,14 +339,19 @@ export class MockApi {
 
     const postsReply = this.posts.handle(rec);
     if (postsReply) return postsReply;
+    const titularReply = this.titular.handle(rec);
+    if (titularReply) return titularReply;
 
     if (placeMatch) {
       const [, id, reviews, me] = placeMatch;
       const place = this.place(id!);
       if (!place) return problem(404, 'Estabelecimento não encontrado.');
       if (place.adultsOnly) {
-        if (!this.session) return problem(401, 'Entre na sua conta para ver: conteúdo de bebida alcoólica é só para maiores de 18.');
+        if (!this.session) return problem(401, 'Entre na sua conta e verifique a idade para ver: conteúdo de bebida alcoólica é só para maiores de 18.');
         if (this.session.minor) return problem(404, 'Estabelecimento não encontrado.');
+        if (!this.titular.alcoholVisible()) {
+          return problem(403, 'Conteúdo de bebida alcoólica aparece só depois de verificar a idade.', { ageVerificationRequired: true });
+        }
       }
       if (!reviews && m === 'GET') return { status: 200, body: place };
       if (reviews && !me && m === 'GET') {
@@ -362,7 +383,7 @@ export class MockApi {
   }
 
   /** Modo sudo (StepUp): senha e, com 2FA, o código do app ou um de recuperação. */
-  private sudo(password: unknown, code: unknown): Reply | null {
+  sudo(password: unknown, code: unknown): Reply | null {
     const mfa = this.account.mfa;
     const okCode = !mfa.enabled || code === CODIGO_2FA || (typeof code === 'string' && mfa.codes.includes(code));
     if (password === SENHA_CERTA && okCode) return null;
@@ -728,7 +749,7 @@ export class MockApi {
     const q = sp.get('q')?.toLowerCase();
     let items = page.items;
     if (q) items = items.filter((c) => c.name.toLowerCase().includes(q));
-    if (!this.session || this.session.minor) items = items.filter((c) => !c.adultsOnly);
+    if (!this.titular.alcoholVisible()) items = items.filter((c) => !c.adultsOnly);
     const lat = sp.get('lat');
     if (lat) items = items.map((c, i) => ({ ...c, distanceKm: Math.round((0.4 + i * 1.3) * 10) / 10 }));
     const removed = page.items.length - items.length;

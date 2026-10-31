@@ -12,6 +12,7 @@ flowchart LR
     RS --> CS
     PS --> CS
     CS --> AP["AgePolicy"]
+    CS --> GCO["GuardianConsents · RF17<br/>consentimento do responsável"]
     CS --> PG[("PostgreSQL<br/>consent_event · user_consent_current<br/>user_account")]
     PS --> PG
     CS -.-> CON["Feed personalizado · marketing ⏳<br/>conferem o estado atual"]

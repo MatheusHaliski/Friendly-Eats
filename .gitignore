@@ -4,6 +4,10 @@ target/
 .vscode/
 .DS_Store
 
+# Python (scripts/)
+__pycache__/
+*.pyc
+
 # Frontend (frontend/)
 node_modules/
 .next/

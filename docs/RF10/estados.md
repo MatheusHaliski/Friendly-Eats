@@ -11,8 +11,8 @@ stateDiagram-v2
     NaBusca --> SoAdulto : tipo principal com foco em bebida alcoólica
     SoAdulto --> NaBusca : tipo principal trocado
     note right of SoAdulto
-        visitante sem login e menor de 18
-        não veem
+        visitante sem login, menor de 18 e adulto
+        sem a idade verificada (RF17) não veem
     end note
 ```
 

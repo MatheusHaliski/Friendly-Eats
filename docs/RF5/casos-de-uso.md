@@ -8,7 +8,8 @@ flowchart LR
     SUDO(["Confirmar senha + código"])
     FIM(["Encerrar todas as sessões"])
     REAT(["Reativar em até 30 dias"])
-    EXP(["Exportar meus dados ⏳"]):::planned
+    EXP(["Exportar meus dados ✅<br/>RF18 · Seus dados"])
+    R17(["Apagar idade verificada e vínculos<br/>com responsável · RF17"])
     ELIM(["Eliminar e anonimizar a conta"])
     FOTO(["Apagar a foto do bucket"])
     AVAL(["Apagar avaliações escritas · RF8"])
@@ -25,6 +26,7 @@ flowchart LR
     ELIM -. «include» .-> AVAL
     ELIM -. «include» .-> ESTB
     ELIM -. «include» .-> APAG
+    ELIM -. «include» .-> R17
     ELIM --- JOB
     FOTO --- S3
     APAG --- S3

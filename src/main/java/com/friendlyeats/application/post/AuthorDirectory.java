@@ -1,6 +1,7 @@
 package com.friendlyeats.application.post;
 
 import com.friendlyeats.application.account.AgePolicy;
+import com.friendlyeats.application.age.AgeGate;
 import com.friendlyeats.application.common.PublicLinks;
 import com.friendlyeats.application.post.PostViews.AuthorView;
 import com.friendlyeats.application.profile.AccountBadge;
@@ -37,16 +38,18 @@ public class AuthorDirectory {
     private final UserPreferenceRepository preferences;
     private final PublicLinks links;
     private final AgePolicy age;
+    private final AgeGate ageGate;
     private final Clock clock;
     private final int protectedUntil;
 
     public AuthorDirectory(UserAccountRepository users, UserPreferenceRepository preferences, PublicLinks links,
-                           AgePolicy age, Clock clock,
+                           AgePolicy age, AgeGate ageGate, Clock clock,
                            @Value("${friendly-eats.registration.protected-until-age:16}") int protectedUntil) {
         this.users = users;
         this.preferences = preferences;
         this.links = links;
         this.age = age;
+        this.ageGate = ageGate;
         this.clock = clock;
         this.protectedUntil = protectedUntil;
     }
@@ -64,8 +67,12 @@ public class AuthorDirectory {
         return user != null && user.getAccountStatus() == AccountStatus.ACTIVE;
     }
 
+    /**
+     * Vê conteúdo de bebida alcoólica (posts 18+ e lugares com foco em bebida): maior de 18 com a idade
+     * <b>verificada</b> (RF17, {@link AgeGate}); a data declarada só restringe.
+     */
     public boolean adult(UserAccount user) {
-        return user != null && age.adult(user.getUserDateOfBirth());
+        return ageGate.alcoholAllowed(user);
     }
 
     /** Preferências gravadas ou, sem linha, os padrões do cadastro (não grava nada). */
