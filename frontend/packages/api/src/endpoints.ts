@@ -2,6 +2,16 @@
 import { createClient, type ApiClient, type ClientOptions } from './client.ts';
 import type {
   AccountTypeCode,
+  AgeAppealView,
+  AgeStartView,
+  AgeVerificationView,
+  DataExportView,
+  GuardianRequestView,
+  MinorLinkView,
+  PrivacyContactView,
+  ProtectionCode,
+  SupervisedView,
+  SupervisionView,
   CommentCreatedView,
   CommentPageView,
   ConsentList,
@@ -187,6 +197,47 @@ export function createApi(client: ApiClient = createClient()) {
       catalog: () => client.get<FrameCatalog>('/api/v1/backgrounds/catalog'),
       recommendations: (category: AccountTypeCode, feed: 'POST' | 'ALERT' = 'POST', media: 'TEXT' | 'IMAGE' = 'TEXT') =>
         client.get<FrameRecommendation[]>('/api/v1/backgrounds/recommendations', { query: { category, feed, media } }),
+    },
+
+    // ============================================================ RF17 · idade verificada e responsável
+    // (AgeVerificationController, GuardianController)
+    age: {
+      status: () => client.get<AgeVerificationView>('/api/v1/me/age-verification'),
+      /** 503 sem fornecedor; 403 para quem declarou menos de 18. */
+      start: () => client.post<AgeStartView>('/api/v1/me/age-verification/start'),
+      /** O servidor pergunta o resultado ao fornecedor; params = o que o fornecedor devolveu na volta. */
+      complete: (reference: string, params: Record<string, string> = {}) =>
+        client.post<AgeVerificationView>('/api/v1/me/age-verification/complete', { reference, params }),
+      appeal: (reason: string) => client.post<AgeAppealView>('/api/v1/me/age-verification/appeal', { reason }),
+    },
+
+    guardian: {
+      // lado do menor
+      status: () => client.get<MinorLinkView>('/api/v1/me/guardian'),
+      /** Sem e-mail: reenvia o convite pendente. */
+      invite: (guardianEmail?: string) => client.post<MinorLinkView>('/api/v1/me/guardian/invite', { guardianEmail: guardianEmail ?? null }),
+      request: (protection: ProtectionCode) => client.post<GuardianRequestView>('/api/v1/me/guardian/requests', { protection }),
+      unlink: () => client.delJson<MinorLinkView>('/api/v1/me/guardian'),
+      // lado do responsável
+      accept: (token: string) => client.post<SupervisedView>('/api/v1/guardian/links/accept', { token }),
+      minors: () => client.get<SupervisedView[]>('/api/v1/guardian/minors'),
+      panel: (minorId: number | string) => client.get<SupervisionView>(`/api/v1/guardian/minors/${seg(minorId)}`),
+      decide: (minorId: number | string, requestId: number, approve: boolean) =>
+        client.post<SupervisionView>(`/api/v1/guardian/minors/${seg(minorId)}/requests/${seg(requestId)}`, { approve }),
+      setProtection: (minorId: number | string, protection: ProtectionCode, allowed: boolean) =>
+        client.put<SupervisionView>(`/api/v1/guardian/minors/${seg(minorId)}/protections/${seg(protection)}`, { allowed }).then((r) => r.data),
+      setSensitiveConsent: (minorId: number | string, granted: boolean) =>
+        client.put<SupervisionView>(`/api/v1/guardian/minors/${seg(minorId)}/sensitive-consent`, { granted }).then((r) => r.data),
+      unlinkMinor: (minorId: number | string) => client.del(`/api/v1/guardian/minors/${seg(minorId)}`),
+    },
+
+    // ============================================================ RF18 · central do titular (PrivacyController)
+    privacy: {
+      /** Público: encarregado, direitos e prazos. */
+      contact: () => client.get<PrivacyContactView>('/api/v1/legal/privacy-contact'),
+      exports: () => client.get<DataExportView[]>('/api/v1/me/data-exports'),
+      /** Modo sudo; 429 = já pediu nas últimas 24 h. */
+      requestExport: (body: SudoRequest) => client.post<DataExportView>('/api/v1/me/data-exports', body),
     },
   };
 }

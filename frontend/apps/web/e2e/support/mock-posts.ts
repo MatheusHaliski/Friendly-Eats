@@ -22,6 +22,8 @@ type Fixture = <T>(name: string) => T;
 export interface PostsHost {
   session: SessionUserView | null;
   uploads(): Set<string> | null;
+  /** RF17: maior de 18 com a idade verificada (sem o host, vale a data declarada). */
+  alcoholVisible?(): boolean;
 }
 
 function problem(status: number, detail: string, extra: Record<string, unknown> = {}): Reply {
@@ -96,7 +98,7 @@ export class PostsState {
   }
 
   private adult(): boolean {
-    return !!this.host.session && !this.host.session.minor;
+    return !!this.host.session && !this.host.session.minor && (this.host.alcoholVisible?.() ?? true);
   }
 
   /** O post como quem está vendo o recebe (viewer e interactions dependem da sessão). */
@@ -223,7 +225,7 @@ export class PostsState {
     const placePosts = /^\/api\/v1\/establishments\/(\d+)\/posts$/.exec(p);
     if (placePosts && m === 'GET') {
       const id = Number(placePosts[1]);
-      if (id === 18 && !s) return problem(401, 'Entre na sua conta para ver: conteúdo de bebida alcoólica é só para maiores de 18.');
+      if (id === 18 && !s) return problem(401, 'Entre na sua conta e verifique a idade para ver: conteúdo de bebida alcoólica é só para maiores de 18.');
       const items = this.sorted(this.posts.filter((x) => x.establishment?.id === id && this.visibleInFeed(x)));
       return this.page(items, sp);
     }
@@ -237,8 +239,9 @@ export class PostsState {
       const visible = post && post.status !== 'REMOVED';
       if (!visible) return problem(404, 'Post não encontrado.');
       if (post.author.id !== this.viewerId && post.ageRating === 'AGE_18') {
-        if (!s) return problem(401, 'Entre na sua conta para ver: conteúdo de bebida alcoólica é só para maiores de 18.');
+        if (!s) return problem(401, 'Entre na sua conta e verifique a idade para ver: conteúdo de bebida alcoólica é só para maiores de 18.');
         if (s.minor) return problem(404, 'Post não encontrado.');
+        if (!this.adult()) return problem(403, 'Conteúdo de bebida alcoólica aparece só depois de verificar a idade.', { ageVerificationRequired: true });
       }
       if (!sub && m === 'GET') return { status: 200, body: this.view(post) };
       if (!sub && m === 'PATCH') return this.update(post, rec.body as Record<string, unknown>);

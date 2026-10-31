@@ -13,9 +13,14 @@ interface ConsentSwitchProps {
   busy?: boolean;
 }
 
-/** Texto da chave travada para menor: o sensível só aos 18 (LGPD Art. 14), os demais aos 16 (ECA Digital). */
+/**
+ * Texto da chave travada para menor: o sensível aos 18 ou antes com o consentimento do responsável vinculado (LGPD
+ * Art. 14, RF17), os demais aos 16 (ECA Digital).
+ */
 export function lockedText(consent: Pick<ConsentView, 'sensitive'>): string {
-  return consent.sensitive ? 'Disponível a partir dos 18 anos' : 'Disponível a partir dos 16 anos';
+  return consent.sensitive
+    ? 'Disponível a partir dos 18 anos, ou antes com o consentimento do responsável vinculado'
+    : 'Disponível a partir dos 16 anos';
 }
 
 /**

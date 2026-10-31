@@ -16,8 +16,14 @@
 //   bookmark-check (salvar), send (enviar comentário), archive e archive-restore (arquivar e restaurar),
 //   newspaper (Feed), square-plus (Publicar), trending-up (em alta; flame fica reservado), hourglass (encerrado),
 //   calendar-clock (vigência), eye-off (perfil privado), external-link (abre outro site), link (link do perfil).
+// Idade e titular (RF17 · RF18): id-card (verificar a idade), user-check (responsável e supervisão),
+//   file-down (exportar meus dados), scale (direitos do titular e encarregado).
 import {
   Archive,
+  FileDown,
+  IdCard,
+  Scale,
+  UserCheck,
   ArchiveRestore,
   BadgeCheck,
   BadgePercent,
@@ -157,6 +163,11 @@ export const IconExternal = decorative(ExternalLink);
 export const IconLink = decorative(LinkIcon);
 export const IconAlert = decorative(TriangleAlert);
 export const IconOfficialSource = decorative(ShieldAlert);
+// RF17 · RF18
+export const IconAgeVerify = decorative(IdCard);
+export const IconGuardian = decorative(UserCheck);
+export const IconExport = decorative(FileDown);
+export const IconRights = decorative(Scale);
 
 /**
  * Ícone de cada tipo de post, pelo código. A API manda {@code camera} na foto de prato, mas camera é da conta

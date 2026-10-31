@@ -27,7 +27,7 @@ test.describe('Cadastro (RF1)', () => {
       await expect(label).toContainText(glifo!);
     }
     await expect(page.getByRole('checkbox', { name: 'Li e aceito os Termos de Uso do Friendly Eats' })).not.toBeChecked();
-    await expect(page.getByText('Versão 2026-10-25.1.')).toBeVisible();
+    await expect(page.getByText('Versão 2026-10-31.1.')).toBeVisible();
     await expect(page.getByRole('link', { name: /Ler os Termos de Uso/ })).toHaveAttribute('href', '/termos');
   });
 
@@ -57,7 +57,7 @@ test.describe('Cadastro (RF1)', () => {
       userType: 'ESTABELECIMENTO',
       dateOfBirth: '1985-04-12',
       acceptTerms: true,
-      termsVersion: '2026-10-25.1',
+      termsVersion: '2026-10-31.1',
     });
     expect(body.typeDetails).toEqual({
       informalFormat: 'AMBULANTE',

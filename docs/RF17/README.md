@@ -15,6 +15,14 @@ paths:
   - src/main/java/com/friendlyeats/application/account/PreferencesService.java
   - src/main/java/com/friendlyeats/application/consent/ConsentService.java
   - src/main/resources/db/migration/V4__conta_lgpd.sql
+  - frontend/apps/web/app/configuracoes/idade/page.tsx
+  - frontend/apps/web/app/configuracoes/idade/menor/[[]id]/page.tsx
+  - frontend/apps/web/components/settings/AgeSection.tsx
+  - frontend/apps/web/components/settings/SupervisionPanel.tsx
+  - frontend/apps/web/components/age/AlcoholNotice.tsx
+  - frontend/apps/web/lib/titular.ts
+  - frontend/apps/web/e2e/support/mock-titular.ts
+  - frontend/apps/web/e2e/titular.spec.ts
 ---
 
 # RF17 · Verificação de idade e conta do responsável
@@ -116,3 +124,4 @@ paths:
 | Sinal de idade da loja (Decreto, art. 25) | — | ⏳ |
 | Tempo de uso e perfis adultos com quem o menor interage, no painel (art. 18) | — | ⏳ |
 | Aviso ao completar 16 | — | ⏳ |
+| Telas | app web `/configuracoes/idade` (**Idade e responsável**): status da verificação com método e validade, "Verificar minha idade" (redireciona ao fornecedor; com o fake, botões de resultado simulado), volta por `?verificacao=` concluída no servidor, histórico, contestação; para o menor, status do vínculo, aviso de pendente, reenviar ou trocar o e-mail, pedir ao responsável cada proteção, desfazer (16+) e histórico; para o adulto, o convite por `?convite=` e a lista "Quem eu supervisiono"; `/configuracoes/idade/menor/[id]` é o painel (aprovar ou negar, interruptores das proteções, consentimento dos estilos alimentares, histórico, desfazer). Aviso `AlcoholHiddenNotice` no feed e na busca e a página `VerifyAgeRequired` no post e no lugar. Foco nos avisos com `useDeferredFocus`; axe sem violações graves nos dois temas; e2e `titular.spec.ts` com `mock-titular.ts` e as fixtures `vinculo-menor.json` e `painel-supervisao.json` | ✅ |

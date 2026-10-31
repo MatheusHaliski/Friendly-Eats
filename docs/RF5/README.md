@@ -77,4 +77,5 @@ paths:
 | Pendências | Cassandra; destruir a DEK (crypto-shredding); reconciliação diária | ⏳ |
 | Tela | modal de exclusão (`alertdialog` com consequências, data final, "Baixar uma cópia", caixa "Entendo" + senha + código) e oferta de reativação no login | ⏳ |
 | Telas | app web `/configuracoes/conta`: diálogo "Excluir sua conta?" com as consequências, a caixa de confirmação, senha e código 2FA (`Dialog` com foco preso, Esc fecha e o foco volta); depois do 202 mostra a data-limite para reativar; `/entrar` em exclusão mostra "Sua conta está em exclusão" com "Reativar minha conta" e "Manter a exclusão e sair"; e2e `configuracoes.spec.ts` e `entrar.spec.ts` | ✅ |
+| Seus dados | `/configuracoes/conta` abre com o cartão **Seus dados** do [RF18](../RF18/README.md) (pedir a cópia com senha e baixar o ZIP); o diálogo de exclusão aponta para ele e cita os registros de acesso com IP e porta cifrados | ✅ |
 | Foco no diálogo | Excluir conta: o resumo de erros e o botão de concluir recebem o foco depois de montados (`useDeferredFocus`); a reativação em `/entrar` segue igual | ✅ |

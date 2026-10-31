@@ -1,5 +1,5 @@
-// Seções de /configuracoes (RF2 · RF3 · RF4 · RF5), na ordem do menu.
-export type SettingsSectionSlug = 'perfil' | 'exibicao' | 'privacidade' | 'seguranca' | 'conta';
+// Seções de /configuracoes (RF2 · RF3 · RF17 · RF4 · RF5 · RF18), na ordem do menu.
+export type SettingsSectionSlug = 'perfil' | 'exibicao' | 'privacidade' | 'idade' | 'seguranca' | 'conta';
 
 export interface SettingsSection {
   slug: SettingsSectionSlug;
@@ -8,7 +8,7 @@ export interface SettingsSection {
   description: string;
   /** Base legal mostrada na lista, quando houver. */
   law?: string;
-  rf: 'RF2' | 'RF3' | 'RF4' | 'RF5';
+  rf: 'RF2' | 'RF3' | 'RF4' | 'RF5' | 'RF17';
 }
 
 export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
@@ -36,6 +36,14 @@ export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
     rf: 'RF3',
   },
   {
+    slug: 'idade',
+    href: '/configuracoes/idade',
+    title: 'Idade e responsável',
+    description: 'Verificar a idade para ver conteúdo de bebida e a conta do responsável de quem tem menos de 16',
+    law: 'ECA Digital · arts. 9º e 24',
+    rf: 'RF17',
+  },
+  {
     slug: 'seguranca',
     href: '/configuracoes/seguranca',
     title: 'Senha e segurança',
@@ -46,7 +54,7 @@ export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
     slug: 'conta',
     href: '/configuracoes/conta',
     title: 'Conta',
-    description: 'Sair e excluir a conta, com 30 dias para reativar',
+    description: 'Seus dados: baixar uma cópia, sair e excluir a conta com 30 dias para reativar',
     law: 'Art. 18, VI — eliminação',
     rf: 'RF5',
   },

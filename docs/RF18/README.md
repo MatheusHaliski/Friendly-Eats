@@ -13,6 +13,11 @@ paths:
   - src/main/java/com/friendlyeats/infrastructure/storage/S3MediaStorage.java
   - src/main/resources/db/migration/V4__conta_lgpd.sql
   - docs/legal/INCIDENTES.md
+  - frontend/apps/web/app/privacidade/page.tsx
+  - frontend/apps/web/components/privacy/PrivacyView.tsx
+  - frontend/apps/web/components/settings/DataExportCard.tsx
+  - frontend/apps/web/lib/titular.ts
+  - frontend/apps/web/e2e/titular.spec.ts
 ---
 
 # RF18 · Central do titular e conformidade
@@ -98,3 +103,4 @@ paths:
 | Console administrativo com 2FA e papéis para consultar registros e incidentes | — | ⏳ ⚖️ |
 | Trilha de auditoria append-only com hash encadeado | — | ⏳ |
 | Relatório de transparência (RC-SEG-17) | — | ⏳ |
+| Telas | app web: `/privacidade` pública (link no rodapé) com o encarregado, o prazo de 15 dias, os direitos com o caminho de cada um e o formulário que monta o e-mail ao encarregado (funciona sem conta, `privacyRequestMailto`); **Seus dados** em `/configuracoes/conta` (`DataExportCard`): pedido com a senha (e o código, com 2FA) num diálogo, um por dia, status que se atualiza enquanto prepara, link "Baixar ZIP" com a URL pré-assinada; axe nos dois temas; e2e `titular.spec.ts` com a fixture `privacidade-contato.json` | ✅ |

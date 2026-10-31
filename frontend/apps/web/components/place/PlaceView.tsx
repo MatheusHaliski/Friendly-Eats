@@ -4,6 +4,7 @@ import { isApiError, type EstablishmentView } from '@friendly-eats/api';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useEffect, type ReactNode } from 'react';
+import { VerifyAgeRequired } from '@/components/age/AlcoholNotice';
 import { AccountBadge, VerifiedSeal } from '@/components/AccountBadge';
 import { CuisineChip } from '@/components/CuisineChip';
 import { Notice } from '@/components/Form';
@@ -47,11 +48,15 @@ export function PlaceView({ id }: { id: string }) {
           <p>
             <Link href={loginHref(`/lugares/${id}`)} className="fe-btn fe-btn-primary">
               <IconLogin size={18} />
-              Entrar
+              Entrar e verificar a idade
             </Link>
           </p>
         </div>
       );
+    }
+    if (isApiError(e, 403) && e.problem.ageVerificationRequired) {
+      // RF17: adulto sem a idade verificada
+      return <VerifyAgeRequired detail={e.detail} />;
     }
     if (isApiError(e, 404)) {
       return (

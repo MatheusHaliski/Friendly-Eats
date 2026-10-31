@@ -1088,3 +1088,168 @@ export interface FrameRecommendation {
   seasonId: string | null;
   reason: string;
 }
+
+// ============================================================ RF17 · idade verificada e conta do responsável
+// (application/age/AgeVerificationService.java · application/guardian/GuardianService.java)
+// Seção própria, para facilitar o merge com outros RFs.
+
+/** 403 de conteúdo de bebida para quem não verificou a idade (ApiExceptionHandler, RF17). */
+export interface Problem {
+  ageVerificationRequired?: boolean;
+}
+
+export type AgeStatus = 'UNVERIFIED' | 'PENDING' | 'VERIFIED_ADULT' | 'VERIFIED_MINOR' | 'FAILED';
+
+export interface AgeHistoryItem {
+  status: AgeStatus;
+  statusLabel: string;
+  method: string | null;
+  note: string | null;
+  occurredAt: string;
+}
+
+export type AgeAppealStatus = 'OPEN' | 'ACCEPTED' | 'REJECTED';
+
+export interface AgeAppealView {
+  id: number;
+  contested: AgeStatus;
+  reason: string;
+  status: AgeAppealStatus;
+  createdAt: string;
+  decidedAt: string | null;
+  decisionNote: string | null;
+}
+
+/** GET /api/v1/me/age-verification. */
+export interface AgeVerificationView {
+  status: AgeStatus;
+  statusLabel: string;
+  method: string | null;
+  verifiedAt: string | null;
+  validUntil: string | null;
+  /** Decide o conteúdo de bebida alcoólica (posts 18+ e lugares com foco em bebida). */
+  alcoholContentVisible: boolean;
+  declaredAdult: boolean;
+  canStart: boolean;
+  canAppeal: boolean;
+  providerAvailable: boolean;
+  /** Fornecedor simulado (dev): a tela mostra os botões de resultado em vez de redirecionar. */
+  simulated: boolean;
+  pending: { reference: string; expiresAt: string } | null;
+  appeal: AgeAppealView | null;
+  history: AgeHistoryItem[];
+}
+
+export interface AgeStartView {
+  reference: string;
+  redirectUrl: string;
+  instructions: string;
+  expiresAt: string;
+  simulated: boolean;
+}
+
+export type GuardianLinkStatus = 'NONE' | 'PENDING' | 'ACTIVE';
+export type ProtectionCode = 'PUBLIC_PROFILE' | 'SENSITIVE_CONTENT' | 'COMMENTS_FROM_EVERYONE' | 'NO_USAGE_REMINDER';
+export type GuardianRequestStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'CANCELLED';
+
+export interface ProtectionView {
+  code: ProtectionCode;
+  label: string;
+  description: string;
+  /** true = a proteção está desligada (liberada pelo responsável). */
+  allowed: boolean;
+}
+
+export interface GuardianRequestView {
+  id: number;
+  protection: ProtectionCode;
+  label: string;
+  status: GuardianRequestStatus;
+  createdAt: string;
+  decidedAt: string | null;
+}
+
+export interface GuardianActionView {
+  actor: 'MINOR' | 'GUARDIAN' | 'SYSTEM';
+  action: string;
+  label: string;
+  detail: string | null;
+  occurredAt: string;
+}
+
+/** GET /api/v1/me/guardian: o vínculo visto pelo menor. */
+export interface MinorLinkView {
+  /** Menor de 16: o vínculo é obrigatório (ECA Digital, art. 24). */
+  required: boolean;
+  /** Menor de 18: pode ter vínculo. */
+  eligible: boolean;
+  status: GuardianLinkStatus;
+  guardianEmail: string | null;
+  guardian: { id: number; name: string; handle: string } | null;
+  invitedAt: string | null;
+  inviteExpiresAt: string | null;
+  pendingDays: number;
+  overdue: boolean;
+  canUnlink: boolean;
+  sensitiveConsent: boolean;
+  protections: ProtectionView[];
+  requests: GuardianRequestView[];
+  history: GuardianActionView[];
+}
+
+export interface SupervisedView {
+  minorId: number;
+  name: string;
+  handle: string;
+  age: number;
+  linkedAt: string;
+  pendingRequests: number;
+}
+
+/** GET /api/v1/guardian/minors/{id}: painel de supervisão (ECA Digital, art. 18). */
+export interface SupervisionView {
+  minor: SupervisedView;
+  protectionsLocked: boolean;
+  protections: ProtectionView[];
+  sensitiveConsent: boolean;
+  sensitiveConsentAvailable: boolean;
+  requests: GuardianRequestView[];
+  history: GuardianActionView[];
+}
+
+// ============================================================ RF18 · central do titular
+// (application/privacy/PrivacyContact.java · DataExportService.java)
+
+export interface PrivacyRight {
+  code: string;
+  label: string;
+  article: string;
+  how: string;
+}
+
+/** GET /api/v1/legal/privacy-contact (público). Campos nulos = ainda a definir. */
+export interface PrivacyContactView {
+  controllerName: string | null;
+  dpoName: string | null;
+  dpoEmail: string | null;
+  dpoSubstituteName: string | null;
+  privacyEmail: string | null;
+  requestDeadlineDays: number;
+  exportLinkHours: number;
+  rights: PrivacyRight[];
+}
+
+export type DataExportStatus = 'REQUESTED' | 'PROCESSING' | 'READY' | 'EXPIRED' | 'FAILED';
+
+export interface DataExportView {
+  id: string;
+  status: DataExportStatus;
+  statusLabel: string;
+  requestedAt: string;
+  dueAt: string;
+  readyAt: string | null;
+  expiresAt: string | null;
+  sizeBytes: number | null;
+  /** URL pré-assinada; só com READY e dentro da validade. */
+  downloadUrl: string | null;
+}

@@ -82,4 +82,5 @@ pontual, não como o perfil inteiro.
 | Reconsentimento | nova `privacy-version` pede reconfirmação das finalidades ligadas | ⏳ |
 | Consumidores | feed personalizado e marketing conferem `ConsentService.granted` quando existirem | ⏳ |
 | Telas | app web `/configuracoes/privacidade`: preferências de privacidade e uma chave por finalidade (`ConsentSwitch`, `role=switch`, estado escrito "Ligado/Desligado"), base legal e selo "Dado sensível"; chave travada pelo `lockedForMinor` com "Disponível a partir dos 16/18 anos"; o cartão "Seu gosto" do perfil bloqueia os estilos alimentares sem o consentimento e recarrega o perfil depois de cada mudança; e2e `configuracoes.spec.ts` (ligar o sensível e salvar estilos) | ✅ |
+| Responsável | a chave travada do dado sensível diz "Disponível a partir dos 18 anos, ou antes com o consentimento do responsável vinculado" (`lockedText`); o consentimento é dado no painel do [RF17](../RF17/README.md) | ✅ |
 | Foco no aviso | Privacidade: o aviso de resultado recebe o foco depois de montado (`useDeferredFocus`) | ✅ |
