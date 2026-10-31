@@ -7,6 +7,7 @@ import com.friendlyeats.domain.model.UserCategoryEnum;
 import com.friendlyeats.infrastructure.persistence.postgres.UserAccountRepository;
 import com.friendlyeats.support.ApiClient;
 import com.friendlyeats.support.CapturingNotifier;
+import com.friendlyeats.support.GarageContainer;
 import com.friendlyeats.support.PolyglotContainers;
 import com.friendlyeats.support.TestImages;
 import org.junit.jupiter.api.BeforeEach;
@@ -179,6 +180,9 @@ class ProfilePhotoApiIT {
     private String uploadPhoto(UserAccount who, byte[] bytes, String contentType) throws Exception {
         Map<String, Object> ticket = send(HttpMethod.POST, "/api/v1/media/uploads", who,
                 Map.of("kind", "IMAGE", "contentType", contentType, "sizeBytes", bytes.length)).getBody();
+        // o original (com EXIF/GPS) vai para o bucket privado de uploads, nunca para o de mídias públicas
+        assertThat((String) ticket.get("uploadUrl")).contains("/" + GarageContainer.UPLOADS_BUCKET + "/uploads/")
+                .doesNotContain("/" + GarageContainer.BUCKET + "/");
         assertThat(putToBucket(ticket, bytes)).isEqualTo(200);
         return (String) ticket.get("objectKey");
     }

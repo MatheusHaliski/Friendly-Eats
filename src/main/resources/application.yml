@@ -103,6 +103,8 @@ friendly-eats:
     presign-endpoint: ${S3_PRESIGN_ENDPOINT:${friendly-eats.storage.endpoint}}
     region: ${S3_REGION:sa-east-1}
     bucket: ${S3_BUCKET:friendly-eats-media}
+    # privado: originais enviados pelo app (uploads/, com EXIF/GPS) e exportações do titular (exports/), nunca públicos
+    uploads-bucket: ${S3_UPLOADS_BUCKET:friendly-eats-uploads}
     # vazio = cadeia padrão da AWS (papel da instância, AWS_ACCESS_KEY_ID...); nada de segredo aqui
     access-key: ${S3_ACCESS_KEY:}
     secret-key: ${S3_SECRET_KEY:}

@@ -67,6 +67,7 @@ public class PolyglotContainers {
             registry.add("friendly-eats.storage.presign-endpoint", garage::s3Endpoint);
             registry.add("friendly-eats.storage.region", () -> GarageContainer.REGION);
             registry.add("friendly-eats.storage.bucket", () -> GarageContainer.BUCKET);
+            registry.add("friendly-eats.storage.uploads-bucket", () -> GarageContainer.UPLOADS_BUCKET);
             registry.add("friendly-eats.storage.access-key", () -> GarageContainer.ACCESS_KEY);
             registry.add("friendly-eats.storage.secret-key", () -> GarageContainer.SECRET_KEY);
         };
