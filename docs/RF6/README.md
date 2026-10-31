@@ -23,6 +23,10 @@ paths:
   - frontend/apps/web/components/place/PlaceView.tsx
   - frontend/apps/web/components/PriceTag.tsx
   - frontend/apps/web/components/place/PlacePosts.tsx
+  - frontend/apps/web/components/place/PlaceForm.tsx
+  - frontend/apps/web/components/place/PlaceMap.tsx
+  - frontend/apps/web/lib/place-form.ts
+  - src/main/java/com/friendlyeats/application/establishment/PlaceEditors.java
 ---
 
 # RF6 · Cadastrar estabelecimento: tipo, local e preço declarado
@@ -37,7 +41,7 @@ paths:
 | **Consumidor (CDC)** | A faixa de preço é informação ao consumidor (art. 6º, III). Com 5 relatos ou mais, a faixa vem das avaliações e não do dono, o que dificulta a faixa enganosa (art. 37, §1º) |
 | **Termos de Uso / ECA Digital** | Página de tipo com foco em bebida alcoólica é só para maiores de 18: o visitante precisa entrar e, para menor, ela não existe (`404`) |
 | **Taxonomia** | [`TAXONOMIA_FRIENDLY_EATS.md`](../TAXONOMIA_FRIENDLY_EATS.md): conta dona (2.4), tipo e grupo (7), preço (9) e local (11) |
-| **Status** | 🟡 Parcial: API, regras, página pública com selo, 18+, endereço protegido e preço derivado prontos; verificação automática de CNPJ e CNAE, moderação, busca e telas ainda não |
+| **Status** | 🟡 Parcial: API, regras, página pública com selo, 18+, endereço protegido, preço derivado e o formulário do dono no app (com o pino no mapa) prontos; verificação automática de CNPJ e CNAE e moderação ainda não |
 
 ## Critérios de aceite
 
@@ -86,17 +90,27 @@ paths:
    `CERVEJARIA`, `VINICOLA_DESTILARIA` e `ADEGA`), quando são o **tipo principal**, marcam a página `adultsOnly`. O
    visitante anônimo recebe `401` com a mensagem "Entre na sua conta para ver: conteúdo de bebida alcoólica é só para
    maiores de 18." e quem tem menos de 18 recebe `404`. A mesma regra vale para a lista de avaliações (RF8).
-10. **Editar.** `PATCH /api/v1/establishments/{id}` é só do dono (para os outros, `404`):
+10. **Editar.** `PATCH /api/v1/establishments/{id}` é só de quem o `PlaceEditors` aceita — hoje, o dono (para os
+    outros, `404`); a equipe do RF20 entra por ali:
     - campo nulo não muda nada; tipos, local e preço são trocados por inteiro;
     - trocar o tipo revalida a classificação atual ([RF7](../RF7/README.md)) e o preço declarado no grupo novo (um polo
       com "não se aplica" que vira restaurante precisa informar o gasto por pessoa);
     - `status` aceita `ACTIVE` (aberto) e `CLOSED` (fechou de vez); qualquer outro valor dá `422`, e um lugar `REMOVED`
-      pela moderação dá `409`.
+      pela moderação dá `409`. A pausa com data de volta é o `temporaryClosure` do [RF11](../RF11/README.md);
+    - os blocos da página do lugar (`hours`, `temporaryClosure`, `charges`, `facets`, `actions`) seguem as regras do
+      [RF11](../RF11/README.md), no cadastro e na edição, e voltam no mesmo `422` com os erros deste RF.
 11. `GET /api/v1/me/establishments` lista os lugares do dono, na ordem de cadastro.
 12. Todos os erros de validação voltam juntos (`422` com `errors[]`), com o código desconhecido apontando para
     `GET /api/v1/taxonomy`.
 13. A eliminação da conta dona ([RF5](../RF5/README.md)) apaga os estabelecimentos dela, e as avaliações deles saem
     junto (`ON DELETE CASCADE`).
+14. **Formulário do dono no app** (`/lugares/novo` e `/lugares/[id]/editar`, a partir de "Meus lugares" da `/conta`):
+    nome e descrição, tipo principal (só os do grupo da conta: Varejo para `VAREJO`, os demais para `ESTABELECIMENTO`) e
+    até 3 secundários, classificação do [RF7](../RF7/README.md), UF, código IBGE, endereço, visibilidade do endereço e o
+    **pino** num mapa Leaflet com tiles do OpenStreetMap (atribuição visível, sem chave paga): arrastar, clicar no mapa,
+    digitar latitude e longitude ou "Pôr o pino no centro do mapa"; gasto por pessoa ("não se aplica" só para varejo e
+    polo) e os blocos do RF11. Sem sessão vai para o login; conta de outro tipo vê o aviso; quem não edita vê "Só quem
+    cuida da página edita o lugar". Depois de salvar, a página do lugar mostra os `publishBlockers`.
 
 ## Diagramas
 
@@ -108,10 +122,10 @@ paths:
 | Camada | Artefato | Situação |
 |---|---|---|
 | Domínio | `Establishment` (`setTypes` com o grupo derivado, `setLocation`, `setDeclaredPrice`, `isAlcoholFocused`, `Status`), `EstablishmentType` (48 tipos, grupo, 18+, CNAE típico), `EstablishmentGroup`, `Uf` (código IBGE), `GeoPrecision`, `AddressVisibility`, `PriceLevel` (`Source`) | ✅ |
-| Regras | `EstablishmentRules.types/location/price/publicCoordinate`, `PriceScale` (limites, `levelOf`, `rangeLabel`), `EstablishmentService` (dono, CPF com um ponto, `requireVisible`, `publishBlockers`, preço derivado, endereço por visibilidade) | ✅ |
+| Regras | `EstablishmentRules.types/location/price/publicCoordinate`, `PriceScale` (limites, `levelOf`, `rangeLabel`), `EstablishmentService` (dono, CPF com um ponto, `requireVisible`, `requireEditable` com o `PlaceEditors`, `publishBlockers`, preço derivado, endereço por visibilidade) | ✅ |
 | Persistência | `V2__estabelecimento_e_avaliacao.sql`: tabela `establishment` com CHECKs, `point` gerado (`geography(Point,4326)`) e índices GiST, GIN e trigrama; `EstablishmentRepository` (`countByOwnerId`, `deleteAllOwnedBy`) | ✅ |
 | API | `POST /api/v1/establishments`, `GET` e `PATCH /api/v1/establishments/{id}`, `GET /api/v1/me/establishments`; GET público no `SecurityConfig` ([RF4](../RF4/README.md)). O `GET /api/v1/establishments` (busca) é do [RF10](../RF10/README.md), que monta os cards com `price`, `rating`, `location` e `classification` deste serviço: o card mostra o mesmo que a página | ✅ |
 | Configuração | `friendly-eats.price.reference-brl` (58), `multipliers` (0.7,1.4,2.8), `round-brl` (5), `min-reports` (5) | ✅ |
 | Testes | `TaxonomyRulesTest.vocabulariesHaveTheResearchedSizeAndEveryCuisineDescendsFromItsMacroGeneric`, `TaxonomyRulesTest.typesFollowTheAccountKindAndPolosAreNeverSecondary`, `TaxonomyRulesTest.locationUsesTheIbgeCodeKeepsPinsInBrazilAndHidesTheHomeKitchenStreet`, `TaxonomyRulesTest.priceScaleDoublesFromTheReferenceMealAndRoundsToFiveReais`; `EstablishmentApiIT.establishmentPageIsPublicOnlyWithTheOwnerSealAndHidesTheHomeKitchenStreet` (inclui 6 cadastros simultâneos com CPF e a conta que vira cozinha caseira depois), `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice` (preço pelas avaliações), `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults` (18+), `EstablishmentApiIT.accountEliminationRemovesReviewsAndOwnedEstablishments` | ✅ |
-| Pendências | verificação automática de CNPJ e CNAE (BrasilAPI, matriz R8); moderação: `REMOVED` e revisão do selo (RF13); auditoria de troca de tipo principal (R10); facetas operacionais (seção 8 da taxonomia); preço pelo cardápio (`PRICE_SRC_MENU`) e cardápio por item (RF9); CEP pelo ViaCEP e geocodificação; contêiner `dentro_de → POLO` (R5) | ⏳ |
-| Tela | app web: página `/lugares/[id]` (tipo, grupo, preço com origem, local com "Localização aproximada", selo do dono, aviso 18+ e a seção "Posts deste lugar", `PlacePosts`, com o feed `GET /establishments/{id}/posts` do [RF14](../RF14/README.md)); e2e `lugar.spec.ts` com axe. Formulário de cadastro do lugar com pino no mapa | ✅ página · ⏳ formulário |
+| Pendências | verificação automática de CNPJ e CNAE (BrasilAPI, matriz R8); moderação: `REMOVED` e revisão do selo (RF13); auditoria de troca de tipo principal (R10); preço pelo cardápio (`PRICE_SRC_MENU`) e cardápio por item (RF9); CEP pelo ViaCEP, município pelo nome (hoje o dono digita o código IBGE) e geocodificação; contêiner `dentro_de → POLO` (R5); equipe da página no `PlaceEditors` (RF20) | ⏳ |
+| Tela | app web: página `/lugares/[id]` (tipo, grupo, preço com origem, local com "Localização aproximada" e o mapa do [RF11](../RF11/README.md), selo do dono, aviso 18+, "Editar a página" para quem edita e a seção "Posts deste lugar", `PlacePosts`, com o feed `GET /establishments/{id}/posts` do [RF14](../RF14/README.md)); formulário do dono `PlaceForm` (`lib/place-form`, `PlaceMap` com o pino); e2e `lugar.spec.ts` e `lugar-dono.spec.ts` com axe | ✅ |

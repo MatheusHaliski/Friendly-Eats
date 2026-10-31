@@ -92,7 +92,7 @@ contestação pelo dono (EST-14) com (SEG-08); e revisão humana (SEG-02) com go
 | **RF13** | Moderação: denúncia, decisão motivada, recurso e integridade das avaliações | SEG-01 a 05, SEG-07, SEG-08, EST-14 | **Must** | Sim (STF, ECA Digital, CDC) | G |
 | **RF18** | Central do titular e conformidade (exportar dados, encarregado, registros de acesso, incidentes, transparência) | SEG-12, SEG-15, SEG-16, SEG-17 | **Must** | Sim (LGPD, Marco Civil) | G |
 | **RF19** | Segurança entre usuários: bloquear, silenciar, palavras filtradas, desfoque de rosto e placa, direito autoral | SEG-09, SEG-10, SEG-11 | **Must** (menores) / Should | Em parte | M |
-| **RF11** | Página do estabelecimento + horários e feriados, cobranças declaradas, botões de reserva, delivery e WhatsApp | EST-04, EST-05, EST-09 | **Must** | Em parte (Decreto 5.903, Lei 13.419) | M |
+| **RF11** ✅ [implementado em parte](RF11/README.md) | Página do estabelecimento + horários e feriados, cobranças declaradas, botões de reserva, delivery e WhatsApp | EST-04, EST-05, EST-09 | **Must** | Em parte (Decreto 5.903, Lei 13.419) | M |
 | **RF20** | Gestão da página: reivindicar e disputar a posse, equipe com papéis, marca e filiais | EST-01, EST-02, EST-03 | **Must** | Não | G |
 | **RF21** | Seguir pessoas e lugares, feed "Seguindo" e preferências de notificação | COM-01, COM-09 | **Must** | Não | M |
 | **RF22** | Prévia de link (Open Graph) e convite ou indicação sem recompensa financeira | COM-16, COM-17 | **Must** | Não | P |

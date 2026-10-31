@@ -36,7 +36,7 @@ sequenceDiagram
     end
     D->>API: PATCH /api/v1/establishments/{id} {status: CLOSED}
     API->>S: update(viewerId, id, draft)
-    alt não é o dono
+    alt PlaceEditors.canEdit falso (não é o dono)
         S-->>D: 404
     else lugar REMOVED pela moderação
         S-->>D: 409

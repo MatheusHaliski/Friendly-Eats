@@ -41,11 +41,13 @@ classDiagram
         CardLocation location
         Double distanceKm
         boolean adultsOnly
+        OpenStatusView openStatus
     }
     class EstablishmentService {
         ~price(Establishment, List~Review~) PriceView
         ~rating(List~Review~) RatingView
         ~location(Establishment, owner)$ LocationView
+        ~openStatus(Establishment) OpenStatusView
     }
     class PriceScale {
         +thresholdsCents() int[]

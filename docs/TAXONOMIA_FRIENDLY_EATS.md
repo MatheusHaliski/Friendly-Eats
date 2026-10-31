@@ -607,11 +607,18 @@ LGPD: guardar só o necessário (CNPJ, resultado e data de cada etapa, hash do d
 
 ## 8. Facetas operacionais
 
-⏳ **Planejado.** Nenhuma faceta tem código ainda. Valor tri-estado (`SIM` / `NAO` / `DESCONHECIDO`) e origem
-(`DECLARADO_DONO`, `COMUNIDADE` com nº de confirmações, `IMPORTADO` com fonte), separando o dado do dono do dado da
-comunidade, como o Google.
+✅ **No código desde o [RF11](RF11/README.md)** (`domain/taxonomy/Facet.java`, 39 facetas; vocabulário em
+`GET /api/v1/taxonomy`, campo `facets`). Valor tri-estado: o dono declara `SIM` / `NAO` (ou os valores próprios da
+faceta, abaixo); ausente = `DESCONHECIDO` ("Sem informação"). Origem mostrada em cada item: `DECLARADO_DONO`,
+`LEI` (fixas), `HORARIO` (refeições derivadas) e `LINKS` (delivery por aplicativo). ⏳ `COMUNIDADE` com nº de
+confirmações e `IMPORTADO` com fonte, separando o dado do dono do da comunidade, como o Google.
 
-### 8.1 Atendimento ⏳
+Cada faceta tem um ícone Lucide próprio, sem repetir os reservados do [Design System](DESIGN_SYSTEM.md#1-princípios)
+(`store`, `users`, `coffee`, `sun`, `moon`, `clock`, `smartphone`, `book-open` e `message-circle` já têm outro
+sentido): por isso balcão é `concierge-bell`, grupos `users-round`, café da manhã `croissant`, almoço `salad`, jantar
+`sunset`, entrega por app `tablet-smartphone`, braille `book-a` e vale-alimentação `shopping-cart`.
+
+### 8.1 Atendimento ✅ (RF11)
 
 | Código | Rótulo | Google | OSM |
 |---|---|---|---|
@@ -621,15 +628,18 @@ comunidade, como o Google.
 | `RETIRADA_CARRO` | Retirada no carro | `curbsidePickup` | — |
 | `DRIVE_THRU` | Drive-thru | — | `drive_through=yes` |
 | `DELIVERY_PROPRIO` | Entrega própria | `delivery` | `delivery=yes` |
-| `DELIVERY_APP` | Entrega por aplicativo | `delivery` | `delivery=yes` |
+| `DELIVERY_APP` | Entrega por aplicativo · **derivada dos links de delivery** (não se declara) | `delivery` | `delivery=yes` |
 | `RESERVA` | Reservas (`OBRIGATORIA`, `RECOMENDADA`, `ACEITA`, `NAO_ACEITA`) | `reservable` | `reservation=*` |
 | `ENCOMENDA` | Sob encomenda | — | — |
-| `CARDAPIO_ONLINE` | Cardápio publicado | `url_menu` (GBP) | `website:menu` |
+| `CARDAPIO_ONLINE` | Cardápio publicado ⏳ (RF27) | `url_menu` (GBP) | `website:menu` |
 
-`formatos_servico` (multivalorado, com refeição opcional por valor): `A_LA_CARTE`, `QUILO`, `BUFFET_PRECO_FIXO`,
+`RESERVA` usa os valores `OBRIGATORIA`, `RECOMENDADA`, `ACEITA` e `NAO_ACEITA`. ⏳ `formatos_servico` (multivalorado, com refeição opcional por valor): `A_LA_CARTE`, `QUILO`, `BUFFET_PRECO_FIXO`,
 `RODIZIO`, `PF_EXECUTIVO`, `MENU_DEGUSTACAO`, `PEDIDO_BALCAO`, `PETISCOS_PORCOES`.
 
-### 8.2 Refeições ⏳
+### 8.2 Refeições ✅ derivadas do horário (RF11)
+
+`CAFE_MANHA`, `ALMOCO`, `JANTAR` e `MADRUGADA` saem do horário da semana (não se declaram); `BRUNCH`, `CAFE_TARDE` e
+`HAPPY_HOUR` ⏳ (horários adicionais).
 
 | Código | Rótulo | Regra de validação |
 |---|---|---|
@@ -641,24 +651,28 @@ comunidade, como o Google.
 | `JANTAR` | Jantar | aberto depois das 19h |
 | `MADRUGADA` | Madrugada | derivado: fecha depois de 0h |
 
-### 8.3 Ambiente e ocasião ⏳
+### 8.3 Ambiente e ocasião ✅ (RF11, menos `ENCONTRO`)
 
 | Código | Rótulo | Origem preferida |
 |---|---|---|
 | `FAMILIA_CRIANCAS` | Bom para crianças (cardápio infantil, cadeirão, espaço kids, trocador) | dono |
 | `GRUPOS` | Bom para grupos | dono + comunidade |
-| `ENCONTRO` | Encontro / romântico | comunidade (é subjetivo) |
+| `ENCONTRO` | Encontro / romântico ⏳ | comunidade (é subjetivo) |
 | `TRABALHO` | Bom para trabalhar (wi-fi, tomadas, silêncio) | dono + comunidade |
-| `PET_FRIENDLY` | Aceita pets (`DENTRO`, `SO_AREA_EXTERNA`, `NAO`) | dono |
+| `PET_FRIENDLY` | Aceita pets (`DENTRO`, `SO_AREA_EXTERNA`, `NAO`; o `NAO` diz junto "cão de assistência sempre entra") | dono |
 | `AO_AR_LIVRE` | Área ao ar livre | dono |
 | `MUSICA_AO_VIVO` | Música ao vivo (com aviso de couvert) | dono |
 | `ESPORTES_TV` | Transmissão de jogos | dono |
+| `WIFI` | Wi-Fi para clientes (código novo do RF11) | dono |
 | `LGBTQIA_ACOLHEDOR` | Espaço LGBTQIA+ acolhedor | dono, com moderação |
 
 "Não aceita pets" nunca pode parecer "não aceita cão-guia": o cão de assistência é sempre permitido (Lei 11.126/2005,
 confirmada na [pesquisa de requisitos](PESQUISA_REQUISITOS.md)).
 
-### 8.4 Acessibilidade ⏳
+### 8.4 Acessibilidade ✅ (RF11)
+
+Valores `SIM`, `PARCIAL` e `NAO`. As duas fixas aparecem em toda página, com a origem "Garantido por lei", e a API
+recusa quem tenta declará-las.
 
 | Código | Rótulo | Referência |
 |---|---|---|
@@ -676,7 +690,7 @@ confirmada na [pesquisa de requisitos](PESQUISA_REQUISITOS.md)).
 Mostrar "declarado pelo estabelecimento" e "confirmado por N visitantes", nunca "conforme NBR 9050". Estado sempre com
 ícone e texto ("Sim", "Parcial", "Não", "Sem informação").
 
-### 8.5 Pagamento ⏳
+### 8.5 Pagamento ✅ (RF11, menos `BENEFICIO_BANDEIRA`)
 
 | Código | Rótulo | Observação |
 |---|---|---|
@@ -687,9 +701,38 @@ Mostrar "declarado pelo estabelecimento" e "confirmado por N visitantes", nunca 
 | `DINHEIRO` | Dinheiro | flag derivada `SOMENTE_DINHEIRO` |
 | `VALE_REFEICAO` | Vale-refeição | refeição pronta: grupos `RESTAURANTE`, `RAPIDO`, `BAR`, `CAFE_DOCE`, `PRODUCAO` |
 | `VALE_ALIMENTACAO` | Vale-alimentação | gêneros alimentícios: grupos `VAREJO` e `POLO` |
-| `BENEFICIO_BANDEIRA` | Bandeiras aceitas | Alelo, Pluxee, Ticket, VR, Ben, Flash, Swile, Caju etc. (Decreto 12.712/2025) |
+| `BENEFICIO_BANDEIRA` | Bandeiras aceitas ⏳ | Alelo, Pluxee, Ticket, VR, Ben, Flash, Swile, Caju etc. (Decreto 12.712/2025) |
 
-Cobranças relacionadas, também ⏳: `TAXA_SERVICO`, `COUVERT` e `SINAL_RESERVA`.
+`VALE_REFEICAO` e `VALE_ALIMENTACAO` são recusados fora dos grupos da tabela (`422`).
+
+### 8.6 Cobranças declaradas ✅ (RF11)
+
+| Código | Regra | Texto público fixo |
+|---|---|---|
+| `TAXA_SERVICO` | 1% a 20% (0 = sem taxa); nunca obrigatória (Lei 13.419/2017) | "Taxa de serviço de 10% (opcional)" |
+| `COUVERT` · `ARTISTICO` | valor por pessoa e os dias com apresentação ao vivo; recusado com `MUSICA_AO_VIVO` = `NAO` | "Couvert artístico de R$ 15 por pessoa, só nos dias com apresentação ao vivo (sexta, sábado)" |
+| `COUVERT` · `ENTRADA_MESA` | valor por pessoa (pão, petiscos) | "… cobrado só se você aceitar" |
+| `FORMA_PAGAMENTO` | `DESCONTO` ou `ACRESCIMO` de 1% a 20%, uma por forma de pagamento da 8.5, recusada se a forma está como `NAO` (Lei 10.962/2004, art. 5º-A) | "5% de desconto no Pix" |
+| `CONSUMACAO_MINIMA` | **sempre recusada** (`422`; orientação dos Procons, CDC art. 39) | — |
+| `SINAL_RESERVA` | ⏳ | — |
+
+Toda cobrança mostra "Declarado pelo estabelecimento em dd/mm/aaaa" e o aviso de que a página não substitui a lista
+de preços afixada na entrada (Decreto 5.903/2006, art. 8º, § 2º).
+
+### 8.7 Botões de ação ✅ (RF11)
+
+Só links, um por provedor (`ActionProvider`), HTTPS e no domínio do provedor ou num subdomínio: reserva — `THEFORK`,
+`TAGME`, `GET_IN`, `OPENTABLE` (até 2); delivery — `IFOOD`, `RAPPI`, `AIQFOME`, `NOVENTA_E_NOVE_FOOD` (até 5, um
+preferido); `WHATSAPP` pelo número em E.164 (`https://wa.me/55…`). ⚖️ Domínios a conferir com cada provedor.
+
+### 8.8 Horário e fuso ✅ (RF11)
+
+Até 3 faixas por dia; faixa que passa da meia-noite pertence ao dia em que começa; datas especiais substituem a semana;
+fechado temporariamente com data de volta (passada a data, "Pode estar fechado"); "fechou de vez" é o `CLOSED` da 7.5.
+O "aberto agora" usa o fuso do lugar pela UF (`America/Sao_Paulo`, `America/Fortaleza`, `America/Recife`,
+`America/Maceio`, `America/Bahia`, `America/Belem`, `America/Araguaina`, `America/Manaus`, `America/Cuiaba`,
+`America/Campo_Grande`, `America/Porto_Velho`, `America/Boa_Vista`, `America/Rio_Branco`) e `America/Noronha` para
+Fernando de Noronha (IBGE 2605459). ⏳ Oeste do Amazonas em UTC−5.
 
 ---
 
@@ -985,7 +1028,7 @@ Exemplos: pizzaria com `ITALIANA` principal → `EUROPEIA` (a culinária vem ant
 | RF8 | Avaliar com estrelas | nota, estados, dimensões, `visit_mode`, fórmulas (10), preço pelas avaliações (9.3) | v1 |
 | RF9 | Publicar conteúdo | tipos de post e quem publica (14), alergênicos por post (6.2), 18+ (14.3), alerta sanitário da conta `OFICIAL`; ⏳ cardápio por item | 🟡 parcial |
 | RF10 | Buscar e filtrar | ⏳ raios (11.3), filtros por todos os eixos, ordenação por `WR` | ⏳ planejado |
-| RF11 | Página do estabelecimento | ⏳ facetas (8), histograma, origem do preço | ⏳ planejado |
+| RF11 | Página do estabelecimento | facetas, cobranças, botões e horário (8), histograma (10.6), origem do preço (9.3) | 🟡 parcial |
 | RF12 | Interações | curtir, salvar, comentar e compartilhar (`ReactionKind`, `ShareChannel`, 14.4); ⏳ resposta do dono (`RULE_OWNER_REPLY`), seguir | 🟡 parcial |
 | RF14 | Feed e página do post | `FeedType` (14.2), 18+ (14.3), "em alta" | 🟡 parcial |
 | RF15 | Perfil público e feed de perfis | tipos de conta com cor, glifo e selo (2.1), `FeedType.PROFILE` | 🟡 parcial |
