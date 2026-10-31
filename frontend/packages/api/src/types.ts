@@ -410,6 +410,14 @@ export interface EstablishmentView {
   publishBlockers: string[] | null;
   createdAt: string;
   updatedAt: string;
+  // página do lugar (RF11): tipos na seção própria, mais abaixo
+  openStatus: OpenStatusView;
+  hours: HoursView;
+  charges: ChargesView;
+  facets: FacetSectionView[];
+  actions: ActionView[];
+  /** Quem pede pode editar (hoje só o dono; a equipe do RF20 entra pelo PlaceEditors). */
+  viewerCanEdit: boolean;
 }
 
 export interface ReviewAuthorView {
@@ -472,6 +480,8 @@ export interface EstablishmentCard {
   distanceKm: number | null;
   adultsOnly: boolean;
   status: EstablishmentStatus;
+  /** O mesmo "aberto agora" da página (RF11). */
+  openStatus: OpenStatusView;
 }
 
 export interface SearchPage {
@@ -566,6 +576,209 @@ export interface TaxonomyCatalog {
   visitModes: Coded[];
   reviewDimensions: DimensionItem[];
   cuisineChips: ChipView[];
+  /** Facetas da página do lugar (RF11). */
+  facets: FacetItem[];
+  actionProviders: ActionProviderItem[];
+  couvertKinds: Coded[];
+}
+
+// ------------------------------------------------------------ página do lugar (RF11 · application/establishment/EstablishmentViews.java,
+// EstablishmentDrafts.java e TaxonomyCatalog.java). Seção própria: outros RFs acrescentam as suas abaixo.
+
+export type OpenState = 'OPEN' | 'CLOSED' | 'UNKNOWN' | 'TEMPORARILY_CLOSED' | 'MAYBE_CLOSED' | 'PERMANENTLY_CLOSED';
+
+/** EstablishmentViews.OpenStatusView: "aberto agora" no fuso do lugar; horários locais AAAA-MM-DDTHH:MM. */
+export interface OpenStatusView {
+  state: OpenState;
+  open: boolean;
+  label: string;
+  closesAt: string | null;
+  opensAt: string | null;
+  /** Horário especial de hoje. */
+  note: string | null;
+  timeZone: string;
+}
+
+export type WeekDay = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+
+/** "00:00" no fechamento = meia-noite; overnight = passa da meia-noite (pertence ao dia em que começa). */
+export interface RangeView {
+  opens: string;
+  closes: string;
+  overnight: boolean;
+}
+
+export interface DayHoursView {
+  day: WeekDay;
+  label: string;
+  ranges: RangeView[];
+  closed: boolean;
+  today: boolean;
+}
+
+export interface SpecialDayView {
+  /** AAAA-MM-DD. */
+  date: string;
+  label: string;
+  closed: boolean;
+  ranges: RangeView[];
+  note: string | null;
+}
+
+export interface HoursView {
+  timeZone: string;
+  /** Sem horário da semana: a página diz "Horário não informado" (nunca "Fechado"). */
+  informed: boolean;
+  weekly: DayHoursView[];
+  special: SpecialDayView[];
+  temporaryClosure: { closed: boolean; reopensOn: string | null };
+}
+
+export interface ChargeLine {
+  code: 'TAXA_SERVICO' | 'COUVERT' | 'FORMA_PAGAMENTO';
+  label: string;
+  /** Texto fixo exibido ao público. */
+  text: string;
+  detail: string | null;
+}
+
+export type CouvertKind = 'ARTISTICO' | 'ENTRADA_MESA';
+export type AdjustmentKind = 'DESCONTO' | 'ACRESCIMO';
+
+export interface ChargesView {
+  serviceFeePercent: number | null;
+  couvert: { kind: CouvertKind; label: string; cents: number; days: Coded[] } | null;
+  paymentAdjustments: Array<{ method: string; methodLabel: string; kind: AdjustmentKind; percent: number; text: string }>;
+  lines: ChargeLine[];
+  declaredAt: string | null;
+  /** "Declarado pelo estabelecimento em 30/10/2026". */
+  declaredLabel: string | null;
+  /** A página não substitui o aviso afixado na entrada (Decreto 5.903/2006, art. 8º, § 2º). */
+  notice: string;
+}
+
+export type FacetOrigin = 'DECLARADO_DONO' | 'LEI' | 'HORARIO' | 'LINKS';
+
+export interface FacetView {
+  code: string;
+  label: string;
+  value: string;
+  valueLabel: string;
+  lucideIcon: string;
+  origin: FacetOrigin;
+  originLabel: string;
+}
+
+export interface FacetSectionView {
+  code: 'ATENDIMENTO' | 'REFEICOES' | 'AMBIENTE' | 'ACESSIBILIDADE' | 'PAGAMENTO';
+  label: string;
+  items: FacetView[];
+}
+
+export type ActionKind = 'RESERVA' | 'DELIVERY' | 'WHATSAPP';
+
+/** Botão de ação: só link externo (nada de pagamento no app). */
+export interface ActionView {
+  kind: ActionKind;
+  provider: string;
+  providerLabel: string;
+  label: string;
+  url: string;
+  preferred: boolean;
+  /** "Você vai sair do Friendly Eats. Pedido e pagamento são com iFood." */
+  exitNotice: string;
+  /** Só no WhatsApp: +55… */
+  phone: string | null;
+}
+
+/** TaxonomyCatalog.FacetItem. */
+export interface FacetItem {
+  code: string;
+  label: string;
+  section: FacetSectionView['code'];
+  sectionLabel: string;
+  lucideIcon: string;
+  values: Coded[];
+  /** O dono escolhe o valor (não é fixa por lei nem derivada). */
+  declarable: boolean;
+  fixed: boolean;
+  groups: string[];
+}
+
+/** TaxonomyCatalog.ActionProviderItem. */
+export interface ActionProviderItem {
+  code: string;
+  label: string;
+  kind: ActionKind;
+  domains: string[];
+}
+
+/** EstablishmentDrafts.RangeDraft: "HH:MM"; fechar em "00:00" = meia-noite. */
+export interface RangeDraft {
+  opens: string;
+  closes: string;
+}
+
+export interface HoursDraft {
+  /** Dia ausente ou vazio = fechado; null = horário não informado. */
+  weekly: Partial<Record<WeekDay, RangeDraft[]>> | null;
+  special: Array<{ date: string; closed: boolean; ranges: RangeDraft[]; note: string | null }>;
+}
+
+export interface ChargesDraft {
+  serviceFeePercent: number | null;
+  couvert: { kind: CouvertKind; cents: number | null; days: WeekDay[] } | null;
+  paymentAdjustments: Array<{ method: string; kind: AdjustmentKind; percent: number | null }>;
+}
+
+export interface ActionsDraft {
+  links: Array<{ provider: string; url: string; preferred: boolean }>;
+  whatsapp: string | null;
+}
+
+export interface LocationDraft {
+  uf: string;
+  municipalityIbge: string;
+  city: string;
+  neighborhood: string | null;
+  street: string | null;
+  streetNumber: string | null;
+  complement: string | null;
+  cep: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  addressVisibility: 'ADDR_PUBLIC_FULL' | 'ADDR_PUBLIC_BAIRRO' | 'ADDR_HIDDEN' | null;
+}
+
+export interface ClassificationDraft {
+  primaryCuisine: string | null;
+  secondaryCuisines: string[];
+  primaryFormat: string | null;
+  secondaryFormats: string[];
+  approach: string | null;
+  dietaryOffers: Record<string, DietaryLevel>;
+}
+
+/**
+ * EstablishmentDrafts.EstablishmentDraft: POST /api/v1/establishments cria com tudo; no PATCH, chave ausente (ou null)
+ * não mexe, e cada bloco presente troca por inteiro.
+ */
+export interface EstablishmentDraft {
+  name?: string;
+  description?: string | null;
+  primaryType?: string;
+  secondaryTypes?: string[];
+  location?: LocationDraft;
+  price?: { minCents: number | null; maxCents: number | null; notApplicable: boolean };
+  classification?: ClassificationDraft;
+  /** ACTIVE (aberto) ou CLOSED (fechou de vez). */
+  status?: 'ACTIVE' | 'CLOSED';
+  hours?: HoursDraft;
+  temporaryClosure?: { closed: boolean; reopensOn: string | null };
+  charges?: ChargesDraft;
+  /** Código → valor; ausente = sem informação. */
+  facets?: Record<string, string>;
+  actions?: ActionsDraft;
 }
 
 // ------------------------------------------------------------ erros (api/ApiExceptionHandler.java)

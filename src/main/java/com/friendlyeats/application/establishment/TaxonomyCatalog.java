@@ -2,6 +2,7 @@ package com.friendlyeats.application.establishment;
 
 import com.friendlyeats.application.establishment.EstablishmentViews.ChipView;
 import com.friendlyeats.application.establishment.EstablishmentViews.Coded;
+import com.friendlyeats.domain.taxonomy.ActionProvider;
 import com.friendlyeats.domain.taxonomy.Approach;
 import com.friendlyeats.domain.taxonomy.Cuisine;
 import com.friendlyeats.domain.taxonomy.CuisineChip;
@@ -9,6 +10,7 @@ import com.friendlyeats.domain.taxonomy.CuisineMacro;
 import com.friendlyeats.domain.taxonomy.DietaryStyle;
 import com.friendlyeats.domain.taxonomy.EstablishmentGroup;
 import com.friendlyeats.domain.taxonomy.EstablishmentType;
+import com.friendlyeats.domain.taxonomy.Facet;
 import com.friendlyeats.domain.taxonomy.FoodFamily;
 import com.friendlyeats.domain.taxonomy.FoodFormat;
 import com.friendlyeats.domain.taxonomy.PriceLevel;
@@ -45,11 +47,21 @@ public class TaxonomyCatalog {
     public record StarItem(String code, int value, String label) {
     }
 
+    /** Faceta da página do lugar (RF11): {@code values} com rótulo; {@code declarable} = o dono escolhe o valor. */
+    public record FacetItem(String code, String label, String section, String sectionLabel, String lucideIcon,
+                            List<Coded> values, boolean declarable, boolean fixed, List<String> groups) {
+    }
+
+    /** Provedor de botão de ação (RF11): {@code kind} RESERVA, DELIVERY ou WHATSAPP e os domínios aceitos. */
+    public record ActionProviderItem(String code, String label, String kind, List<String> domains) {
+    }
+
     public record Catalog(List<Coded> cuisineMacros, List<CuisineItem> cuisines, List<Coded> foodFamilies,
                           List<FormatItem> formats, List<Coded> approaches, List<Coded> dietaryStyles,
                           List<String> dietaryLevels, List<Coded> establishmentGroups, List<TypeItem> establishmentTypes,
                           List<PriceItem> priceLevels, List<StarItem> stars, List<Coded> visitModes,
-                          List<DimensionItem> reviewDimensions, List<ChipView> cuisineChips) {
+                          List<DimensionItem> reviewDimensions, List<ChipView> cuisineChips,
+                          List<FacetItem> facets, List<ActionProviderItem> actionProviders, List<Coded> couvertKinds) {
     }
 
     private final PriceScale prices;
@@ -78,6 +90,14 @@ public class TaxonomyCatalog {
                 Arrays.stream(VisitMode.values()).map(v -> new Coded(v.name(), v.getLabel(), null)).toList(),
                 Arrays.stream(ReviewDimension.values()).map(d -> new DimensionItem(d.name(), d.getLabel(),
                         Arrays.stream(VisitMode.values()).filter(d::appliesTo).map(Enum::name).toList())).toList(),
-                Arrays.stream(CuisineChip.values()).map(ChipView::of).toList());
+                Arrays.stream(CuisineChip.values()).map(ChipView::of).toList(),
+                Arrays.stream(Facet.values()).map(f -> new FacetItem(f.name(), f.getLabel(), f.getSection().name(),
+                        f.getSection().getLabel(), f.getLucideIcon(),
+                        f.getValues().getCodes().stream().map(v -> new Coded(v, f.valueLabel(v), null)).toList(),
+                        f.declarable(), f.fixed(), f.getGroups().stream().map(Enum::name).sorted().toList())).toList(),
+                Arrays.stream(ActionProvider.values()).map(p -> new ActionProviderItem(p.name(), p.getLabel(),
+                        p.getKind().name(), p.getDomains())).toList(),
+                List.of(new Coded("ARTISTICO", "Couvert artístico (apresentação ao vivo)", null),
+                        new Coded("ENTRADA_MESA", "Couvert de entrada (pão, petiscos)", null)));
     }
 }

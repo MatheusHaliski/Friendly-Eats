@@ -9,6 +9,7 @@ import type {
   ConsentView,
   DeletionRequest,
   DeletionView,
+  EstablishmentDraft,
   EstablishmentView,
   FeedPageView,
   FeedParams,
@@ -125,6 +126,11 @@ export function createApi(client: ApiClient = createClient()) {
       search: (params: SearchParams, signal?: AbortSignal) =>
         client.get<SearchPage>('/api/v1/establishments', { query: { ...params }, signal }),
       get: (id: number | string) => client.get<EstablishmentView>(`/api/v1/establishments/${encodeURIComponent(String(id))}`),
+      /** Cadastro (RF6, RF11): 201 com a página do dono (published e publishBlockers). */
+      create: (draft: EstablishmentDraft) => client.post<EstablishmentView>('/api/v1/establishments', draft),
+      /** Edição pelo dono (RF6, RF11): bloco ausente não muda; 404 para quem não edita. */
+      update: (id: number | string, draft: EstablishmentDraft) =>
+        client.patch<EstablishmentView>(`/api/v1/establishments/${seg(id)}`, draft),
       reviews: (id: number | string, page = 0, size = 10) =>
         client.get<ReviewPage>(`/api/v1/establishments/${encodeURIComponent(String(id))}/reviews`, {
           query: { page, size },

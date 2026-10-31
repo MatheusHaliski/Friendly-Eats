@@ -336,6 +336,103 @@ class EstablishmentApiIT {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM establishment", Integer.class)).isZero();
     }
 
+    /** RF11: horários, fechamento temporário, cobranças, facetas e botões; só quem edita muda; tudo volta junto no 422. */
+    @Test
+    void placePageHasHoursChargesFacetsAndActionButtonsEditableOnlyByTheOwner() {
+        Map<String, Object> draft = new LinkedHashMap<>(mineiro());
+        Map<String, Object> weekly = new LinkedHashMap<>();
+        for (String day : List.of("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")) {
+            weekly.put(day, List.of(Map.of("opens", "00:00", "closes", "00:00")));
+        }
+        draft.put("hours", Map.of("weekly", weekly, "special", List.of(
+                Map.of("date", LocalDate.now().plusDays(10).toString(), "closed", true, "note", "Inventário"))));
+        draft.put("facets", Map.of("WIFI", "SIM", "PET_FRIENDLY", "SO_AREA_EXTERNA", "PIX", "SIM",
+                "MUSICA_AO_VIVO", "SIM", "ENTRADA_ACESSIVEL", "PARCIAL"));
+        draft.put("charges", Map.of("serviceFeePercent", 10,
+                "couvert", Map.of("kind", "ARTISTICO", "cents", 1500, "days", List.of("FRIDAY", "SATURDAY")),
+                "paymentAdjustments", List.of(Map.of("method", "PIX", "kind", "DESCONTO", "percent", 5))));
+        draft.put("actions", Map.of("links", List.of(
+                Map.of("provider", "IFOOD", "url", "https://www.ifood.com.br/delivery/bh/sabor-mineiro", "preferred", true),
+                Map.of("provider", "THEFORK", "url", "https://www.thefork.com.br/restaurante/sabor-mineiro")),
+                "whatsapp", "(31) 99999-8888"));
+        ResponseEntity<Map> created = send(HttpMethod.POST, "/api/v1/establishments", restaurant, draft);
+        assertThat(created.getStatusCode().value()).isEqualTo(201);
+        long id = ((Number) created.getBody().get("id")).longValue();
+        verify(restaurant);
+
+        Map<String, Object> pub = new ApiClient(port).get("/api/v1/establishments/" + id).getBody();
+        assertThat(pub).containsEntry("viewerCanEdit", false);
+        assertThat(map(pub, "openStatus")).containsEntry("state", "OPEN").containsEntry("label", "Aberto 24 horas")
+                .containsEntry("timeZone", "America/Sao_Paulo");
+        Map<String, Object> hours = map(pub, "hours");
+        assertThat(hours).containsEntry("informed", true);
+        assertThat((List<Map<String, Object>>) hours.get("weekly")).hasSize(7);
+        assertThat((List<Map<String, Object>>) hours.get("special")).singleElement()
+                .satisfies(sd -> assertThat(sd).containsEntry("closed", true).containsEntry("note", "Inventário"));
+        Map<String, Object> charges = map(pub, "charges");
+        assertThat((List<Map<String, Object>>) charges.get("lines")).extracting(l -> l.get("text")).containsExactly(
+                "Taxa de serviço de 10% (opcional)",
+                "Couvert artístico de R$ 15 por pessoa, só nos dias com apresentação ao vivo (sexta, sábado)",
+                "5% de desconto no Pix");
+        assertThat((String) charges.get("declaredLabel")).startsWith("Declarado pelo estabelecimento em ");
+        assertThat((String) charges.get("notice")).contains("Decreto 5.903/2006");
+        List<Map<String, Object>> facets = (List<Map<String, Object>>) pub.get("facets");
+        assertThat(facets).extracting(f -> f.get("code"))
+                .containsExactly("ATENDIMENTO", "REFEICOES", "AMBIENTE", "ACESSIBILIDADE", "PAGAMENTO");
+        assertThat(facets.get(3).get("items").toString()).contains("CAO_ASSISTENCIA", "Garantido por lei", "PARCIAL");
+        assertThat(facets.get(0).get("items").toString()).contains("DELIVERY_APP", "Pelos links de delivery");
+        List<Map<String, Object>> actions = (List<Map<String, Object>>) pub.get("actions");
+        assertThat(actions).extracting(a -> a.get("label"))
+                .containsExactly("Reservar pelo TheFork", "Pedir pelo iFood", "Conversar no WhatsApp");
+        assertThat(actions.get(2)).containsEntry("url", "https://wa.me/5531999998888").containsEntry("phone", "+5531999998888");
+        assertThat(actions.get(1).get("exitNotice")).isEqualTo("Você vai sair do Friendly Eats. Pedido e pagamento são com iFood.");
+        assertThat(send(HttpMethod.GET, "/api/v1/establishments/" + id, restaurant, null).getBody())
+                .containsEntry("viewerCanEdit", true);
+
+        // o card da busca mostra o mesmo "aberto agora"
+        Map<String, Object> card = ((List<Map<String, Object>>) new ApiClient(port).get("/api/v1/establishments?q=Sabor")
+                .getBody().get("items")).getFirst();
+        assertThat(map(card, "openStatus")).containsEntry("open", true);
+
+        // só o dono edita: a outra conta de estabelecimento recebe 404
+        assertThat(send(HttpMethod.PATCH, "/api/v1/establishments/" + id, market,
+                Map.of("temporaryClosure", Map.of("closed", true))).getStatusCode().value()).isEqualTo(404);
+
+        // tudo errado de uma vez: 422 com todos os erros e nada gravado
+        ResponseEntity<Map> bad = send(HttpMethod.PATCH, "/api/v1/establishments/" + id, restaurant, Map.of(
+                "facets", Map.of("CAO_ASSISTENCIA", "NAO", "MUSICA_AO_VIVO", "NAO"),
+                "charges", Map.of("serviceFeePercent", 30, "minimumSpendCents", 5000),
+                "actions", Map.of("links", List.of(Map.of("provider", "IFOOD", "url", "https://ifood.golpe.example/x"))),
+                "hours", Map.of("weekly", Map.of("MONDAY", List.of(Map.of("opens", "11:00", "closes", "15:00"),
+                        Map.of("opens", "14:00", "closes", "18:00"))))));
+        assertThat(bad.getStatusCode().value()).isEqualTo(422);
+        assertThat((List<String>) bad.getBody().get("errors"))
+                .anyMatch(e -> e.contains("garantido por lei"))
+                .anyMatch(e -> e.startsWith("Consumação mínima não é aceita"))
+                .anyMatch(e -> e.startsWith("Taxa de serviço de 1% a 20%"))
+                .anyMatch(e -> e.startsWith("Link do iFood"))
+                .anyMatch(e -> e.contains("se sobrepõem"));
+        // mudar a faceta sem mexer nas cobranças também confere o couvert artístico gravado
+        assertThat((List<String>) send(HttpMethod.PATCH, "/api/v1/establishments/" + id, restaurant,
+                Map.of("facets", Map.of("MUSICA_AO_VIVO", "NAO"))).getBody().get("errors"))
+                .anyMatch(e -> e.contains("\"Música ao vivo\" está como Não"));
+
+        // pausa com data de volta: some o "aberto agora"
+        String back = LocalDate.now().plusDays(20).toString();
+        Map<String, Object> paused = send(HttpMethod.PATCH, "/api/v1/establishments/" + id, restaurant,
+                Map.of("temporaryClosure", Map.of("closed", true, "reopensOn", back))).getBody();
+        assertThat(map(paused, "openStatus")).containsEntry("state", "TEMPORARILY_CLOSED").containsEntry("open", false);
+        assertThat(map(map(paused, "hours"), "temporaryClosure")).containsEntry("reopensOn", back);
+        assertThat(jdbc.queryForObject("SELECT temporarily_closed FROM establishment WHERE id = ?", Boolean.class, id))
+                .isTrue();
+        // tirar as cobranças limpa a data de declaração
+        Map<String, Object> noCharges = send(HttpMethod.PATCH, "/api/v1/establishments/" + id, restaurant,
+                Map.of("charges", Map.of(), "temporaryClosure", Map.of("closed", false))).getBody();
+        assertThat(map(noCharges, "charges")).containsEntry("declaredAt", null);
+        assertThat((List<?>) map(noCharges, "charges").get("lines")).isEmpty();
+        assertThat(map(noCharges, "openStatus")).containsEntry("state", "OPEN");
+    }
+
     // ------------------------------------------------------------ apoio
 
     private static int sendAs(ApiClient tab, HttpMethod method, String path) {

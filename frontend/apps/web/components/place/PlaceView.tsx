@@ -7,7 +7,7 @@ import { useEffect, type ReactNode } from 'react';
 import { AccountBadge, VerifiedSeal } from '@/components/AccountBadge';
 import { CuisineChip } from '@/components/CuisineChip';
 import { Notice } from '@/components/Form';
-import { IconGlutenFree, IconLactoseFree, IconLogin, IconPlace } from '@/components/icons';
+import { IconEdit, IconGlutenFree, IconLactoseFree, IconLogin } from '@/components/icons';
 import { PriceTag } from '@/components/PriceTag';
 import { RatingPanel } from '@/components/RatingSummary';
 import { api } from '@/lib/api';
@@ -17,9 +17,11 @@ import { DIMENSIONS } from '@/lib/review';
 import { loginHref } from '@/lib/safe-redirect';
 import { MyReviewArea } from './MyReviewArea';
 import { PlacePosts } from './PlacePosts';
+import { OpenStatusBadge } from './OpenStatusBadge';
+import { ActionButtons, ChargesSection, FacetsSection, HoursSection, PlaceLocation } from './PlaceSections';
 import { ReviewList } from './ReviewList';
 
-/** Página do estabelecimento (RF6, RF7, RF8). */
+/** Página do estabelecimento (RF6, RF7, RF8, RF11). */
 export function PlaceView({ id }: { id: string }) {
   const place = useQuery({ queryKey: placeKey(id), queryFn: () => api.establishments.get(id) });
   const name = place.data?.name;
@@ -84,6 +86,14 @@ function PlaceContent({ place }: { place: EstablishmentView }) {
   const taxonomy = useTaxonomy();
   const dimensions = taxonomy.data?.reviewDimensions ?? [...DIMENSIONS];
   const c = place.classification;
+  const loc = place.location;
+  // "Como chegar" só com o endereço completo e público
+  const directions =
+    loc.street && !loc.approximate
+      ? [`${loc.street}${loc.streetNumber ? `, ${loc.streetNumber}` : ''}`, loc.neighborhood, [loc.city, loc.uf].filter(Boolean).join(' – ')].filter(
+          (x): x is string => !!x,
+        )
+      : null;
   return (
     <article aria-labelledby="titulo-lugar" className="grid gap-8">
       <header className="grid gap-3">
@@ -104,8 +114,20 @@ function PlaceContent({ place }: { place: EstablishmentView }) {
               18+<span className="sr-only"> (só para maiores de 18 anos)</span>
             </span>
           )}
-          {place.status === 'CLOSED' && <span className="fe-tag">Fechado</span>}
+          {place.status === 'CLOSED' && <span className="fe-tag">Fechou de vez</span>}
         </div>
+        <p className="text-lg">
+          <OpenStatusBadge status={place.openStatus} size={20} />
+        </p>
+        <ActionButtons actions={place.actions} />
+        {place.viewerCanEdit && (
+          <p>
+            <Link href={`/lugares/${place.id}/editar`} className="fe-btn fe-btn-sm">
+              <IconEdit size={16} />
+              Editar a página
+            </Link>
+          </p>
+        )}
         {place.published === false && (
           <Notice tone="info">
             <p className="font-semibold">Esta página está fora do ar: só você a vê.</p>
@@ -129,6 +151,19 @@ function PlaceContent({ place }: { place: EstablishmentView }) {
             </h2>
             <RatingPanel rating={place.rating} dimensions={dimensions} />
           </section>
+
+          {place.facets.length > 0 && (
+            <section aria-labelledby="titulo-comodidades" className="fe-card grid gap-4 p-5">
+              <h2 id="titulo-comodidades" className="text-xl font-bold">
+                Comodidades, acessibilidade e pagamento
+              </h2>
+              <FacetsSection sections={place.facets} />
+              <p className="text-sm text-muted">
+                Declarado pelo estabelecimento, salvo o que é garantido por lei ou vem do horário e dos links. Não é
+                laudo de acessibilidade.
+              </p>
+            </section>
+          )}
 
           <MyReviewArea place={place} />
 
@@ -178,28 +213,16 @@ function PlaceContent({ place }: { place: EstablishmentView }) {
             </InfoSection>
           )}
 
+          <InfoSection title="Horários">
+            <HoursSection hours={place.hours} status={place.openStatus} />
+          </InfoSection>
+
+          <InfoSection title="Cobranças">
+            <ChargesSection charges={place.charges} />
+          </InfoSection>
+
           <InfoSection title="Local">
-            <address className="grid gap-1 not-italic">
-              {place.location.street && (
-                <span>
-                  {place.location.street}
-                  {place.location.streetNumber ? `, ${place.location.streetNumber}` : ''}
-                  {place.location.complement ? ` – ${place.location.complement}` : ''}
-                </span>
-              )}
-              {place.location.neighborhood && <span>{place.location.neighborhood}</span>}
-              <span className="flex items-center gap-1.5">
-                <IconPlace size={16} />
-                {[place.location.city, place.location.uf].filter(Boolean).join(' – ')}
-              </span>
-              {place.location.cep && <span className="text-sm text-muted">CEP {place.location.cep.replace(/^(\d{5})(\d{3})$/, '$1-$2')}</span>}
-            </address>
-            {place.location.approximate && (
-              <p className="mt-2 text-sm">
-                <strong>Localização aproximada</strong>
-                <span className="text-muted"> · endereço aproximado: bairro e cidade</span>
-              </p>
-            )}
+            <PlaceLocation place={place} directions={directions} />
           </InfoSection>
 
           {place.owner && (

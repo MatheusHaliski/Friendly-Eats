@@ -26,7 +26,7 @@ paths:
 | **Taxonomia** | Os mesmos códigos de [`TAXONOMIA_FRIENDLY_EATS.md`](../TAXONOMIA_FRIENDLY_EATS.md): culinária (seção 3), formato (4), tipo e grupo (7), estilo (6), preço (9), estrelas (10) e local (11) |
 | **LGPD** | A coordenada de quem busca é usada só na requisição (Art. 7º, V; Art. 6º, III): não é gravada nem vai para log. Lugar com endereço aproximado é medido até o ponto público arredondado, e a distância sai de 0,5 em 0,5 km |
 | **ECA Digital / Termos** | Lugar com foco em bebida alcoólica não aparece para visitante sem login nem para menor de 18 |
-| **Status** | 🟡 Parcial: filtros, raio, ordenações e cards prontos e testados; sugestões, cache no Valkey, C por categoria e município e mapa ainda não |
+| **Status** | 🟡 Parcial: filtros, raio, ordenações e cards (com o "aberto agora") prontos e testados; filtro "aberto agora", sugestões, cache no Valkey, C por categoria e município e mapa ainda não |
 
 ## Critérios de aceite
 
@@ -65,8 +65,11 @@ paths:
    `RatingCalculator` (peso confiança × recência, idade em horas inteiras) e da `PriceScale` (limites `[início, fim)`).
 6. **Card** de cada resultado: `id`, `name`, `primaryType`, `group`, `chip`, `primaryCuisine`, `primaryFormat`, `price`
    e `rating` **iguais aos da página do lugar** (montados pelo `EstablishmentService`), `location` (`uf`, `city`,
-   `neighborhood`, `approximate`), `distanceKm`, `adultsOnly` e `status`. A resposta traz `total` e `radiusKm` (nulo sem
+   `neighborhood`, `approximate`), `distanceKm`, `adultsOnly`, `status` e `openStatus` (o "aberto agora" do
+   [RF11](../RF11/README.md), no fuso do lugar, igual ao da página). A resposta traz `total` e `radiusKm` (nulo sem
    "perto de mim").
+7. **"Aberto agora" como filtro ainda não existe**: o card mostra o estado, mas filtrar exige calcular as faixas por
+   fuso no SQL (⏳). Lugar fechado temporariamente continua na busca, com o rótulo no card.
 
 ## Diagramas
 
@@ -82,6 +85,6 @@ paths:
 | API | `GET /api/v1/establishments` em `EstablishmentController`; GET público no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Tela | app web: Explorar em `/` (busca por nome, chips, culinária específica, tipo de comida, preço com o rótulo em reais, nota mínima, estilos, "perto de mim" com raio e aviso de que a localização não é guardada, ordem e paginação). Os filtros ficam na URL; a coordenada só na memória da página, arredondada a ~110 m; mudar um filtro ou ligar/desligar "perto de mim" volta para a primeira página; e2e `explorar.spec.ts` com axe | ✅ |
 | Dados de exemplo | `config/DevSeed` (perfil `dev`, banco vazio): 10 lugares em SP, BH e Recife com avaliações | ✅ |
-| Testes | `SearchApiIT.searchShowsOnlyPublicPlacesAndCuisineIncludesItsDescendants` (inclui `chip`), `SearchApiIT.radiusSearchMeasuresTheHomeKitchenFromItsPublicPointAndSortsByDistance` | ✅ |
-| Modal do lugar | clicar no cartão (no Explorar e na aba Restaurantes do `/feed`) abre o `PlaceDialog`: nome e selo, tipo, culinária e formato, preço com o significado da escala nacional, nota com a contagem e o que ela significa, estilos com o aviso de autodeclaração, endereço conforme a visibilidade, responsável, "por que aparece aqui" (`filterReasons`) e os botões "Ver página do lugar" e "Como chegar" (só com endereço público); o nome continua um link real para `/lugares/[id]`; e2e `explorar.spec.ts` (teclado, Esc devolve o foco, axe com o modal aberto) | ✅ |
-| Pendências | sugestões e autocompletar; cache dos agregados no Valkey; C por categoria e município (job); mapa com pins; busca por bairro; facetas operacionais como filtro; histórico de buscas só com consentimento | ⏳ |
+| Testes | `SearchApiIT.searchShowsOnlyPublicPlacesAndCuisineIncludesItsDescendants` (inclui `chip`), `SearchApiIT.radiusSearchMeasuresTheHomeKitchenFromItsPublicPointAndSortsByDistance`; `EstablishmentApiIT.placePageHasHoursChargesFacetsAndActionButtonsEditableOnlyByTheOwner` (card com `openStatus`); e2e `lugar-pagina.spec.ts` (modal com o aberto agora e as cobranças) | ✅ |
+| Modal do lugar | clicar no cartão (no Explorar e na aba Restaurantes do `/feed`) abre o `PlaceDialog`: nome e selo, tipo, culinária e formato, preço com o significado da escala nacional, nota com a contagem e o que ela significa, estilos com o aviso de autodeclaração, endereço conforme a visibilidade, "Funcionamento" (o `openStatus` do RF11) e as cobranças declaradas resumidas, responsável, "por que aparece aqui" (`filterReasons`) e os botões "Ver página do lugar" e "Como chegar" (só com endereço público); o nome continua um link real para `/lugares/[id]`; e2e `explorar.spec.ts` (teclado, Esc devolve o foco, axe com o modal aberto) | ✅ |
+| Pendências | filtro "aberto agora" (RC-EST-04: lugar fechado temporariamente sai dele); sugestões e autocompletar; cache dos agregados no Valkey; C por categoria e município (job); mapa com pins; busca por bairro; facetas operacionais do RF11 como filtro; histórico de buscas só com consentimento | ⏳ |

@@ -23,6 +23,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -31,7 +32,8 @@ import java.util.Map;
 
 /**
  * Estabelecimento (tabela {@code establishment}, V2): tipo, local e preço declarado (RF6) e classificação (RF7).
- * Os vocabulários ficam como códigos estáveis em JSON; os getters devolvem os enums da taxonomia.
+ * Os vocabulários ficam como códigos estáveis em JSON; os getters devolvem os enums da taxonomia. A página do lugar
+ * (RF11, V6) acrescenta horários, "fechado temporariamente", cobranças, facetas e botões de ação ({@link PlaceDetails}).
  */
 @Entity
 @Table(name = "establishment")
@@ -144,6 +146,33 @@ public class Establishment {
     @Column(name = "status", nullable = false)
     private Status status = Status.ACTIVE;
 
+    // ------------------------------------------------------------ página do lugar (RF11, V6)
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "opening_hours")
+    private PlaceDetails.HoursData openingHours;
+
+    @Column(name = "temporarily_closed", nullable = false)
+    private boolean temporarilyClosed;
+
+    @Column(name = "reopens_on")
+    private LocalDate reopensOn;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "charges")
+    private PlaceDetails.ChargesData charges;
+
+    @Column(name = "charges_declared_at")
+    private Instant chargesDeclaredAt;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "facets", nullable = false)
+    private Map<String, String> facets = new LinkedHashMap<>();
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "action_links")
+    private PlaceDetails.ActionsData actionLinks;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -250,6 +279,45 @@ public class Establishment {
         this.geoPrecision = geoPrecision;
         this.addressVisibility = visibility;
     }
+
+    // ------------------------------------------------------------ página do lugar (RF11)
+
+    public void setOpeningHours(PlaceDetails.HoursData hours) {
+        this.openingHours = hours;
+    }
+
+    /** "Fechou de vez" é o status CLOSED; aqui é a pausa, com a data de volta opcional. */
+    public void setTemporaryClosure(boolean closed, LocalDate reopensOn) {
+        this.temporarilyClosed = closed;
+        this.reopensOn = closed ? reopensOn : null;
+    }
+
+    /** Toda mudança nas cobranças renova a data "declarado pelo estabelecimento em". */
+    public void declareCharges(PlaceDetails.ChargesData charges, Instant at) {
+        boolean empty = charges == null || (charges.serviceFeePercent() == null && charges.couvert() == null
+                && (charges.paymentAdjustments() == null || charges.paymentAdjustments().isEmpty()));
+        if (java.util.Objects.equals(this.charges, empty ? null : charges)) {
+            return;
+        }
+        this.charges = empty ? null : charges;
+        this.chargesDeclaredAt = empty ? null : at;
+    }
+
+    public void setFacets(Map<String, String> facets) {
+        this.facets = new LinkedHashMap<>(facets);
+    }
+
+    public void setActionLinks(PlaceDetails.ActionsData actions) {
+        this.actionLinks = actions;
+    }
+
+    public PlaceDetails.HoursData getOpeningHours() { return openingHours; }
+    public boolean isTemporarilyClosed() { return temporarilyClosed; }
+    public LocalDate getReopensOn() { return reopensOn; }
+    public PlaceDetails.ChargesData getCharges() { return charges; }
+    public Instant getChargesDeclaredAt() { return chargesDeclaredAt; }
+    public Map<String, String> getFacets() { return facets == null ? Map.of() : Map.copyOf(facets); }
+    public PlaceDetails.ActionsData getActionLinks() { return actionLinks; }
 
     // ------------------------------------------------------------ getters e setters simples
 

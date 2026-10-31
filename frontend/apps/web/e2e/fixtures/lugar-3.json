@@ -90,5 +90,141 @@
   "published": null,
   "publishBlockers": null,
   "createdAt": "2026-09-02T14:10:00Z",
-  "updatedAt": "2026-10-20T18:30:00Z"
+  "updatedAt": "2026-10-20T18:30:00Z",
+  "openStatus": {
+    "state": "TEMPORARILY_CLOSED",
+    "open": false,
+    "label": "Fechado temporariamente · volta em 20/11/2026",
+    "closesAt": null,
+    "opensAt": null,
+    "note": null,
+    "timeZone": "America/Sao_Paulo"
+  },
+  "hours": {
+    "timeZone": "America/Sao_Paulo",
+    "informed": true,
+    "weekly": [
+      {
+        "day": "MONDAY",
+        "label": "Segunda",
+        "ranges": [
+          {
+            "opens": "11:00",
+            "closes": "14:00",
+            "overnight": false
+          }
+        ],
+        "closed": false,
+        "today": false
+      },
+      {
+        "day": "TUESDAY",
+        "label": "Terça",
+        "ranges": [
+          {
+            "opens": "11:00",
+            "closes": "14:00",
+            "overnight": false
+          }
+        ],
+        "closed": false,
+        "today": false
+      },
+      {
+        "day": "WEDNESDAY",
+        "label": "Quarta",
+        "ranges": [
+          {
+            "opens": "11:00",
+            "closes": "14:00",
+            "overnight": false
+          }
+        ],
+        "closed": false,
+        "today": false
+      },
+      {
+        "day": "THURSDAY",
+        "label": "Quinta",
+        "ranges": [
+          {
+            "opens": "11:00",
+            "closes": "14:00",
+            "overnight": false
+          }
+        ],
+        "closed": false,
+        "today": false
+      },
+      {
+        "day": "FRIDAY",
+        "label": "Sexta",
+        "ranges": [
+          {
+            "opens": "11:00",
+            "closes": "14:00",
+            "overnight": false
+          }
+        ],
+        "closed": false,
+        "today": true
+      },
+      {
+        "day": "SATURDAY",
+        "label": "Sábado",
+        "ranges": [],
+        "closed": true,
+        "today": false
+      },
+      {
+        "day": "SUNDAY",
+        "label": "Domingo",
+        "ranges": [],
+        "closed": true,
+        "today": false
+      }
+    ],
+    "special": [],
+    "temporaryClosure": {
+      "closed": true,
+      "reopensOn": "2026-11-20"
+    }
+  },
+  "charges": {
+    "serviceFeePercent": null,
+    "couvert": null,
+    "paymentAdjustments": [],
+    "lines": [],
+    "declaredAt": null,
+    "declaredLabel": null,
+    "notice": "A página não substitui os preços e avisos afixados na entrada do lugar (Decreto 5.903/2006, art. 8º, § 2º)."
+  },
+  "facets": [
+    {
+      "code": "ACESSIBILIDADE",
+      "label": "Acessibilidade",
+      "items": [
+        {
+          "code": "CAO_ASSISTENCIA",
+          "label": "Cão-guia ou de assistência sempre permitido",
+          "value": "SIM",
+          "valueLabel": "Sempre permitido (Lei 11.126/2005)",
+          "lucideIcon": "dog",
+          "origin": "LEI",
+          "originLabel": "Garantido por lei"
+        },
+        {
+          "code": "ATENDIMENTO_PRIORITARIO",
+          "label": "Atendimento prioritário",
+          "value": "SIM",
+          "valueLabel": "Garantido por lei (Lei 10.048/2000)",
+          "lucideIcon": "user-check",
+          "origin": "LEI",
+          "originLabel": "Garantido por lei"
+        }
+      ]
+    }
+  ],
+  "actions": [],
+  "viewerCanEdit": false
 }

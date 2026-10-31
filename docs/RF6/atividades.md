@@ -18,7 +18,9 @@ flowchart TD
     VI -- "FULL sem rua ou<br/>FULL na cozinha caseira" --> ERR
     VI -- ok --> PR{Preço: mínimo, máximo até R$ 5.000,<br/>não se aplica só em VAREJO e POLO?}
     PR --> CL{Classificação válida · RF7}
-    CL --> ERR{Algum erro?}
+    CL --> RF11{Blocos do RF11 válidos?<br/>horários · cobranças · facetas · botões}
+    RF11 -. erros .-> ERR
+    RF11 --> ERR{Algum erro?}
     TP -. erros .-> ERR
     LO -. erros .-> ERR
     PR -. erros .-> ERR
