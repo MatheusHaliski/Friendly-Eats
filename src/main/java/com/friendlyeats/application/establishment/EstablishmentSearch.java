@@ -64,9 +64,11 @@ public class EstablishmentSearch {
     public record CardLocation(String uf, String city, String neighborhood, boolean approximate) {
     }
 
+    /** {@code openStatus}: o mesmo "aberto agora" da página do lugar (RF11), no fuso do lugar. */
     public record Card(long id, String name, Coded primaryType, Coded group, ChipView chip, Coded primaryCuisine,
                        Coded primaryFormat, PriceView price, RatingView rating, CardLocation location,
-                       Double distanceKm, boolean adultsOnly, Establishment.Status status) {
+                       Double distanceKm, boolean adultsOnly, Establishment.Status status,
+                       EstablishmentViews.OpenStatusView openStatus) {
     }
 
     public record Page(List<Card> items, int page, int size, long total, Double radiusKm) {
@@ -421,7 +423,8 @@ public class EstablishmentSearch {
                     ChipView.of(CuisineChip.of(e.getPrimaryCuisine(), e.getPrimaryFormat(), e.getDietaryOffers())),
                     c.primaryCuisine(), c.primaryFormat(), pages.price(e, rs), pages.rating(rs),
                     new CardLocation(l.uf(), l.city(), l.neighborhood(), l.approximate()),
-                    distanceKm((Double) row[1], (Boolean) row[2]), e.isAlcoholFocused(), e.getStatus()));
+                    distanceKm((Double) row[1], (Boolean) row[2]), e.isAlcoholFocused(), e.getStatus(),
+                    pages.openStatus(e)));
         }
         return out;
     }

@@ -11,6 +11,7 @@ import com.friendlyeats.domain.model.PostKind;
 import com.friendlyeats.domain.model.ReactionKind;
 import com.friendlyeats.domain.model.UuidV7;
 import com.friendlyeats.domain.model.Establishment;
+import com.friendlyeats.domain.model.PlaceDetails;
 import com.friendlyeats.domain.model.Review;
 import com.friendlyeats.domain.model.UserAccount;
 import com.friendlyeats.domain.model.UserCategoryEnum;
@@ -324,6 +325,20 @@ public class DevSeed implements ApplicationRunner {
         e.setDeclaredPrice(p.minCents(), p.maxCents(), false);
         e.setLocation(p.uf(), p.ibge(), p.city(), p.neighborhood(), p.street(), "100", null, null, p.lat(), p.lng(),
                 GeoPrecision.GEO_PIN_CONFIRMED, visibility);
+        // página do lugar (RF11): almoço e jantar de terça a domingo, Pix e cartão; o primeiro também com
+        // cobranças declaradas e botões de ação
+        java.util.Map<String, List<String>> week = new java.util.LinkedHashMap<>();
+        for (String day : List.of("TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")) {
+            week.put(day, day.equals("SUNDAY") ? List.of("11:30-16:00") : List.of("11:30-15:00", "18:00-23:30"));
+        }
+        e.setOpeningHours(new PlaceDetails.HoursData(week, List.of()));
+        e.setFacets(Map.of("PIX", "SIM", "CARTAO_CREDITO", "SIM", "CARTAO_DEBITO", "SIM", "SALAO", "SIM"));
+        if (p.name().equals("Sabor Mineiro")) {
+            e.declareCharges(new PlaceDetails.ChargesData(10, null,
+                    List.of(new PlaceDetails.PaymentAdjustmentData("PIX", "DESCONTO", 5))), Instant.now());
+            e.setActionLinks(new PlaceDetails.ActionsData(List.of(new PlaceDetails.ActionLinkData("IFOOD",
+                    "https://www.ifood.com.br/delivery/belo-horizonte-mg/sabor-mineiro-exemplo", true)), "5531999998888"));
+        }
         return establishments.save(e);
     }
 }
