@@ -34,13 +34,15 @@ tracejada).
 | [RF9](RF9/README.md) | Publicar conteúdo: posts de comida com foto, taxonomia e alergênicos | 🟡 parcial |
 | [RF10](RF10/README.md) | Buscar e filtrar estabelecimentos (taxonomia, preço, estrelas e raio) | 🟡 parcial |
 | [RF12](RF12/README.md) | Interações: curtir, salvar, comentar e compartilhar | 🟡 parcial |
+| [RF13](RF13/README.md) | Moderação: denúncia, decisão motivada, recurso e integridade das avaliações | 🟡 parcial |
 | [RF14](RF14/README.md) | Feed e página do post, com o ranking em alta | 🟡 parcial |
 | [RF15](RF15/README.md) | Perfil público e feed de perfis | 🟡 parcial |
 | [RF16](RF16/README.md) | Moldura do post (estúdio de moldura) | 🟡 parcial |
+| [RF19](RF19/README.md) | Segurança entre usuários: bloquear, silenciar e palavras filtradas | 🟡 parcial |
 
 Próximos (seguem a [taxonomia](TAXONOMIA_FRIENDLY_EATS.md#13-mapa-para-os-rfs)): RF11 página do estabelecimento,
-com as facetas · RF13 moderação e avaliações falsas. Do RF9 e do RF12 ainda faltam o cardápio com alergênicos por item,
-seguir perfis e a resposta identificada do dono.
+com as facetas, e os demais da [proposta](PESQUISA_REQUISITOS.md#3-proposta-de-rfs). Do RF9 e do RF12 ainda faltam o
+cardápio com alergênicos por item, seguir perfis e a resposta identificada do dono.
 
 ## Outros documentos
 

@@ -13,8 +13,8 @@ import java.util.UUID;
 /** Caixa de mensagens do post (RF12) e a limpeza dos comentários na eliminação da conta (RF5). */
 public interface PostCommentRepository extends JpaRepository<PostComment, Long> {
 
-    /** Mais antigos primeiro, paginação por id crescente. */
-    List<PostComment> findByPostIdAndStatusAndIdGreaterThanOrderByIdAsc(
+    /** Mais antigos primeiro, paginação por id crescente; sem os retirados pela moderação (RF13). */
+    List<PostComment> findByPostIdAndStatusAndModerationStateIsNullAndIdGreaterThanOrderByIdAsc(
             UUID postId, CommentStatus status, long afterId, Limit limit);
 
     /**
@@ -32,7 +32,8 @@ public interface PostCommentRepository extends JpaRepository<PostComment, Long> 
     @Query(value = """
             UPDATE post p SET comment_count = p.comment_count - c.n
             FROM (SELECT post_id, count(*) AS n FROM post_comment
-                  WHERE author_id = :userId AND status = 'VISIBLE' GROUP BY post_id) c
+                  WHERE author_id = :userId AND status = 'VISIBLE' AND moderation_state IS NULL
+                  GROUP BY post_id) c
             WHERE p.id = c.post_id
             """, nativeQuery = true)
     int discountCommentsOf(Long userId);

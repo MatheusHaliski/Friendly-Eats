@@ -29,7 +29,7 @@ public class UserProfileController {
                                 @RequestParam(required = false) String q,
                                 @RequestParam(required = false) String cursor,
                                 @RequestParam(required = false) Integer size) {
-        return profiles.profiles(type, city, q, cursor, size);
+        return profiles.profiles(type, city, q, cursor, size, viewer.viewerId());
     }
 
     @GetMapping("/{userId}/profile")

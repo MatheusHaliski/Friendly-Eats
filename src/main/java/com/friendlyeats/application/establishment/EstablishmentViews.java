@@ -70,9 +70,10 @@ public final class EstablishmentViews {
     public record ReviewAuthorView(String name, String handle, CategoryView category) {
     }
 
+    /** {@code status} (RF13): {@code PUBLISHED}; {@code UNDER_REVIEW} e {@code REMOVED} só aparecem para o autor. */
     public record ReviewView(long id, int rating, String ratingLabel, Coded visitMode, Map<String, Integer> dimensions,
                              Integer spentPerPersonCents, String body, String trust, boolean edited,
-                             ReviewAuthorView author, Instant createdAt, Instant updatedAt) {
+                             ReviewAuthorView author, Instant createdAt, Instant updatedAt, String status) {
     }
 
     public record ReviewPage(List<ReviewView> items, int page, int size, long total, RatingView rating) {

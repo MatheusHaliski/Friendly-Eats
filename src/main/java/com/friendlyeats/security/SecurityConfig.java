@@ -33,6 +33,9 @@ import java.util.Map;
  *   <li>Leitura pública dos documentos legais, da taxonomia, das páginas de estabelecimento com as avaliações, dos
  *       posts com os comentários, do "em alta", dos perfis públicos e do catálogo de molduras; o resto exige sessão.
  *       Regras por estado da conta (ativa, pendente, suspensa), de 18+ e de perfil privado ficam nos serviços.</li>
+ *   <li>Moderação (RF13): {@code /api/v1/moderation/**} só com {@code ROLE_MODERATOR}. São públicos o catálogo de
+ *       motivos, o formulário de denúncia sem conta (STF: canal para não usuários) e a integridade da página do lugar
+ *       (alertas ao consumidor e congelamento).</li>
  * </ul>
  */
 @Configuration
@@ -59,6 +62,11 @@ public class SecurityConfig {
                         .permitAll()
                         // catálogo e recomendações de moldura do post (RF16)
                         .requestMatchers(HttpMethod.GET, "/api/v1/backgrounds/**").permitAll()
+                        // moderação (RF13): fila só para moderador; denúncia sem conta e integridade do lugar públicas
+                        .requestMatchers("/api/v1/moderation/**").hasRole("MODERATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reports/reasons", "/api/v1/establishments/*/integrity")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/reports/public").permitAll()
                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e

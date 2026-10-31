@@ -14,6 +14,7 @@ import java.util.List;
  *
  * <p>A cidade filtrada é a do cadastro do tipo de conta ({@code type_details.city}: a praça de atuação), nunca a de
  * residência; para o comensal ela não é pública, então o filtro por cidade não o alcança (LGPD Art. 6º, III).
+ * Quem bloqueou quem busca, ou foi bloqueado por ele, não aparece (RF19).
  */
 @Repository
 public class ProfileDirectoryQueries {
@@ -28,15 +29,19 @@ public class ProfileDirectoryQueries {
     }
 
     /** Ids das contas, das mais novas para as mais antigas (paginação por id). */
-    public List<Long> page(Filter f, LocalDate minorBirthAfter, int limit) {
+    public List<Long> page(Filter f, LocalDate minorBirthAfter, Long viewerId, int limit) {
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("minorBirthAfter", minorBirthAfter).addValue("limit", limit);
+                .addValue("minorBirthAfter", minorBirthAfter).addValue("limit", limit)
+                .addValue("viewer", viewerId == null ? -1L : viewerId);
         StringBuilder sql = new StringBuilder("""
                 SELECT u.id FROM user_account u
                 LEFT JOIN user_preference pp ON pp.user_id = u.id
                 WHERE u.account_status = 'ACTIVE'
                   AND NOT COALESCE(pp.profile_private, u.user_date_of_birth > :minorBirthAfter, FALSE)
                   AND (u.user_type NOT IN ('ESTABELECIMENTO','VAREJO','OFICIAL') OR u.category_verification = 'VERIFIED')
+                  AND NOT EXISTS (SELECT 1 FROM user_block b
+                                  WHERE (b.blocker_id = :viewer AND b.blocked_id = u.id)
+                                     OR (b.blocker_id = u.id AND b.blocked_id = :viewer))
                 """);
         if (f.type() != null) {
             sql.append(" AND u.user_type = :type");

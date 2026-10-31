@@ -8,6 +8,7 @@ import com.friendlyeats.domain.model.UserAccount;
 import com.friendlyeats.infrastructure.persistence.postgres.EstablishmentRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.RecoveryCodeRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.ReviewRepository;
+import com.friendlyeats.infrastructure.persistence.postgres.SafetyRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserAccountRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserMfaRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserPreferenceRepository;
@@ -48,13 +49,14 @@ public class AccountService {
     private final ReviewRepository reviews;
     private final EstablishmentRepository establishments;
     private final PostContentEraser postEraser;
+    private final SafetyRepository safety;
 
     public AccountService(UserAccountRepository users, UserMfaRepository mfa, RecoveryCodeRepository recovery,
                           UserPreferenceRepository preferences, PasswordEncoder passwords, SessionService sessions,
                           MediaJanitor media, AccountNotifier notifier, Clock clock,
                           @Value("${friendly-eats.account.deletion-grace:30d}") Duration grace,
                           ReviewRepository reviews, EstablishmentRepository establishments,
-                          PostContentEraser postEraser) {
+                          PostContentEraser postEraser, SafetyRepository safety) {
         this.users = users;
         this.mfa = mfa;
         this.recovery = recovery;
@@ -68,6 +70,7 @@ public class AccountService {
         this.reviews = reviews;
         this.establishments = establishments;
         this.postEraser = postEraser;
+        this.safety = safety;
     }
 
     /** Senha nova (já com o modo sudo confirmado): sai de todos os outros aparelhos. */
@@ -121,6 +124,8 @@ public class AccountService {
         mfa.deleteById(userId);
         recovery.deleteAllOf(userId);
         preferences.deleteById(userId);
+        // bloqueios, silenciados e palavras filtradas (RF19), nos dois sentidos
+        safety.deleteAllOf(userId);
         user.anonymizeForLgpdDeletion(passwords.encode(UUID.randomUUID().toString()));
         users.save(user);
         sessions.revokeAll(userId, null);

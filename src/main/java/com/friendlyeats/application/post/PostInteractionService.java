@@ -9,6 +9,8 @@ import com.friendlyeats.application.post.InteractionViews.LikeStateView;
 import com.friendlyeats.application.post.InteractionViews.SaveStateView;
 import com.friendlyeats.application.post.InteractionViews.ShareResultView;
 import com.friendlyeats.application.post.PostReader.Viewer;
+import com.friendlyeats.application.safety.SafetyGuard;
+import com.friendlyeats.application.safety.WordFilter;
 import com.friendlyeats.domain.model.CommentStatus;
 import com.friendlyeats.domain.model.Post;
 import com.friendlyeats.domain.model.PostComment;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -34,6 +37,10 @@ import java.util.UUID;
  * a linha realmente entrou ou saiu. Repetir "curtir" ou o mesmo compartilhamento não altera o número (idempotente,
  * seguro para o app repetir). O post precisa estar visível para quem interage, com as regras da página do post (RF14).
  * Alerta sanitário aceita só compartilhar e salvar; comentar segue o {@link CommentPolicy}.
+ *
+ * <p>Na lista de comentários (RF19) somem, para quem vê, os de quem o bloqueou, foi bloqueado ou silenciado por ele, e
+ * para todos os que têm palavras filtradas por quem publicou (o autor do comentário ainda vê o seu). Comentários
+ * retirados pela moderação (RF13) não aparecem e não contam.
  */
 @Service
 @Transactional
@@ -47,15 +54,18 @@ public class PostInteractionService {
     private final AuthorDirectory authors;
     private final PublicLinks links;
     private final TrendingService trending;
+    private final SafetyGuard safety;
 
     public PostInteractionService(PostRepository posts, PostCommentRepository comments, PostReader reader,
-                                  AuthorDirectory authors, PublicLinks links, TrendingService trending) {
+                                  AuthorDirectory authors, PublicLinks links, TrendingService trending,
+                                  SafetyGuard safety) {
         this.posts = posts;
         this.comments = comments;
         this.reader = reader;
         this.authors = authors;
         this.links = links;
         this.trending = trending;
+        this.safety = safety;
     }
 
     // ------------------------------------------------------------ curtir
@@ -141,16 +151,23 @@ public class PostInteractionService {
         Viewer v = reader.viewer(viewerId);
         Post post = reader.requireVisible(postId, v);
         int size = Math.clamp(limit, 1, MAX_COMMENTS_PAGE);
-        List<PostComment> page = comments.findByPostIdAndStatusAndIdGreaterThanOrderByIdAsc(
+        List<PostComment> page = comments.findByPostIdAndStatusAndModerationStateIsNullAndIdGreaterThanOrderByIdAsc(
                 postId, CommentStatus.VISIBLE, afterId, Limit.of(size + 1));
         boolean hasMore = page.size() > size;
         List<PostComment> items = hasMore ? page.subList(0, size) : page;
+        Long nextAfter = hasMore ? items.getLast().getId() : null;
+        Set<Long> hidden = safety.hiddenFrom(v.id());
+        List<String> filtered = authors.find(post.getAuthorId()).map(safety::filterOf).orElse(List.of());
+        items = items.stream()
+                .filter(c -> !hidden.contains(c.getAuthorId()))
+                .filter(c -> c.getAuthorId().equals(v.id()) || post.isAuthoredBy(c.getAuthorId())
+                        || !WordFilter.matches(c.getBody(), filtered))
+                .toList();
         Map<Long, UserAccount> byId = authors.findAll(items.stream().map(PostComment::getAuthorId).distinct().toList());
         List<CommentView> views = items.stream().map(c -> new CommentView(c.getId(),
                 authors.view(byId.get(c.getAuthorId())), c.getBody(), c.getCreatedAt(),
                 v.id() != null && c.canBeRemovedBy(v.id(), post))).toList();
-        return new CommentPageView(views, hasMore ? items.getLast().getId() : null,
-                posts.findCounters(postId).getComments());
+        return new CommentPageView(views, nextAfter, posts.findCounters(postId).getComments());
     }
 
     // ------------------------------------------------------------ compartilhar

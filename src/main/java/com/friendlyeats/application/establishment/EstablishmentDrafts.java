@@ -29,8 +29,17 @@ public final class EstablishmentDrafts {
                                       List<String> secondaryFormats, String approach, Map<String, String> dietaryOffers) {
     }
 
-    /** Nota de 1 a 5 obrigatória; dimensões, gasto por pessoa e texto opcionais. */
+    /**
+     * Nota de 1 a 5 obrigatória; dimensões, gasto por pessoa e texto opcionais. {@code disclosure} (RF13): vínculo
+     * declarado com o lugar ({@code NONE}, {@code COURTESY}, {@code INVITATION} ou {@code RELATIONSHIP}); ausente
+     * mantém o que estava.
+     */
     public record ReviewDraft(Integer rating, String visitMode, Map<String, Integer> dimensions,
-                              Integer spentPerPersonCents, String body) {
+                              Integer spentPerPersonCents, String body, String disclosure) {
+
+        public ReviewDraft(Integer rating, String visitMode, Map<String, Integer> dimensions,
+                           Integer spentPerPersonCents, String body) {
+            this(rating, visitMode, dimensions, spentPerPersonCents, body, null);
+        }
     }
 }

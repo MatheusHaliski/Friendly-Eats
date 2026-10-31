@@ -96,6 +96,27 @@ friendly-eats:
     deletion-cron: "0 15 3 * * *"
   notifications:
     log-codes: false             # true só no perfil dev
+  # moderação (RF13): limites e prazos são metas da casa, a confirmar com o jurídico
+  moderation:
+    bootstrap-moderators: ${MODERATOR_EMAILS:}   # e-mails separados por vírgula; recebem MODERATOR na subida
+    reports-per-hour: 10         # denúncias por conta
+    reports-per-day: 50
+    public-reports-per-hour: 5   # formulário sem conta, por origem (HMAC do IP)
+    appeal-days: 30              # prazo para recorrer (ECA Digital, art. 30)
+    appeal-response-days: 7      # meta de resposta do recurso
+    owner-contests-per-month: 10 # contestações de avaliação por lugar
+    low-trust:                   # denunciante com muitas improcedentes desce um nível na fila
+      min-dismissed: 3
+      ratio: 0.7
+      window-days: 90
+  # integridade das avaliações (RF13): sinais de fraude e congelamento
+  integrity:
+    new-account-days: 7          # conta "nova"
+    burst-window-hours: 24
+    burst-threshold: 3           # avaliações de contas novas no mesmo lugar na janela: vão para análise
+    freeze-threshold: 5          # a partir daqui, novas avaliações do lugar ficam congeladas
+    freeze-days: 7
+    same-origin-days: 30
   storage:
     # API S3: AWS S3 (sa-east-1) em produção, Garage em desenvolvimento
     endpoint: ${S3_ENDPOINT:http://localhost:3900}

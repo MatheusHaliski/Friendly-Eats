@@ -76,6 +76,13 @@ paths:
 6. **Autor no card** (`AuthorView`): nome, @, bolinha (`AccountBadge`: cor nos dois temas, glifo, ícone e rótulo), selo
    e link do perfil; conta eliminada vira "Conta excluída" sem bolinha nem link; suspensa fica sem link.
 
+- **Moderação e segurança** ([RF13](../RF13/README.md), [RF19](../RF19/README.md)): post retirado pela moderação
+  (`moderation_state`) dá `404` na página e sai do feed, do "em alta" e dos posts do lugar (o autor ainda abre o seu).
+  Bloqueio em qualquer sentido entre quem vê e o autor também dá `404` e tira o post do feed e do "em alta"; quem
+  silenciou não vê os posts do silenciado no feed. Tudo na mesma regra `VISIBLE` (`NOT EXISTS` em `user_block` e
+  `user_mute`). A página do post e a do lugar têm o menu "…" com "Denunciar", e o cabeçalho mostra "Moderação" só a
+  quem tem o papel.
+
 ## Contrato (`PostViews`)
 
 - `PostDetailView {id, kind: KindView, feed, mediaType, title, body, mediaUrl, altText, establishment: PlaceRefView,
@@ -107,7 +114,8 @@ paths:
 |---|---|---|
 | Domínio | `FeedType` (`PROFILE`, `POST`, `ALERT`) | ✅ |
 | Regras | `PostReader` (quem vê, 401/404 do 18+, lugar no ar, montagem da página e dos cards sem N+1), `AuthorDirectory` (conta ativa, perfil privado com os padrões do cadastro, `AuthorView`), `FeedCursor`, `PostQueryService` (feed, lugar, em alta) | ✅ |
-| Persistência | `PostFeedQueries` (SQL com a regra de visibilidade em `VISIBLE` e índices `idx_post_feed` e `idx_post_establishment` da V3) | ✅ |
+| Persistência | `PostFeedQueries` (SQL com a regra de visibilidade em `VISIBLE`, que exclui o moderado, o bloqueio nos dois sentidos e o silenciado, e índices `idx_post_feed` e `idx_post_establishment` da V3) | ✅ |
+| Moderação e segurança | `PostReader.requireVisible` com `Post.isModerated` e `SafetyGuard.blockedEitherWay` ([RF13](../RF13/README.md), [RF19](../RF19/README.md)); `ModerationApiIT.reportDecisionAndAppealByAnotherModerator`, `SafetyApiIT.blockWorksBothWaysOnFeedPostCommentsAndProfiles`, `SafetyApiIT.muteHidesOnlyForWhoMutedAndIsSilent`; menu "…" na página do post (`PostPage`) e do lugar (`PlaceView`), link "Moderação" (`SiteHeader`), tipos e rotas do RF13 e do RF19 em `packages/api` | ✅ |
 | Cache | `TrendingScoreCalculator` (fórmula da Orange), `TrendingScoreRepository` (ZSET por feed e por tipo de conta, TTL 72 h), `TrendingService` (depois do commit, melhor esforço), `TrendingJob` (10 min, desligável com `friendly-eats.jobs.enabled`) | ✅ |
 | API | `PostFeedController`: `GET /api/v1/posts`, `/api/v1/posts/{id}`, `/api/v1/posts/trending`, `/api/v1/establishments/{id}/posts`; GET públicos no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Testes | `FeedCursorTest` (cursor e preço em reais), `TrendingScoreTest` (fórmula e chaves); `PostApiIT.feedPagesByCursorAndHidesExpiredAdultPrivateAndInactiveContent`, `PostApiIT.trendingRanksByInteractionsAndOnlyShowsWhatTheViewerCanSee`, `PostApiIT.frameFromTheCatalogIsValidatedAndResolvedButAlertsNeverHaveOne` (moldura no card e na página) | ✅ |

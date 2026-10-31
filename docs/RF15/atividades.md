@@ -6,7 +6,7 @@
 flowchart TD
     G[GET /users/id/profile ou /users/id/posts] --> T{É o titular?}
     T -- sim --> FULL
-    T -- não --> A{Conta ACTIVE?}
+    T -- não --> A{Conta ACTIVE e sem bloqueio<br/>entre os dois? RF19}
     A -- não --> N404[404]
     A -- sim --> P{Perfil privado?<br/>sem preferências: menor de 16}
     P -- sim, profile --> MIN[200 · nome, @, bolinha, selo<br/>privateProfile true]
@@ -27,7 +27,7 @@ flowchart TD
 flowchart TD
     F[GET /users?type&city&q&cursor&size] --> V{type, q e cursor válidos?}
     V -- não --> E400[400]
-    V -- sim --> Q[Conta ACTIVE e perfil público]
+    V -- sim --> Q[Conta ACTIVE e perfil público<br/>sem bloqueio com quem busca]
     Q --> O[Organização só com selo VERIFIED]
     O --> TY{type?}
     TY -- sim --> FT[user_type igual]

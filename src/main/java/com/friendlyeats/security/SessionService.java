@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.friendlyeats.infrastructure.persistence.postgres.UserRoleRepository;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -35,24 +38,34 @@ public class SessionService {
     private final FindByIndexNameSessionRepository<? extends Session> sessions;
     private final SecurityContextRepository contextRepository;
     private final AppSecrets secrets;
+    private final UserRoleRepository roles;
     private final Clock clock;
 
     public SessionService(FindByIndexNameSessionRepository<? extends Session> sessions,
-                          SecurityContextRepository contextRepository, AppSecrets secrets, Clock clock) {
+                          SecurityContextRepository contextRepository, AppSecrets secrets, UserRoleRepository roles,
+                          Clock clock) {
         this.sessions = sessions;
         this.contextRepository = contextRepository;
         this.secrets = secrets;
+        this.roles = roles;
         this.clock = clock;
     }
 
-    /** Login concluído (senha e, se houver, 2FA): troca o id da sessão e grava o usuário nela. */
+    /**
+     * Login concluído (senha e, se houver, 2FA): troca o id da sessão e grava o usuário nela, com {@code ROLE_USER} e os
+     * papéis da conta ({@code ROLE_MODERATOR}, RF13). Papel concedido depois vale no próximo login; papel retirado vale
+     * na hora, porque o serviço da moderação confere de novo no banco.
+     */
     public void establish(long userId, ClientInfo client, HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession(true);
         request.changeSessionId();
         PendingLogin.clear(session);
         SecurityContext context = SecurityContextHolder.createEmptyContext();
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        roles.rolesOf(userId).forEach(r -> authorities.add(new SimpleGrantedAuthority("ROLE_" + r)));
         context.setAuthentication(UsernamePasswordAuthenticationToken.authenticated(
-                new FriendlyPrincipal(userId), null, List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+                new FriendlyPrincipal(userId), null, authorities));
         SecurityContextHolder.setContext(context);
         contextRepository.saveContext(context, request, response);
         session.setAttribute(AUTH_AT, clock.millis());

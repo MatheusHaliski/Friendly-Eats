@@ -178,6 +178,10 @@ public class Post implements Persistable<UUID> {
     @Column(name = "removed_at")
     private Instant removedAt;
 
+    /** Moderação (RF13): {@code null} = normal; gravado só pela moderação (SQL), nunca pela entidade. */
+    @Column(name = "moderation_state", insertable = false, updatable = false)
+    private String moderationState;
+
     @Version
     @Column(name = "version", nullable = false)
     private Long version;
@@ -268,6 +272,15 @@ public class Post implements Persistable<UUID> {
 
     public boolean isExpired(Instant now) {
         return expiresAt != null && !expiresAt.isAfter(now);
+    }
+
+    /** Retirado pela moderação (preventiva, ocultado ou removido): só o autor ainda abre (RF13). */
+    public boolean isModerated() {
+        return moderationState != null;
+    }
+
+    public String getModerationState() {
+        return moderationState;
     }
 
     public boolean isAuthoredBy(Long userId) {

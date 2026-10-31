@@ -35,7 +35,7 @@ paths:
 | **Marco Civil** | A avaliação nasce publicada, sem censura prévia (art. 19); a moderação vem depois (RF13) |
 | **Conflito de interesse** | `RULE_NO_INSIDER`: contas de organização e o dono do lugar não avaliam |
 | **Taxonomia** | [`TAXONOMIA_FRIENDLY_EATS.md`](../TAXONOMIA_FRIENDLY_EATS.md#10-estrelas), seção 10, e o preço pelas avaliações (9.3) |
-| **Status** | 🟡 Parcial: avaliação única editável com histórico, dimensões por modo, nota agregada e score de ranking prontos; verificação de visita, resposta do dono, moderação e telas ainda não |
+| **Status** | 🟡 Parcial: avaliação única editável com histórico, dimensões por modo, nota agregada, score de ranking, vínculo declarado, sinais de fraude, congelamento e moderação ([RF13](../RF13/README.md)) prontos; verificação de visita e resposta do dono ainda não |
 
 ## Critérios de aceite
 
@@ -63,6 +63,13 @@ paths:
    Uma dimensão fora do modo dá `422`. As dimensões explicam a nota, mas não a compõem.
 6. Opcionais: `spentPerPersonCents` (de R$ 0 a R$ 5.000), que alimenta a faixa de preço (mediana com 5 relatos ou mais
    em 12 meses, RF6), e `body` (até 2.000 caracteres). Todos os erros voltam juntos (`422`).
+   **Vínculo declarado** (`disclosure`, [RF13](../RF13/README.md)): `NONE`, `COURTESY` ou `INVITATION` (viram
+   `REVIEW_INCENTIVIZED`, peso 0,6 e selo escrito) ou `RELATIONSHIP` (vira `REVIEW_CONFLICT`, fora da nota); ausente
+   mantém o que estava; outro valor dá `422`. O app pergunta "Você tem vínculo com o lugar?".
+6a. **Integridade** ([RF13](../RF13/README.md)): a criação guarda o HMAC do IP (`origin_hash`, nunca o IP) e passa pelo
+   filtro antifraude. Rajada de contas novas no mesmo lugar ou contas diferentes da mesma origem põem as envolvidas em
+   `UNDER_REVIEW` (a resposta já traz `status: UNDER_REVIEW`). Com o lugar **congelado** (pico suspeito ou decisão da
+   moderação), avaliação nova dá `409` com a data de fim; editar a própria continua.
 7. Avaliação **removida pela moderação** não é reescrita: o `PUT` dá `409`.
 8. **`DELETE /api/v1/establishments/{id}/reviews/me`** apaga a própria avaliação (`204`), com as versões (`ON DELETE
    CASCADE`). Sem avaliação, `404`. Avaliação `REMOVED` não é apagada pelo autor (`409`): apagar e avaliar de novo
@@ -84,8 +91,9 @@ paths:
     - média exibida `Σ w·r / Σ w`;
     - score de ranking bayesiano `(m·C + Σ w·r) / (m + Σ w)`, com m = 10 e C = 4,2. Ele é calculado, mas só vai
       ordenar a busca no RF10.
-13. **Estados da avaliação:** `PUBLISHED` na v1. `UNDER_REVIEW` e `REMOVED` ficam fora do agregado e chegam com a
-    moderação (⏳ RF13).
+13. **Estados da avaliação:** `PUBLISHED`; `UNDER_REVIEW` (sinal antifraude ou criança em risco) e `REMOVED` (decisão
+    da moderação) ficam fora da lista e do agregado ([RF13](../RF13/README.md)). A view traz `status`, que só difere de
+    `PUBLISHED` para o próprio autor (`GET …/reviews/me`), que vê "Em análise" ou "Removida pela moderação".
 14. A eliminação da conta ([RF5](../RF5/README.md)) apaga as avaliações que ela escreveu, e a do dono apaga as
     avaliações dos lugares dele (RF6).
 
@@ -98,12 +106,13 @@ paths:
 
 | Camada | Artefato | Situação |
 |---|---|---|
-| Domínio | `Review` (`write`, `Status`, `Trust` com os pesos), `ReviewRevision.of`, `StarRating` (âncoras 1 a 5), `ReviewDimension.appliesTo`, `VisitMode` | ✅ |
-| Regras | `ReviewService.upsertMine/deleteMine/mine/list` (organizações, dono, conta ativa, `REMOVED`), `EstablishmentRules.review` (nota, modo, dimensões, gasto), `RatingCalculator.summarize` (estados, média ponderada, histograma, dimensões, score bayesiano) | ✅ |
+| Domínio | `Review` (`write`, `Status`, `Trust` com os pesos, `Disclosure` e `declare`, `originHash`, `putUnderReview`/`removeByModeration`/`restoreByModeration` do RF13), `ReviewRevision.of`, `StarRating` (âncoras 1 a 5), `ReviewDimension.appliesTo`, `VisitMode` | ✅ |
+| Regras | `ReviewService.upsertMine/deleteMine/mine/list` (organizações, dono, conta ativa, `REMOVED`, congelamento, vínculo, `ReviewIntegrityService.afterNewReview` do RF13), `EstablishmentRules.review` (nota, modo, dimensões, gasto), `RatingCalculator.summarize` (estados, média ponderada, histograma, dimensões, score bayesiano) | ✅ |
 | Persistência | `V2__estabelecimento_e_avaliacao.sql`: `review` (CHECKs, único por pessoa e lugar, `ON DELETE CASCADE` a partir do estabelecimento) e `review_revision`; `ReviewRepository.findCounting/pageCounting/deleteAllWrittenBy`, `ReviewRevisionRepository` | ✅ |
 | Busca | `ReviewRepository.findCountingIn` traz as avaliações que contam de vários lugares de uma vez para os cards; o score bayesiano ordena a busca por relevância ([RF10](../RF10/README.md)), recalculado no SQL com a mesma fórmula | ✅ |
 | API | `PUT`, `GET` e `DELETE /api/v1/establishments/{id}/reviews/me`; `GET /api/v1/establishments/{id}/reviews` (público no `SecurityConfig`, [RF4](../RF4/README.md)) | ✅ |
 | Configuração | `friendly-eats.rating.min-display` (5), `prior-weight` (10), `prior-mean` (4.2), `half-life-days` (365), `recency-floor` (0.25) | ✅ |
 | Testes | `TaxonomyRulesTest.starsAreIntegersAndDimensionsOnlyWhereTheyWereLived`, `TaxonomyRulesTest.ratingIsNoneThenFewThenAWeightedAverageAndRankingIsBayesian`; `EstablishmentApiIT.reviewsAreOnePerPersonEditableAndFeedTheRatingAndThePrice`, `EstablishmentApiIT.organizationsAndOwnersDoNotReviewAndBarsAreForAdults`, `EstablishmentApiIT.accountEliminationRemovesReviewsAndOwnedEstablishments` | ✅ |
-| Pendências | avaliação verificada por check-in, nota fiscal (NFC-e) ou pedido, com confiança 1,0; resposta pública do dono (`RULE_OWNER_REPLY`, RF12); moderação, `UNDER_REVIEW` e `REMOVED`, denúncia e regras `RULE_*` (RF13); C por categoria e município calculado em job diário; página "Como calculamos as notas" | ⏳ |
-| Tela | app web: formulário Avaliar (rádio de 5 estrelas rotulado, modo, dimensões do modo, gasto em reais, texto), editar e apagar a própria, histograma e "4,3 de 5 · 6 avaliações", lista paginada; e2e `lugar.spec.ts` com axe | ✅ |
+| Moderação | `UNDER_REVIEW`, `REMOVED`, denúncia, contestação do dono, sinais de fraude, alerta ao consumidor e congelamento no [RF13](../RF13/README.md); `ModerationApiIT.burstOfNewAccountsGoesUnderReviewAndFreezesNewReviews`, `.declaredCourtesyLowersTheWeightAndIsShown` | ✅ |
+| Pendências | avaliação verificada por check-in, nota fiscal (NFC-e) ou pedido, com confiança 1,0; resposta pública do dono (`RULE_OWNER_REPLY`, RF12); C por categoria e município calculado em job diário; página "Como calculamos as notas" | ⏳ |
+| Tela | app web: formulário Avaliar (rádio de 5 estrelas rotulado, modo, dimensões do modo, gasto em reais, texto, vínculo com o lugar), editar e apagar a própria, "Em análise" e "Removida" para o autor, selo escrito do vínculo, aviso de avaliações pausadas no lugar congelado, histograma e "4,3 de 5 · 6 avaliações", lista paginada com o menu "…" (denunciar; contestar, para o dono); e2e `lugar.spec.ts` e `moderacao.spec.ts` com axe | ✅ |

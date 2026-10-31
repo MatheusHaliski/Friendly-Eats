@@ -24,6 +24,8 @@ server:
 friendly-eats:
   jobs:
     enabled: false            # o job de exclusão é chamado direto nos testes
+  integrity:
+    signals-enabled: false    # todos os testes saem de 127.0.0.1 com contas novas; o ModerationApiIT liga
   security:
     login:
       per-ip-minute: 10000    # todos os testes saem de 127.0.0.1; o limite por conta continua valendo

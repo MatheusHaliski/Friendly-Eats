@@ -14,6 +14,12 @@ stateDiagram-v2
     Published --> Removed : DELETE /id ou eliminação da conta (RF5)
     Archived --> Removed : DELETE /id ou eliminação da conta (RF5)
     Removed --> [*]
+    Published --> Moderado : moderação (RF13) · preventiva, ocultar ou remover
+    Moderado --> Published : decisão manter ou recurso revertido
+    note right of Moderado
+        moderation_state, conteúdo guardado.
+        404 para os outros, o autor abre.
+    end note
     note right of Archived
         Página no ar, fora do feed
         e do em alta. Sem novas interações.
