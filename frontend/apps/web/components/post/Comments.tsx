@@ -34,7 +34,7 @@ export function Comments({ post }: { post: PostDetailView }) {
   const [toDelete, setToDelete] = useState<CommentView | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const it = post.interactions;
-  const items = comments.data?.pages.flatMap((p) => p.items) ?? [];
+  const items = uniqueById(comments.data?.pages.flatMap((p) => p.items) ?? []);
   const total = comments.data?.pages.at(-1)?.total ?? post.counts.comments;
 
   const setCount = (n: number) =>
@@ -50,7 +50,13 @@ export function Comments({ post }: { post: PostDetailView }) {
     onSuccess: (r) => {
       qc.setQueryData<InfiniteData<CommentPageView>>(commentsKey(post.id), (d) => {
         if (!d) return d;
-        const pages = d.pages.map((p, i) => (i === d.pages.length - 1 ? { ...p, items: [...p.items, r.comment], total: r.comments } : { ...p, total: r.comments }));
+        // a lista vem em ordem crescente de id: o comentário novo só entra direto se a última página carregada é a
+        // final; se ainda há páginas por carregar, ele chega nelas, no lugar certo e sem duplicar
+        const last = d.pages.length - 1;
+        const complete = d.pages.at(-1)?.nextAfter == null;
+        const pages = d.pages.map((p, i) =>
+          i === last && complete ? { ...p, items: [...p.items, r.comment], total: r.comments } : { ...p, total: r.comments },
+        );
         return { ...d, pages };
       });
       setCount(r.comments);
@@ -212,4 +218,9 @@ export function Comments({ post }: { post: PostDetailView }) {
       </Dialog>
     </section>
   );
+}
+
+function uniqueById(list: CommentView[]): CommentView[] {
+  const seen = new Set<CommentView['id']>();
+  return list.filter((c) => (seen.has(c.id) ? false : (seen.add(c.id), true)));
 }

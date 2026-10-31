@@ -58,6 +58,11 @@ sequenceDiagram
     else permitido
         S->>DB: INSERT post_comment e comment_count + 1
         API-->>U: 201 {comment, comments}
+        alt última página carregada é a final
+            U->>U: comentário no fim da lista e contador novo
+        else ainda há páginas por carregar
+            U->>U: só o contador sobe, o comentário chega ao carregar mais, sem duplicar
+        end
     end
     U->>API: GET /api/v1/posts/{id}/comments?after=0&limit=20 (sem sessão é permitido)
     API-->>U: 200 {items, nextAfter, total}
