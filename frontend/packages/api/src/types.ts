@@ -435,7 +435,13 @@ export interface ReviewView {
   author: ReviewAuthorView;
   createdAt: string;
   updatedAt: string;
+  /** RF13: PUBLISHED; UNDER_REVIEW e REMOVED só chegam ao autor (GET …/reviews/me). */
+  status?: ReviewStatus;
 }
+
+export type ReviewStatus = 'PUBLISHED' | 'UNDER_REVIEW' | 'REMOVED';
+/** Vínculo declarado com o lugar (RF13): cortesia ou convite pesam menos; relação fica fora da nota. */
+export type ReviewDisclosure = 'NONE' | 'COURTESY' | 'INVITATION' | 'RELATIONSHIP';
 
 /** EstablishmentViews.ReviewPage (GET /api/v1/establishments/{id}/reviews). */
 export interface ReviewPage {
@@ -453,6 +459,8 @@ export interface ReviewDraft {
   dimensions: Partial<Record<ReviewDimensionCode, number>>;
   spentPerPersonCents: number | null;
   body: string | null;
+  /** RF13; ausente mantém o que estava. */
+  disclosure?: ReviewDisclosure;
 }
 
 // ------------------------------------------------------------ busca (RF10, contrato combinado com o backend)
@@ -1087,4 +1095,283 @@ export interface FrameRecommendation {
   materialId: string | null;
   seasonId: string | null;
   reason: string;
+}
+
+// ============================================================ moderação (RF13) e segurança entre usuários (RF19)
+// application/moderation/ModerationViews.java e application/safety/SafetyViews.java
+
+export type ReportTargetType = 'POST' | 'COMMENT' | 'REVIEW' | 'PROFILE' | 'ESTABLISHMENT';
+export type ReportReasonCode =
+  | 'CRIANCA_EM_RISCO'
+  | 'DESINFORMACAO_SANITARIA'
+  | 'ASSEDIO'
+  | 'ODIO'
+  | 'CONTEUDO_SEXUAL'
+  | 'DADO_PESSOAL'
+  | 'GOLPE_FRAUDE'
+  | 'AVALIACAO_FALSA'
+  | 'CONFLITO_INTERESSE'
+  | 'OFENSA_OU_CRIME'
+  | 'DIREITO_AUTORAL'
+  | 'SPAM'
+  | 'FORA_DO_TEMA'
+  | 'OUTRO';
+export type ModerationActionCode = 'KEEP' | 'HIDE' | 'REMOVE' | 'WARN';
+export type CaseStatusCode = 'OPEN' | 'DECIDED' | 'IN_APPEAL' | 'FINAL';
+
+/** GET /api/v1/reports/reasons (público). */
+export interface ReasonView {
+  code: ReportReasonCode;
+  label: string;
+  description: string;
+  priority: string;
+  priorityLabel: string;
+  targets: ReportTargetType[];
+  ownerContest: boolean;
+}
+
+export interface ReportRequest {
+  targetType: ReportTargetType;
+  targetId: string;
+  reason: ReportReasonCode;
+  details?: string | null;
+  /** Só com CRIANCA_EM_RISCO: indício de abuso sexual (marca para comunicação às autoridades). */
+  childSexualAbuse?: boolean;
+}
+
+/** Formulário sem conta: nome e e-mail obrigatórios (a denúncia não é anônima). */
+export interface PublicReportRequest extends ReportRequest {
+  name: string;
+  email: string;
+}
+
+export interface ContestRequest {
+  reason: ReportReasonCode;
+  details: string;
+}
+
+/** Recibo: protocolo DEN-aaaa-nnnnnn e o prazo de análise. */
+export interface ReceiptView {
+  protocol: string;
+  status: string;
+  message: string;
+  createdAt: string;
+  reviewBy: string;
+}
+
+export interface TargetView {
+  type: ReportTargetType;
+  typeLabel: string;
+  id: string;
+  /** Caminho no app web; nulo quando não abre mais. */
+  path: string | null;
+  excerpt: string | null;
+}
+
+export interface PriorityView {
+  code: 'CRITICA' | 'URGENTE' | 'ALTA' | 'NORMAL' | 'BAIXA';
+  label: string;
+  level: number;
+}
+
+export interface CaseSummaryView {
+  id: number;
+  protocol: string;
+  target: TargetView;
+  topReason: Coded;
+  priority: PriorityView;
+  status: Coded;
+  reportCount: number;
+  preventive: boolean;
+  authorityReferral: 'NONE' | 'PENDING' | 'SENT';
+  dueAt: string;
+  overdue: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CasePageView {
+  items: CaseSummaryView[];
+  page: number;
+  size: number;
+  total: number;
+}
+
+export interface ModerationReportView {
+  id: number;
+  protocol: string;
+  source: Coded;
+  reason: Coded;
+  details: string | null;
+  reporter: string;
+  lowTrust: boolean;
+  childSexualAbuse: boolean;
+  status: 'OPEN' | 'UPHELD' | 'DISMISSED';
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface DecisionView {
+  id: number;
+  stage: 'PREVENTIVE' | 'FIRST' | 'APPEAL';
+  action: Coded;
+  policy: Coded | null;
+  statement: string;
+  automated: boolean;
+  origin: string;
+  /** Só a moderação vê. */
+  moderatorId: number | null;
+  createdAt: string;
+}
+
+export interface AppealView {
+  id: number;
+  role: 'AUTHOR' | 'REPORTER';
+  reason: string;
+  status: 'OPEN' | 'MAINTAINED' | 'REVERSED';
+  decisionId: number;
+  resultDecisionId: number | null;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface SignalView {
+  code: string;
+  label: string;
+  detail: string | null;
+  createdAt: string;
+}
+
+export interface CaseDetailView {
+  summary: CaseSummaryView;
+  snapshot: Record<string, unknown>;
+  currentState: string;
+  targetOwnerId: number | null;
+  establishmentId: number | null;
+  authorityReference: string | null;
+  authoritySentAt: string | null;
+  reports: ModerationReportView[];
+  signals: SignalView[];
+  decisions: DecisionView[];
+  appeals: AppealView[];
+  allowedActions: Coded[];
+  viewerCanDecide: boolean;
+  viewerBlockedReason: string | null;
+}
+
+export interface DecisionRequest {
+  action: ModerationActionCode;
+  policyReason?: ReportReasonCode | null;
+  statement: string;
+}
+
+export interface AppealDecisionRequest {
+  outcome: 'MAINTAINED' | 'REVERSED';
+  action?: ModerationActionCode | null;
+  policyReason?: ReportReasonCode | null;
+  statement: string;
+}
+
+export interface MyReportView {
+  protocol: string;
+  target: TargetView;
+  reason: Coded;
+  status: 'RECEBIDA' | 'EM_RECURSO' | 'DECIDIDA';
+  statusLabel: string;
+  outcome: 'PROCEDENTE' | 'IMPROCEDENTE' | null;
+  outcomeLabel: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  caseId: number;
+  canAppeal: boolean;
+  appealDeadline: string | null;
+  appealStatus: AppealView['status'] | null;
+}
+
+/** Aviso ao autor (ECA Digital, art. 30): motivo, origem, como recorrer e prazos. */
+export interface MyDecisionView {
+  caseId: number;
+  protocol: string;
+  target: TargetView;
+  decision: DecisionView;
+  canAppeal: boolean;
+  appealDeadline: string | null;
+  appealResponseDays: number;
+  howToAppeal: string;
+  appeal: AppealView | null;
+  appealResult: DecisionView | null;
+}
+
+/** Alerta ao consumidor na página do lugar (o AlertView do post é o alerta sanitário). */
+export interface ConsumerAlertView {
+  id: number;
+  kind: Coded;
+  message: string;
+  freezeReviews: boolean;
+  startsAt: string;
+  endsAt: string | null;
+  liftedAt: string | null;
+  automated: boolean;
+  active: boolean;
+}
+
+/** GET /api/v1/establishments/{id}/integrity (público). */
+export interface IntegrityView {
+  establishmentId: number;
+  frozen: boolean;
+  frozenUntil: string | null;
+  active: ConsumerAlertView[];
+  history: ConsumerAlertView[];
+  howWeVerify: string;
+}
+
+export interface AlertRequest {
+  kind: 'AVALIACAO_PAGA' | 'ATIVIDADE_SUSPEITA' | 'ATENCAO_PUBLICA';
+  message?: string | null;
+  freezeDays?: number | null;
+}
+
+export interface CountView {
+  code: string;
+  label: string;
+  count: number;
+}
+
+export interface ModerationStatsView {
+  from: string;
+  to: string;
+  openCases: number;
+  inAppeal: number;
+  overdue: number;
+  reportsByReason: CountView[];
+  reportsBySource: CountView[];
+  decisionsByAction: CountView[];
+  decisionsByPolicy: CountView[];
+  appeals: CountView[];
+  authorityReferrals: CountView[];
+}
+
+export interface RolesView {
+  moderator: boolean;
+}
+
+// ---- RF19
+
+export interface RelatedUserView {
+  user: AuthorView;
+  since: string;
+}
+
+export interface SafetyView {
+  blocked: RelatedUserView[];
+  muted: RelatedUserView[];
+  words: string[];
+  defaultFilter: { enabled: boolean; locked: boolean; size: number };
+  maxWords: number;
+}
+
+export interface RelationView {
+  userId: number;
+  blocked: boolean;
+  muted: boolean;
 }

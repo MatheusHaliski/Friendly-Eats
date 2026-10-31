@@ -7,11 +7,12 @@ import { useId, useState, type FormEvent } from 'react';
 import { Notice, useDeferredFocus } from '@/components/Form';
 import { api } from '@/lib/api';
 import { CONSENTS_KEY, PROFILE_KEY, useConsents, usePreferences } from '@/lib/queries';
+import { SafetySection } from '@/components/safety/SafetySection';
 import { ConsentSwitch } from './ConsentSwitch';
 import { CheckRow, MinorNotice, RadioPills, ResultNotice, useSavePreferences, type Result } from './PreferenceControls';
 import { SectionHeading } from './SectionHeading';
 
-/** Configurações → Privacidade (RF2 · RF3): quem vê e comenta e os 5 consentimentos opcionais. */
+/** Configurações → Privacidade (RF2 · RF3 · RF19): quem vê e comenta, bloqueados e palavras, e os 5 consentimentos opcionais. */
 export function PrivacySection() {
   const prefs = usePreferences();
   return (
@@ -27,6 +28,7 @@ export function PrivacySection() {
         </Notice>
       )}
       {prefs.data && <AudienceForm prefs={prefs.data} />}
+      <SafetySection />
       <Consents />
       <p className="text-sm">
         Como o Friendly Eats trata os seus dados está nos{' '}

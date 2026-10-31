@@ -1,0 +1,199 @@
+[
+  {
+    "code": "CRIANCA_EM_RISCO",
+    "label": "Criança ou adolescente em risco",
+    "description": "Exploração, abuso, aliciamento ou exposição de criança ou adolescente.",
+    "priority": "CRITICA",
+    "priorityLabel": "Crítica",
+    "targets": [
+      "COMMENT",
+      "ESTABLISHMENT",
+      "POST",
+      "PROFILE",
+      "REVIEW"
+    ],
+    "ownerContest": false
+  },
+  {
+    "code": "DESINFORMACAO_SANITARIA",
+    "label": "Desinformação sanitária",
+    "description": "Alerta sanitário falso ou que contradiz a fonte oficial.",
+    "priority": "URGENTE",
+    "priorityLabel": "Urgente",
+    "targets": [
+      "COMMENT",
+      "POST",
+      "REVIEW"
+    ],
+    "ownerContest": false
+  },
+  {
+    "code": "ASSEDIO",
+    "label": "Assédio ou cyberbullying",
+    "description": "Ataques repetidos, humilhação, ameaça ou intimidação de uma pessoa.",
+    "priority": "ALTA",
+    "priorityLabel": "Alta",
+    "targets": [
+      "COMMENT",
+      "ESTABLISHMENT",
+      "POST",
+      "PROFILE",
+      "REVIEW"
+    ],
+    "ownerContest": false
+  },
+  {
+    "code": "ODIO",
+    "label": "Discurso de ódio ou discriminação",
+    "description": "Ataque por raça, religião, origem, gênero, orientação ou deficiência.",
+    "priority": "ALTA",
+    "priorityLabel": "Alta",
+    "targets": [
+      "COMMENT",
+      "ESTABLISHMENT",
+      "POST",
+      "PROFILE",
+      "REVIEW"
+    ],
+    "ownerContest": false
+  },
+  {
+    "code": "CONTEUDO_SEXUAL",
+    "label": "Nudez ou conteúdo sexual",
+    "description": "Nudez, conteúdo sexual ou imagem íntima sem consentimento.",
+    "priority": "ALTA",
+    "priorityLabel": "Alta",
+    "targets": [
+      "COMMENT",
+      "ESTABLISHMENT",
+      "POST",
+      "PROFILE",
+      "REVIEW"
+    ],
+    "ownerContest": false
+  },
+  {
+    "code": "DADO_PESSOAL",
+    "label": "Dado pessoal exposto",
+    "description": "Telefone, endereço, documento ou foto de alguém sem autorização.",
+    "priority": "ALTA",
+    "priorityLabel": "Alta",
+    "targets": [
+      "COMMENT",
+      "ESTABLISHMENT",
+      "POST",
+      "PROFILE",
+      "REVIEW"
+    ],
+    "ownerContest": true
+  },
+  {
+    "code": "GOLPE_FRAUDE",
+    "label": "Golpe ou fraude",
+    "description": "Promoção falsa, cobrança indevida, link enganoso ou perfil que se passa por outro.",
+    "priority": "ALTA",
+    "priorityLabel": "Alta",
+    "targets": [
+      "COMMENT",
+      "ESTABLISHMENT",
+      "POST",
+      "PROFILE",
+      "REVIEW"
+    ],
+    "ownerContest": false
+  },
+  {
+    "code": "AVALIACAO_FALSA",
+    "label": "Avaliação falsa ou com incentivo",
+    "description": "Não é experiência própria, foi paga ou trocada por vantagem, ou o lugar oferece vantagem em troca de nota.",
+    "priority": "NORMAL",
+    "priorityLabel": "Normal",
+    "targets": [
+      "ESTABLISHMENT",
+      "POST",
+      "REVIEW"
+    ],
+    "ownerContest": true
+  },
+  {
+    "code": "CONFLITO_INTERESSE",
+    "label": "Conflito de interesse",
+    "description": "Quem escreveu é dono, funcionário, parente ou concorrente do lugar.",
+    "priority": "NORMAL",
+    "priorityLabel": "Normal",
+    "targets": [
+      "POST",
+      "REVIEW"
+    ],
+    "ownerContest": true
+  },
+  {
+    "code": "OFENSA_OU_CRIME",
+    "label": "Ofensa ou acusação de crime",
+    "description": "Xingamento ou acusação de crime contra pessoa ou empresa.",
+    "priority": "NORMAL",
+    "priorityLabel": "Normal",
+    "targets": [
+      "COMMENT",
+      "POST",
+      "REVIEW"
+    ],
+    "ownerContest": true
+  },
+  {
+    "code": "DIREITO_AUTORAL",
+    "label": "Direito autoral",
+    "description": "Foto, receita ou texto de outra pessoa usado sem permissão.",
+    "priority": "NORMAL",
+    "priorityLabel": "Normal",
+    "targets": [
+      "ESTABLISHMENT",
+      "POST",
+      "PROFILE"
+    ],
+    "ownerContest": false
+  },
+  {
+    "code": "SPAM",
+    "label": "Spam",
+    "description": "Propaganda repetida, correntes ou conteúdo automático.",
+    "priority": "BAIXA",
+    "priorityLabel": "Baixa",
+    "targets": [
+      "COMMENT",
+      "ESTABLISHMENT",
+      "POST",
+      "PROFILE",
+      "REVIEW"
+    ],
+    "ownerContest": false
+  },
+  {
+    "code": "FORA_DO_TEMA",
+    "label": "Fora do tema ou lugar errado",
+    "description": "Não fala de comida ou do lugar avaliado.",
+    "priority": "BAIXA",
+    "priorityLabel": "Baixa",
+    "targets": [
+      "COMMENT",
+      "POST",
+      "REVIEW"
+    ],
+    "ownerContest": true
+  },
+  {
+    "code": "OUTRO",
+    "label": "Outro motivo",
+    "description": "Algo que fere os Termos de Uso e não está na lista. Conte o que aconteceu.",
+    "priority": "NORMAL",
+    "priorityLabel": "Normal",
+    "targets": [
+      "COMMENT",
+      "ESTABLISHMENT",
+      "POST",
+      "PROFILE",
+      "REVIEW"
+    ],
+    "ownerContest": false
+  }
+]

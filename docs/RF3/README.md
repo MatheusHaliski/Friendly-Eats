@@ -74,6 +74,7 @@ pontual, não como o perfil inteiro.
 | Preferências de privacidade | perfil privado, quem comenta e ano de nascimento em `user_preference` ([RF2](../RF2/README.md)); travadas para menor de 16 | ✅ |
 | Domínio | `ConsentPurpose`: rótulo, descrição, base legal, `sensitive` e `MinorRule` (16 ou 18 anos) de cada finalidade; o cadastro usa o mesmo enum (`ConsentService.recordDefaults`) | ✅ |
 | API | `GET /api/v1/me/consents` e `PUT /api/v1/me/consents/{purpose}` (`ConsentController` → `ConsentService`); `ConsentApiIT` | ✅ |
+| Segurança entre usuários | Configurações → Privacidade traz "Bloqueados, silenciados e palavras" (`SafetySection`, [RF19](../RF19/README.md)) entre "Quem vê e comenta" e os consentimentos; o filtro de ofensas fica travado ligado para menor de 16, como os outros padrões protetivos | ✅ |
 | Efeitos imediatos | revogar apaga os estilos alimentares e a última localização na mesma transação; `ConsentApiIT` | ✅ |
 | Menores | `LOCATION_TRACKING`, `PERSONALIZED_FEED` e `MARKETING` travados para menor de 16; `SENSITIVE_PROFILE_DATA` para menor de 18 (`AgePolicy`); `ConsentApiIT` | ✅ |
 | Responsável | consentimento do responsável para dado sensível de adolescente (Art. 14) | ⏳ |

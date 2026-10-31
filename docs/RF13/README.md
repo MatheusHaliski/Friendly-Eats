@@ -14,6 +14,15 @@ paths:
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/UserRoleRepository.java
   - src/test/java/com/friendlyeats/api/ModerationApiIT.java
   - src/test/java/com/friendlyeats/domain/moderation/ModerationDomainTest.java
+  - frontend/apps/web/app/moderacao/page.tsx
+  - frontend/apps/web/app/denunciar/page.tsx
+  - frontend/apps/web/app/configuracoes/denuncias/page.tsx
+  - frontend/apps/web/components/moderation/*.tsx
+  - frontend/apps/web/lib/moderation.ts
+  - frontend/apps/web/lib/moderation.test.ts
+  - frontend/apps/web/e2e/moderacao.spec.ts
+  - frontend/apps/web/e2e/support/mock-moderation.ts
+  - frontend/apps/web/e2e/fixtures/motivos-denuncia.json
 ---
 
 # RF13 · Moderação: denúncia, decisão motivada, recurso e integridade das avaliações

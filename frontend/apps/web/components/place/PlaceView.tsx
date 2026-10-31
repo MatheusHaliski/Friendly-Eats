@@ -8,18 +8,20 @@ import { AccountBadge, VerifiedSeal } from '@/components/AccountBadge';
 import { CuisineChip } from '@/components/CuisineChip';
 import { Notice } from '@/components/Form';
 import { IconGlutenFree, IconLactoseFree, IconLogin, IconPlace } from '@/components/icons';
+import { ContentActions } from '@/components/moderation/ContentActions';
+import { IntegrityBanner } from '@/components/moderation/IntegrityBanner';
 import { PriceTag } from '@/components/PriceTag';
 import { RatingPanel } from '@/components/RatingSummary';
 import { api } from '@/lib/api';
 import { CROSS_CONTACT_WARNING, dietaryText, needsCrossContactWarning } from '@/lib/dietary';
-import { placeKey, useTaxonomy } from '@/lib/queries';
+import { placeKey, useSession, useTaxonomy } from '@/lib/queries';
 import { DIMENSIONS } from '@/lib/review';
 import { loginHref } from '@/lib/safe-redirect';
 import { MyReviewArea } from './MyReviewArea';
 import { PlacePosts } from './PlacePosts';
 import { ReviewList } from './ReviewList';
 
-/** Página do estabelecimento (RF6, RF7, RF8). */
+/** Página do estabelecimento (RF6, RF7, RF8), com os alertas ao consumidor e "Denunciar" (RF13). */
 export function PlaceView({ id }: { id: string }) {
   const place = useQuery({ queryKey: placeKey(id), queryFn: () => api.establishments.get(id) });
   const name = place.data?.name;
@@ -83,11 +85,17 @@ export function PlaceView({ id }: { id: string }) {
 function PlaceContent({ place }: { place: EstablishmentView }) {
   const taxonomy = useTaxonomy();
   const dimensions = taxonomy.data?.reviewDimensions ?? [...DIMENSIONS];
+  const session = useSession();
   const c = place.classification;
   return (
     <article aria-labelledby="titulo-lugar" className="grid gap-8">
       <header className="grid gap-3">
-        <p className="text-sm font-semibold uppercase tracking-wide text-muted">{place.group.label}</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm font-semibold uppercase tracking-wide text-muted">{place.group.label}</p>
+          {session.data?.id !== place.owner?.id && (
+            <ContentActions targetType="ESTABLISHMENT" targetId={place.id} context={`a página de ${place.name}`} />
+          )}
+        </div>
         <h1 id="titulo-lugar" className="text-3xl font-extrabold tracking-tight sm:text-4xl">
           {place.name}
         </h1>
@@ -123,6 +131,7 @@ function PlaceContent({ place }: { place: EstablishmentView }) {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-start">
         <div className="grid gap-8">
+          <IntegrityBanner placeId={String(place.id)} />
           <section aria-labelledby="titulo-nota" className="fe-card grid gap-4 p-5">
             <h2 id="titulo-nota" className="text-xl font-bold">
               Nota
@@ -132,7 +141,7 @@ function PlaceContent({ place }: { place: EstablishmentView }) {
 
           <MyReviewArea place={place} />
 
-          <ReviewList placeId={String(place.id)} dimensions={dimensions} />
+          <ReviewList placeId={String(place.id)} dimensions={dimensions} ownerId={place.owner?.id ?? null} />
 
           <PlacePosts placeId={String(place.id)} />
         </div>

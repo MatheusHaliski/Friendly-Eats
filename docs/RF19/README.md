@@ -9,6 +9,8 @@ paths:
   - src/main/java/com/friendlyeats/infrastructure/persistence/postgres/SafetyRepository.java
   - src/test/java/com/friendlyeats/api/SafetyApiIT.java
   - src/test/java/com/friendlyeats/application/safety/WordFilterTest.java
+  - frontend/apps/web/components/safety/*.tsx
+  - frontend/apps/web/app/seguranca/page.tsx
 ---
 
 # RF19 · Segurança entre usuários: bloquear, silenciar e palavras filtradas

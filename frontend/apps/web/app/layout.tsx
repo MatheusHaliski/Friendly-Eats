@@ -40,6 +40,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Link href="/termos" className="inline-flex min-h-6 items-center underline">
               Termos de Uso
             </Link>
+            <Link href="/seguranca" className="inline-flex min-h-6 items-center underline">
+              Segurança e denúncias
+            </Link>
           </div>
         </footer>
       </body>

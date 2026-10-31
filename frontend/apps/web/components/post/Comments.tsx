@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useId, useRef, useState } from 'react';
 import { Dialog } from '@/components/Dialog';
 import { FieldErrors, Notice } from '@/components/Form';
+import { ContentActions } from '@/components/moderation/ContentActions';
 import { IconDelete, IconSend } from '@/components/icons';
 import { api } from '@/lib/api';
 import { plural } from '@/lib/format';
@@ -17,7 +18,11 @@ import { AuthorBadge, Avatar } from './PostBits';
 
 const MAX = 2000;
 
-/** Caixa de mensagens do post (RF12): lista paginada por "after", enviar e apagar o próprio comentário. */
+/**
+ * Caixa de mensagens do post (RF12): lista paginada por "after", enviar e apagar o próprio comentário, e "Denunciar"
+ * no menu "…" dos comentários dos outros (RF13). A API já tira os comentários de quem bloqueou ou foi silenciado e os
+ * com palavras filtradas por quem publicou (RF19).
+ */
 export function Comments({ post }: { post: PostDetailView }) {
   const uid = useId();
   const qc = useQueryClient();
@@ -115,6 +120,9 @@ export function Comments({ post }: { post: PostDetailView }) {
                     <button type="button" className="fe-btn fe-btn-sm" onClick={() => setToDelete(c)} aria-label={`Apagar o comentário de ${c.author.name}`}>
                       <IconDelete size={16} />
                     </button>
+                  )}
+                  {session.data?.id !== c.author.id && (
+                    <ContentActions targetType="COMMENT" targetId={c.id} context={`o comentário de ${c.author.name}`} />
                   )}
                 </div>
               </li>

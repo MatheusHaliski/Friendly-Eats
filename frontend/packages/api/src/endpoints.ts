@@ -2,6 +2,26 @@
 import { createClient, type ApiClient, type ClientOptions } from './client.ts';
 import type {
   AccountTypeCode,
+  AlertRequest,
+  ConsumerAlertView,
+  AppealDecisionRequest,
+  AppealView,
+  CaseDetailView,
+  CasePageView,
+  CaseStatusCode,
+  ContestRequest,
+  DecisionRequest,
+  IntegrityView,
+  ModerationStatsView,
+  MyDecisionView,
+  MyReportView,
+  PublicReportRequest,
+  ReasonView,
+  ReceiptView,
+  RelationView,
+  ReportRequest,
+  RolesView,
+  SafetyView,
   CommentCreatedView,
   CommentPageView,
   ConsentList,
@@ -180,6 +200,52 @@ export function createApi(client: ApiClient = createClient()) {
       /** 403 = perfil privado para quem não é o titular. */
       posts: (id: number | string, params: { cursor?: string; size?: number } = {}) =>
         client.get<FeedPageView>(`/api/v1/users/${seg(id)}/posts`, { query: { ...params } }),
+    },
+
+    // ---- moderação (RF13): denúncia, recurso e integridade do lugar (ReportController) e a área da moderação
+    // (ModerationController, só com ROLE_MODERATOR)
+    reports: {
+      /** Motivos fechados (público). */
+      reasons: () => client.get<ReasonView[]>('/api/v1/reports/reasons'),
+      /** 201 com o protocolo; 409 já denunciado; 429 limite de ritmo. */
+      create: (body: ReportRequest) => client.post<ReceiptView>('/api/v1/reports', body),
+      /** Sem conta (STF: canal para não usuários). */
+      createPublic: (body: PublicReportRequest) => client.post<ReceiptView>('/api/v1/reports/public', body),
+      /** Contestação do dono (RC-SEG-08): a avaliação fica no ar até a decisão. */
+      contestReview: (placeId: number | string, reviewId: number, body: ContestRequest) =>
+        client.post<ReceiptView>(`/api/v1/establishments/${seg(placeId)}/reviews/${seg(reviewId)}/contest`, body),
+      integrity: (placeId: number | string) => client.get<IntegrityView>(`/api/v1/establishments/${seg(placeId)}/integrity`),
+      mine: () => client.get<MyReportView[]>('/api/v1/me/reports'),
+      myDecisions: () => client.get<MyDecisionView[]>('/api/v1/me/moderation/decisions'),
+      appeal: (caseId: number, reason: string) => client.post<AppealView>(`/api/v1/me/moderation/cases/${seg(caseId)}/appeal`, { reason }),
+      roles: () => client.get<RolesView>('/api/v1/me/roles'),
+    },
+
+    moderation: {
+      queue: (status: CaseStatusCode = 'OPEN', page = 0, size = 20) =>
+        client.get<CasePageView>('/api/v1/moderation/cases', { query: { status, page, size } }),
+      get: (id: number) => client.get<CaseDetailView>(`/api/v1/moderation/cases/${seg(id)}`),
+      decide: (id: number, body: DecisionRequest) => client.post<CaseDetailView>(`/api/v1/moderation/cases/${seg(id)}/decision`, body),
+      decideAppeal: (id: number, body: AppealDecisionRequest) =>
+        client.post<CaseDetailView>(`/api/v1/moderation/cases/${seg(id)}/appeal-decision`, body),
+      authorityReferral: (id: number, reference: string) =>
+        client.post<CaseDetailView>(`/api/v1/moderation/cases/${seg(id)}/authority-referral`, { reference }),
+      createAlert: (placeId: number, body: AlertRequest) => client.post<ConsumerAlertView>(`/api/v1/moderation/establishments/${seg(placeId)}/alerts`, body),
+      liftAlert: (placeId: number, alertId: number) =>
+        client.post<ConsumerAlertView>(`/api/v1/moderation/establishments/${seg(placeId)}/alerts/${seg(alertId)}/lift`),
+      stats: (days = 30) => client.get<ModerationStatsView>('/api/v1/moderation/stats', { query: { days } }),
+    },
+
+    // ---- segurança entre usuários (RF19, SafetyController): PUT/DELETE idempotentes
+    safety: {
+      mine: () => client.get<SafetyView>('/api/v1/me/safety'),
+      setDefaultFilter: (defaultFilter: boolean) => client.patch<SafetyView>('/api/v1/me/safety', { defaultFilter }),
+      setWords: (words: string[]) => client.put<SafetyView>('/api/v1/me/filtered-words', { words }).then((r) => r.data),
+      relation: (userId: number) => client.get<RelationView>(`/api/v1/me/relations/${seg(userId)}`),
+      block: (userId: number) => client.put<RelationView>(`/api/v1/me/blocks/${seg(userId)}`).then((r) => r.data),
+      unblock: (userId: number) => client.delJson<RelationView>(`/api/v1/me/blocks/${seg(userId)}`),
+      mute: (userId: number) => client.put<RelationView>(`/api/v1/me/mutes/${seg(userId)}`).then((r) => r.data),
+      unmute: (userId: number) => client.delJson<RelationView>(`/api/v1/me/mutes/${seg(userId)}`),
     },
 
     backgrounds: {
