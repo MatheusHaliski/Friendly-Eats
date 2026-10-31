@@ -10,7 +10,8 @@ import java.time.Instant;
 
 /**
  * Registra os avisos no log com e-mail mascarado. O código de verificação só aparece no log com
- * {@code friendly-eats.notifications.log-codes=true} (perfil dev), nunca em produção.
+ * {@code friendly-eats.notifications.log-codes=true} (perfil dev), nunca em produção. O token do convite do
+ * responsável (RF17) nunca aparece.
  */
 @Component
 public class LoggingAccountNotifier implements AccountNotifier {
@@ -55,8 +56,9 @@ public class LoggingAccountNotifier implements AccountNotifier {
 
     @Override
     public void guardianInvite(String guardianEmail, UserAccount minor, String token, Instant expiresAt) {
-        log.info("Convite de responsável enviado para {} (menor {}, vale até {}){}", mask(guardianEmail), minor.getId(),
-                expiresAt, logCodes ? " (dev: /configuracoes/idade?convite=" + token + ")" : "");
+        // o token é uma credencial (quem tem o link vira responsável): nunca vai para o log, nem em dev
+        log.info("Convite de responsável enviado para {} (menor {}, vale até {})", mask(guardianEmail), minor.getId(),
+                expiresAt);
     }
 
     @Override

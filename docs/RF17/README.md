@@ -86,7 +86,8 @@ paths:
 ### Responsável
 
 7. Cadastro de menor de 16 (RF1) cria o vínculo `PENDING` com um token de uso único por e-mail
-   (`AccountNotifier.guardianInvite`, link `/configuracoes/idade?convite=…`); só o HMAC do token fica no banco.
+   (`AccountNotifier.guardianInvite`, link `/configuracoes/idade?convite=…`); só o HMAC do token fica no banco, e o token
+   nunca vai para o log (nem com `log-codes` do perfil dev), porque quem tem o link vira responsável.
 8. `GET /api/v1/me/guardian` → `{"required","eligible","status":"NONE|PENDING|ACTIVE","guardianEmail","guardian",
    "invitedAt","inviteExpiresAt","pendingDays","overdue","canUnlink","sensitiveConsent","protections","requests",
    "history"}`.
