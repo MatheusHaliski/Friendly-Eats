@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { MouseEvent } from 'react';
 import { formatDistance } from '@/lib/format';
 import { CuisineChip } from './CuisineChip';
+import { OpenStatusBadge } from './place/OpenStatusBadge';
 import { IconPlace } from './icons';
 import { PriceTag } from './PriceTag';
 import { RatingInline } from './RatingSummary';
@@ -19,7 +20,7 @@ function plainClick(e: MouseEvent): boolean {
 }
 
 /**
- * Card da busca (RF10): nome, tipo, chip, preço, nota, local e distância. O cartão inteiro é clicável (o nome é o
+ * Card da busca (RF10): nome, tipo, chip, preço, nota, "aberto agora" (RF11), local e distância. O cartão inteiro é clicável (o nome é o
  * link, esticado sobre o cartão); com {@code onOpen}, o clique abre o modal explicativo em vez de navegar.
  */
 export function EstablishmentCard({ card, onOpen }: { card: Card; onOpen?: (card: Card) => void }) {
@@ -60,6 +61,7 @@ export function EstablishmentCard({ card, onOpen }: { card: Card; onOpen?: (card
       <div className="grid gap-1 text-sm">
         <RatingInline rating={card.rating} size={16} />
         <PriceTag price={card.price} compact />
+        {card.openStatus && <OpenStatusBadge status={card.openStatus} size={16} />}
       </div>
       <p className="mt-auto flex items-start gap-1.5 text-sm text-muted">
         <IconPlace size={16} className="mt-0.5 flex-none" />

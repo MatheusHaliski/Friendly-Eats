@@ -125,5 +125,414 @@
   "published": null,
   "publishBlockers": null,
   "createdAt": "2026-09-02T14:10:00Z",
-  "updatedAt": "2026-10-20T18:30:00Z"
+  "updatedAt": "2026-10-20T18:30:00Z",
+  "openStatus": {
+    "state": "OPEN",
+    "open": true,
+    "label": "Aberto agora · fecha às 15:00",
+    "closesAt": "2026-10-30T15:00",
+    "opensAt": null,
+    "note": null,
+    "timeZone": "America/Sao_Paulo"
+  },
+  "hours": {
+    "timeZone": "America/Sao_Paulo",
+    "informed": true,
+    "weekly": [
+      {
+        "day": "MONDAY",
+        "label": "Segunda",
+        "ranges": [],
+        "closed": true,
+        "today": false
+      },
+      {
+        "day": "TUESDAY",
+        "label": "Terça",
+        "ranges": [
+          {
+            "opens": "11:30",
+            "closes": "15:00",
+            "overnight": false
+          },
+          {
+            "opens": "18:00",
+            "closes": "23:00",
+            "overnight": false
+          }
+        ],
+        "closed": false,
+        "today": false
+      },
+      {
+        "day": "WEDNESDAY",
+        "label": "Quarta",
+        "ranges": [
+          {
+            "opens": "11:30",
+            "closes": "15:00",
+            "overnight": false
+          },
+          {
+            "opens": "18:00",
+            "closes": "23:00",
+            "overnight": false
+          }
+        ],
+        "closed": false,
+        "today": false
+      },
+      {
+        "day": "THURSDAY",
+        "label": "Quinta",
+        "ranges": [
+          {
+            "opens": "11:30",
+            "closes": "15:00",
+            "overnight": false
+          },
+          {
+            "opens": "18:00",
+            "closes": "23:00",
+            "overnight": false
+          }
+        ],
+        "closed": false,
+        "today": false
+      },
+      {
+        "day": "FRIDAY",
+        "label": "Sexta",
+        "ranges": [
+          {
+            "opens": "11:30",
+            "closes": "15:00",
+            "overnight": false
+          },
+          {
+            "opens": "18:00",
+            "closes": "02:00",
+            "overnight": true
+          }
+        ],
+        "closed": false,
+        "today": true
+      },
+      {
+        "day": "SATURDAY",
+        "label": "Sábado",
+        "ranges": [
+          {
+            "opens": "11:30",
+            "closes": "15:00",
+            "overnight": false
+          },
+          {
+            "opens": "18:00",
+            "closes": "02:00",
+            "overnight": true
+          }
+        ],
+        "closed": false,
+        "today": false
+      },
+      {
+        "day": "SUNDAY",
+        "label": "Domingo",
+        "ranges": [
+          {
+            "opens": "11:30",
+            "closes": "16:00",
+            "overnight": false
+          }
+        ],
+        "closed": false,
+        "today": false
+      }
+    ],
+    "special": [
+      {
+        "date": "2026-11-15",
+        "label": "15/11 (dom)",
+        "closed": true,
+        "ranges": [],
+        "note": "Proclamação da República"
+      }
+    ],
+    "temporaryClosure": {
+      "closed": false,
+      "reopensOn": null
+    }
+  },
+  "charges": {
+    "serviceFeePercent": 10,
+    "couvert": {
+      "kind": "ARTISTICO",
+      "label": "Couvert artístico",
+      "cents": 1500,
+      "days": [
+        {
+          "code": "FRIDAY",
+          "label": "sexta",
+          "group": null
+        },
+        {
+          "code": "SATURDAY",
+          "label": "sábado",
+          "group": null
+        }
+      ]
+    },
+    "paymentAdjustments": [
+      {
+        "method": "PIX",
+        "methodLabel": "Pix",
+        "kind": "DESCONTO",
+        "percent": 5,
+        "text": "5% de desconto no Pix"
+      }
+    ],
+    "lines": [
+      {
+        "code": "TAXA_SERVICO",
+        "label": "Taxa de serviço",
+        "text": "Taxa de serviço de 10% (opcional)",
+        "detail": "É gorjeta: você paga só se quiser (Lei 13.419/2017)."
+      },
+      {
+        "code": "COUVERT",
+        "label": "Couvert artístico",
+        "text": "Couvert artístico de R$ 15 por pessoa, só nos dias com apresentação ao vivo (sexta, sábado)",
+        "detail": "Só pode ser cobrado com aviso na entrada, com o preço e a programação."
+      },
+      {
+        "code": "FORMA_PAGAMENTO",
+        "label": "Por forma de pagamento",
+        "text": "5% de desconto no Pix",
+        "detail": "Diferença de preço por forma de pagamento informada (Lei 10.962/2004, art. 5º-A)."
+      }
+    ],
+    "declaredAt": "2026-10-20T18:30:00Z",
+    "declaredLabel": "Declarado pelo estabelecimento em 20/10/2026",
+    "notice": "A página não substitui os preços e avisos afixados na entrada do lugar (Decreto 5.903/2006, art. 8º, § 2º)."
+  },
+  "facets": [
+    {
+      "code": "ATENDIMENTO",
+      "label": "Atendimento",
+      "items": [
+        {
+          "code": "SALAO",
+          "label": "Consumo no salão",
+          "value": "SIM",
+          "valueLabel": "Sim",
+          "lucideIcon": "utensils",
+          "origin": "DECLARADO_DONO",
+          "originLabel": "Declarado pelo estabelecimento"
+        },
+        {
+          "code": "DELIVERY_APP",
+          "label": "Entrega por aplicativo",
+          "value": "SIM",
+          "valueLabel": "Sim",
+          "lucideIcon": "tablet-smartphone",
+          "origin": "LINKS",
+          "originLabel": "Pelos links de delivery"
+        },
+        {
+          "code": "RESERVA",
+          "label": "Reservas",
+          "value": "RECOMENDADA",
+          "valueLabel": "Reserva recomendada",
+          "lucideIcon": "calendar-check",
+          "origin": "DECLARADO_DONO",
+          "originLabel": "Declarado pelo estabelecimento"
+        }
+      ]
+    },
+    {
+      "code": "REFEICOES",
+      "label": "Refeições",
+      "items": [
+        {
+          "code": "ALMOCO",
+          "label": "Almoço",
+          "value": "SIM",
+          "valueLabel": "Sim",
+          "lucideIcon": "salad",
+          "origin": "HORARIO",
+          "originLabel": "Pelo horário de funcionamento"
+        },
+        {
+          "code": "JANTAR",
+          "label": "Jantar",
+          "value": "SIM",
+          "valueLabel": "Sim",
+          "lucideIcon": "sunset",
+          "origin": "HORARIO",
+          "originLabel": "Pelo horário de funcionamento"
+        },
+        {
+          "code": "MADRUGADA",
+          "label": "Madrugada",
+          "value": "SIM",
+          "valueLabel": "Sim",
+          "lucideIcon": "moon-star",
+          "origin": "HORARIO",
+          "originLabel": "Pelo horário de funcionamento"
+        }
+      ]
+    },
+    {
+      "code": "AMBIENTE",
+      "label": "Ambiente e ocasião",
+      "items": [
+        {
+          "code": "WIFI",
+          "label": "Wi-Fi para clientes",
+          "value": "SIM",
+          "valueLabel": "Sim",
+          "lucideIcon": "wifi",
+          "origin": "DECLARADO_DONO",
+          "originLabel": "Declarado pelo estabelecimento"
+        },
+        {
+          "code": "PET_FRIENDLY",
+          "label": "Aceita pets",
+          "value": "SO_AREA_EXTERNA",
+          "valueLabel": "Aceita pets só na área externa",
+          "lucideIcon": "paw-print",
+          "origin": "DECLARADO_DONO",
+          "originLabel": "Declarado pelo estabelecimento"
+        },
+        {
+          "code": "MUSICA_AO_VIVO",
+          "label": "Música ao vivo",
+          "value": "SIM",
+          "valueLabel": "Sim",
+          "lucideIcon": "music",
+          "origin": "DECLARADO_DONO",
+          "originLabel": "Declarado pelo estabelecimento"
+        }
+      ]
+    },
+    {
+      "code": "ACESSIBILIDADE",
+      "label": "Acessibilidade",
+      "items": [
+        {
+          "code": "ENTRADA_ACESSIVEL",
+          "label": "Entrada acessível (sem degrau ou com rampa)",
+          "value": "PARCIAL",
+          "valueLabel": "Parcial",
+          "lucideIcon": "accessibility",
+          "origin": "DECLARADO_DONO",
+          "originLabel": "Declarado pelo estabelecimento"
+        },
+        {
+          "code": "SANITARIO_ACESSIVEL",
+          "label": "Sanitário acessível",
+          "value": "SIM",
+          "valueLabel": "Sim",
+          "lucideIcon": "toilet",
+          "origin": "DECLARADO_DONO",
+          "originLabel": "Declarado pelo estabelecimento"
+        },
+        {
+          "code": "CAO_ASSISTENCIA",
+          "label": "Cão-guia ou de assistência sempre permitido",
+          "value": "SIM",
+          "valueLabel": "Sempre permitido (Lei 11.126/2005)",
+          "lucideIcon": "dog",
+          "origin": "LEI",
+          "originLabel": "Garantido por lei"
+        },
+        {
+          "code": "ATENDIMENTO_PRIORITARIO",
+          "label": "Atendimento prioritário",
+          "value": "SIM",
+          "valueLabel": "Garantido por lei (Lei 10.048/2000)",
+          "lucideIcon": "user-check",
+          "origin": "LEI",
+          "originLabel": "Garantido por lei"
+        }
+      ]
+    },
+    {
+      "code": "PAGAMENTO",
+      "label": "Formas de pagamento",
+      "items": [
+        {
+          "code": "PIX",
+          "label": "Pix",
+          "value": "SIM",
+          "valueLabel": "Sim",
+          "lucideIcon": "qr-code",
+          "origin": "DECLARADO_DONO",
+          "originLabel": "Declarado pelo estabelecimento"
+        },
+        {
+          "code": "CARTAO_CREDITO",
+          "label": "Cartão de crédito",
+          "value": "SIM",
+          "valueLabel": "Sim",
+          "lucideIcon": "credit-card",
+          "origin": "DECLARADO_DONO",
+          "originLabel": "Declarado pelo estabelecimento"
+        },
+        {
+          "code": "VALE_REFEICAO",
+          "label": "Vale-refeição",
+          "value": "NAO",
+          "valueLabel": "Não",
+          "lucideIcon": "ticket",
+          "origin": "DECLARADO_DONO",
+          "originLabel": "Declarado pelo estabelecimento"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "kind": "RESERVA",
+      "provider": "THEFORK",
+      "providerLabel": "TheFork",
+      "label": "Reservar pelo TheFork",
+      "url": "https://www.thefork.com.br/restaurante/sabor-mineiro",
+      "preferred": false,
+      "exitNotice": "Você vai sair do Friendly Eats. A reserva é feita com TheFork.",
+      "phone": null
+    },
+    {
+      "kind": "DELIVERY",
+      "provider": "IFOOD",
+      "providerLabel": "iFood",
+      "label": "Pedir pelo iFood",
+      "url": "https://www.ifood.com.br/delivery/belo-horizonte-mg/sabor-mineiro",
+      "preferred": true,
+      "exitNotice": "Você vai sair do Friendly Eats. Pedido e pagamento são com iFood.",
+      "phone": null
+    },
+    {
+      "kind": "DELIVERY",
+      "provider": "RAPPI",
+      "providerLabel": "Rappi",
+      "label": "Pedir pelo Rappi",
+      "url": "https://www.rappi.com.br/restaurantes/sabor-mineiro",
+      "preferred": false,
+      "exitNotice": "Você vai sair do Friendly Eats. Pedido e pagamento são com Rappi.",
+      "phone": null
+    },
+    {
+      "kind": "WHATSAPP",
+      "provider": "WHATSAPP",
+      "providerLabel": "WhatsApp",
+      "label": "Conversar no WhatsApp",
+      "url": "https://wa.me/5531999998888",
+      "preferred": false,
+      "exitNotice": "Abre o WhatsApp numa conversa com o estabelecimento; o Friendly Eats não vê a conversa.",
+      "phone": "+5531999998888"
+    }
+  ],
+  "viewerCanEdit": false
 }

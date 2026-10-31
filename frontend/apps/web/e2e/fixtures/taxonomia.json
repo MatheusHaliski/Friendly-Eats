@@ -1449,5 +1449,1303 @@
       "darkHex": "#6FE699",
       "lightHex": "#08693A"
     }
+  ],
+  "facets": [
+    {
+      "code": "SALAO",
+      "label": "Consumo no salão",
+      "section": "ATENDIMENTO",
+      "sectionLabel": "Atendimento",
+      "lucideIcon": "utensils",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "BALCAO",
+      "label": "Pedido ou consumo no balcão",
+      "section": "ATENDIMENTO",
+      "sectionLabel": "Atendimento",
+      "lucideIcon": "concierge-bell",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "RETIRADA",
+      "label": "Retirada / para viagem",
+      "section": "ATENDIMENTO",
+      "sectionLabel": "Atendimento",
+      "lucideIcon": "shopping-bag",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "RETIRADA_CARRO",
+      "label": "Retirada no carro",
+      "section": "ATENDIMENTO",
+      "sectionLabel": "Atendimento",
+      "lucideIcon": "car",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "DRIVE_THRU",
+      "label": "Drive-thru",
+      "section": "ATENDIMENTO",
+      "sectionLabel": "Atendimento",
+      "lucideIcon": "car-front",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "DELIVERY_PROPRIO",
+      "label": "Entrega própria",
+      "section": "ATENDIMENTO",
+      "sectionLabel": "Atendimento",
+      "lucideIcon": "bike",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "DELIVERY_APP",
+      "label": "Entrega por aplicativo",
+      "section": "ATENDIMENTO",
+      "sectionLabel": "Atendimento",
+      "lucideIcon": "tablet-smartphone",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": false,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "RESERVA",
+      "label": "Reservas",
+      "section": "ATENDIMENTO",
+      "sectionLabel": "Atendimento",
+      "lucideIcon": "calendar-check",
+      "values": [
+        {
+          "code": "OBRIGATORIA",
+          "label": "Reserva obrigatória",
+          "group": null
+        },
+        {
+          "code": "RECOMENDADA",
+          "label": "Reserva recomendada",
+          "group": null
+        },
+        {
+          "code": "ACEITA",
+          "label": "Aceita reservas",
+          "group": null
+        },
+        {
+          "code": "NAO_ACEITA",
+          "label": "Não aceita reservas",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "ENCOMENDA",
+      "label": "Sob encomenda",
+      "section": "ATENDIMENTO",
+      "sectionLabel": "Atendimento",
+      "lucideIcon": "package",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "CAFE_MANHA",
+      "label": "Café da manhã",
+      "section": "REFEICOES",
+      "sectionLabel": "Refeições",
+      "lucideIcon": "croissant",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": false,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "ALMOCO",
+      "label": "Almoço",
+      "section": "REFEICOES",
+      "sectionLabel": "Refeições",
+      "lucideIcon": "salad",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": false,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "JANTAR",
+      "label": "Jantar",
+      "section": "REFEICOES",
+      "sectionLabel": "Refeições",
+      "lucideIcon": "sunset",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": false,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "MADRUGADA",
+      "label": "Madrugada",
+      "section": "REFEICOES",
+      "sectionLabel": "Refeições",
+      "lucideIcon": "moon-star",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": false,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "FAMILIA_CRIANCAS",
+      "label": "Bom para crianças",
+      "section": "AMBIENTE",
+      "sectionLabel": "Ambiente e ocasião",
+      "lucideIcon": "baby",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "GRUPOS",
+      "label": "Bom para grupos",
+      "section": "AMBIENTE",
+      "sectionLabel": "Ambiente e ocasião",
+      "lucideIcon": "users-round",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "TRABALHO",
+      "label": "Bom para trabalhar",
+      "section": "AMBIENTE",
+      "sectionLabel": "Ambiente e ocasião",
+      "lucideIcon": "laptop",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "WIFI",
+      "label": "Wi-Fi para clientes",
+      "section": "AMBIENTE",
+      "sectionLabel": "Ambiente e ocasião",
+      "lucideIcon": "wifi",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "PET_FRIENDLY",
+      "label": "Aceita pets",
+      "section": "AMBIENTE",
+      "sectionLabel": "Ambiente e ocasião",
+      "lucideIcon": "paw-print",
+      "values": [
+        {
+          "code": "DENTRO",
+          "label": "Aceita pets, inclusive no salão",
+          "group": null
+        },
+        {
+          "code": "SO_AREA_EXTERNA",
+          "label": "Aceita pets só na área externa",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não aceita pets (cão de assistência sempre entra)",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "AO_AR_LIVRE",
+      "label": "Área ao ar livre",
+      "section": "AMBIENTE",
+      "sectionLabel": "Ambiente e ocasião",
+      "lucideIcon": "trees",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "MUSICA_AO_VIVO",
+      "label": "Música ao vivo",
+      "section": "AMBIENTE",
+      "sectionLabel": "Ambiente e ocasião",
+      "lucideIcon": "music",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "ESPORTES_TV",
+      "label": "Transmissão de jogos",
+      "section": "AMBIENTE",
+      "sectionLabel": "Ambiente e ocasião",
+      "lucideIcon": "tv",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "LGBTQIA_ACOLHEDOR",
+      "label": "Espaço LGBTQIA+ acolhedor",
+      "section": "AMBIENTE",
+      "sectionLabel": "Ambiente e ocasião",
+      "lucideIcon": "heart-handshake",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "ENTRADA_ACESSIVEL",
+      "label": "Entrada acessível (sem degrau ou com rampa)",
+      "section": "ACESSIBILIDADE",
+      "sectionLabel": "Acessibilidade",
+      "lucideIcon": "accessibility",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "PARCIAL",
+          "label": "Parcial",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "MESAS_ACESSIVEIS",
+      "label": "Mesas acessíveis",
+      "section": "ACESSIBILIDADE",
+      "sectionLabel": "Acessibilidade",
+      "lucideIcon": "armchair",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "PARCIAL",
+          "label": "Parcial",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "SANITARIO_ACESSIVEL",
+      "label": "Sanitário acessível",
+      "section": "ACESSIBILIDADE",
+      "sectionLabel": "Acessibilidade",
+      "lucideIcon": "toilet",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "PARCIAL",
+          "label": "Parcial",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "ESTACIONAMENTO_ACESSIVEL",
+      "label": "Vaga reservada",
+      "section": "ACESSIBILIDADE",
+      "sectionLabel": "Acessibilidade",
+      "lucideIcon": "square-parking",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "PARCIAL",
+          "label": "Parcial",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "CARDAPIO_BRAILLE",
+      "label": "Cardápio em braille",
+      "section": "ACESSIBILIDADE",
+      "sectionLabel": "Acessibilidade",
+      "lucideIcon": "book-a",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "PARCIAL",
+          "label": "Parcial",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "CARDAPIO_ACESSIVEL_DIGITAL",
+      "label": "Cardápio digital acessível",
+      "section": "ACESSIBILIDADE",
+      "sectionLabel": "Acessibilidade",
+      "lucideIcon": "monitor-smartphone",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "PARCIAL",
+          "label": "Parcial",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "ATENDIMENTO_LIBRAS",
+      "label": "Atendimento em Libras",
+      "section": "ACESSIBILIDADE",
+      "sectionLabel": "Acessibilidade",
+      "lucideIcon": "hand",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "PARCIAL",
+          "label": "Parcial",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "HORA_SILENCIOSA",
+      "label": "Horário com menos estímulo sensorial",
+      "section": "ACESSIBILIDADE",
+      "sectionLabel": "Acessibilidade",
+      "lucideIcon": "volume-x",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "PARCIAL",
+          "label": "Parcial",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "CAO_ASSISTENCIA",
+      "label": "Cão-guia ou de assistência sempre permitido",
+      "section": "ACESSIBILIDADE",
+      "sectionLabel": "Acessibilidade",
+      "lucideIcon": "dog",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sempre permitido (Lei 11.126/2005)",
+          "group": null
+        }
+      ],
+      "declarable": false,
+      "fixed": true,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "ATENDIMENTO_PRIORITARIO",
+      "label": "Atendimento prioritário",
+      "section": "ACESSIBILIDADE",
+      "sectionLabel": "Acessibilidade",
+      "lucideIcon": "user-check",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Garantido por lei (Lei 10.048/2000)",
+          "group": null
+        }
+      ],
+      "declarable": false,
+      "fixed": true,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "PIX",
+      "label": "Pix",
+      "section": "PAGAMENTO",
+      "sectionLabel": "Formas de pagamento",
+      "lucideIcon": "qr-code",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "CARTAO_CREDITO",
+      "label": "Cartão de crédito",
+      "section": "PAGAMENTO",
+      "sectionLabel": "Formas de pagamento",
+      "lucideIcon": "credit-card",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "CARTAO_DEBITO",
+      "label": "Cartão de débito",
+      "section": "PAGAMENTO",
+      "sectionLabel": "Formas de pagamento",
+      "lucideIcon": "wallet-cards",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "APROXIMACAO",
+      "label": "Aproximação (NFC, carteiras)",
+      "section": "PAGAMENTO",
+      "sectionLabel": "Formas de pagamento",
+      "lucideIcon": "nfc",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "DINHEIRO",
+      "label": "Dinheiro",
+      "section": "PAGAMENTO",
+      "sectionLabel": "Formas de pagamento",
+      "lucideIcon": "banknote",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "POLO",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE",
+        "VAREJO"
+      ]
+    },
+    {
+      "code": "VALE_REFEICAO",
+      "label": "Vale-refeição",
+      "section": "PAGAMENTO",
+      "sectionLabel": "Formas de pagamento",
+      "lucideIcon": "ticket",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "BAR",
+        "CAFE_DOCE",
+        "PRODUCAO",
+        "RAPIDO",
+        "RESTAURANTE"
+      ]
+    },
+    {
+      "code": "VALE_ALIMENTACAO",
+      "label": "Vale-alimentação",
+      "section": "PAGAMENTO",
+      "sectionLabel": "Formas de pagamento",
+      "lucideIcon": "shopping-cart",
+      "values": [
+        {
+          "code": "SIM",
+          "label": "Sim",
+          "group": null
+        },
+        {
+          "code": "NAO",
+          "label": "Não",
+          "group": null
+        }
+      ],
+      "declarable": true,
+      "fixed": false,
+      "groups": [
+        "POLO",
+        "VAREJO"
+      ]
+    }
+  ],
+  "actionProviders": [
+    {
+      "code": "IFOOD",
+      "label": "iFood",
+      "kind": "DELIVERY",
+      "domains": [
+        "ifood.com.br"
+      ]
+    },
+    {
+      "code": "RAPPI",
+      "label": "Rappi",
+      "kind": "DELIVERY",
+      "domains": [
+        "rappi.com.br"
+      ]
+    },
+    {
+      "code": "AIQFOME",
+      "label": "aiqfome",
+      "kind": "DELIVERY",
+      "domains": [
+        "aiqfome.com"
+      ]
+    },
+    {
+      "code": "NOVENTA_E_NOVE_FOOD",
+      "label": "99Food",
+      "kind": "DELIVERY",
+      "domains": [
+        "99app.com"
+      ]
+    },
+    {
+      "code": "THEFORK",
+      "label": "TheFork",
+      "kind": "RESERVA",
+      "domains": [
+        "thefork.com.br",
+        "thefork.com"
+      ]
+    },
+    {
+      "code": "TAGME",
+      "label": "Tagme",
+      "kind": "RESERVA",
+      "domains": [
+        "tagme.com.br"
+      ]
+    },
+    {
+      "code": "GET_IN",
+      "label": "Get In",
+      "kind": "RESERVA",
+      "domains": [
+        "getinapp.com.br"
+      ]
+    },
+    {
+      "code": "OPENTABLE",
+      "label": "OpenTable",
+      "kind": "RESERVA",
+      "domains": [
+        "opentable.com.br",
+        "opentable.com"
+      ]
+    },
+    {
+      "code": "WHATSAPP",
+      "label": "WhatsApp",
+      "kind": "WHATSAPP",
+      "domains": [
+        "wa.me"
+      ]
+    }
+  ],
+  "couvertKinds": [
+    {
+      "code": "ARTISTICO",
+      "label": "Couvert artístico (apresentação ao vivo)",
+      "group": null
+    },
+    {
+      "code": "ENTRADA_MESA",
+      "label": "Couvert de entrada (pão, petiscos)",
+      "group": null
+    }
   ]
 }

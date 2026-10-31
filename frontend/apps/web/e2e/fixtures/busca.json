@@ -64,7 +64,16 @@
       },
       "distanceKm": null,
       "adultsOnly": false,
-      "status": "ACTIVE"
+      "status": "ACTIVE",
+      "openStatus": {
+        "state": "OPEN",
+        "open": true,
+        "label": "Aberto agora · fecha às 15:00",
+        "closesAt": "2026-10-30T15:00",
+        "opensAt": null,
+        "note": null,
+        "timeZone": "America/Sao_Paulo"
+      }
     },
     {
       "id": 2,
@@ -124,7 +133,16 @@
       },
       "distanceKm": null,
       "adultsOnly": false,
-      "status": "ACTIVE"
+      "status": "ACTIVE",
+      "openStatus": {
+        "state": "CLOSED",
+        "open": false,
+        "label": "Fechado agora · abre às 18:00",
+        "closesAt": null,
+        "opensAt": "2026-10-30T18:00",
+        "note": null,
+        "timeZone": "America/Sao_Paulo"
+      }
     },
     {
       "id": 3,
@@ -180,7 +198,16 @@
       },
       "distanceKm": null,
       "adultsOnly": false,
-      "status": "ACTIVE"
+      "status": "ACTIVE",
+      "openStatus": {
+        "state": "TEMPORARILY_CLOSED",
+        "open": false,
+        "label": "Fechado temporariamente · volta em 20/11/2026",
+        "closesAt": null,
+        "opensAt": null,
+        "note": null,
+        "timeZone": "America/Sao_Paulo"
+      }
     },
     {
       "id": 4,
@@ -246,7 +273,16 @@
       },
       "distanceKm": null,
       "adultsOnly": false,
-      "status": "ACTIVE"
+      "status": "ACTIVE",
+      "openStatus": {
+        "state": "CLOSED",
+        "open": false,
+        "label": "Fechado agora · abre às 18:00",
+        "closesAt": null,
+        "opensAt": "2026-10-30T18:00",
+        "note": null,
+        "timeZone": "America/Sao_Paulo"
+      }
     },
     {
       "id": 5,
@@ -308,7 +344,16 @@
       },
       "distanceKm": null,
       "adultsOnly": false,
-      "status": "CLOSED"
+      "status": "CLOSED",
+      "openStatus": {
+        "state": "CLOSED",
+        "open": false,
+        "label": "Fechado agora · abre às 18:00",
+        "closesAt": null,
+        "opensAt": "2026-10-30T18:00",
+        "note": null,
+        "timeZone": "America/Sao_Paulo"
+      }
     },
     {
       "id": 18,
@@ -364,7 +409,16 @@
       },
       "distanceKm": null,
       "adultsOnly": true,
-      "status": "ACTIVE"
+      "status": "ACTIVE",
+      "openStatus": {
+        "state": "CLOSED",
+        "open": false,
+        "label": "Fechado agora · abre às 18:00",
+        "closesAt": null,
+        "opensAt": "2026-10-30T18:00",
+        "note": null,
+        "timeZone": "America/Sao_Paulo"
+      }
     }
   ],
   "page": 0,

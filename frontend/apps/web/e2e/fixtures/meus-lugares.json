@@ -126,7 +126,63 @@
     "published": true,
     "publishBlockers": [],
     "createdAt": "2026-09-02T14:10:00Z",
-    "updatedAt": "2026-10-20T18:30:00Z"
+    "updatedAt": "2026-10-20T18:30:00Z",
+    "openStatus": {
+      "state": "UNKNOWN",
+      "open": false,
+      "label": "Horário não informado",
+      "closesAt": null,
+      "opensAt": null,
+      "note": null,
+      "timeZone": "America/Sao_Paulo"
+    },
+    "hours": {
+      "timeZone": "America/Sao_Paulo",
+      "informed": false,
+      "weekly": [],
+      "special": [],
+      "temporaryClosure": {
+        "closed": false,
+        "reopensOn": null
+      }
+    },
+    "charges": {
+      "serviceFeePercent": null,
+      "couvert": null,
+      "paymentAdjustments": [],
+      "lines": [],
+      "declaredAt": null,
+      "declaredLabel": null,
+      "notice": "A página não substitui os preços e avisos afixados na entrada do lugar (Decreto 5.903/2006, art. 8º, § 2º)."
+    },
+    "facets": [
+      {
+        "code": "ACESSIBILIDADE",
+        "label": "Acessibilidade",
+        "items": [
+          {
+            "code": "CAO_ASSISTENCIA",
+            "label": "Cão-guia ou de assistência sempre permitido",
+            "value": "SIM",
+            "valueLabel": "Sempre permitido (Lei 11.126/2005)",
+            "lucideIcon": "dog",
+            "origin": "LEI",
+            "originLabel": "Garantido por lei"
+          },
+          {
+            "code": "ATENDIMENTO_PRIORITARIO",
+            "label": "Atendimento prioritário",
+            "value": "SIM",
+            "valueLabel": "Garantido por lei (Lei 10.048/2000)",
+            "lucideIcon": "user-check",
+            "origin": "LEI",
+            "originLabel": "Garantido por lei"
+          }
+        ]
+      }
+    ],
+    "actions": [],
+    "viewerCanEdit": true
   },
   {
     "id": 7,
@@ -241,6 +297,62 @@
       "Aguardando a conferência do selo da conta (CNPJ ou CPF e documentos)."
     ],
     "createdAt": "2026-09-02T14:10:00Z",
-    "updatedAt": "2026-10-20T18:30:00Z"
+    "updatedAt": "2026-10-20T18:30:00Z",
+    "openStatus": {
+      "state": "UNKNOWN",
+      "open": false,
+      "label": "Horário não informado",
+      "closesAt": null,
+      "opensAt": null,
+      "note": null,
+      "timeZone": "America/Sao_Paulo"
+    },
+    "hours": {
+      "timeZone": "America/Sao_Paulo",
+      "informed": false,
+      "weekly": [],
+      "special": [],
+      "temporaryClosure": {
+        "closed": false,
+        "reopensOn": null
+      }
+    },
+    "charges": {
+      "serviceFeePercent": null,
+      "couvert": null,
+      "paymentAdjustments": [],
+      "lines": [],
+      "declaredAt": null,
+      "declaredLabel": null,
+      "notice": "A página não substitui os preços e avisos afixados na entrada do lugar (Decreto 5.903/2006, art. 8º, § 2º)."
+    },
+    "facets": [
+      {
+        "code": "ACESSIBILIDADE",
+        "label": "Acessibilidade",
+        "items": [
+          {
+            "code": "CAO_ASSISTENCIA",
+            "label": "Cão-guia ou de assistência sempre permitido",
+            "value": "SIM",
+            "valueLabel": "Sempre permitido (Lei 11.126/2005)",
+            "lucideIcon": "dog",
+            "origin": "LEI",
+            "originLabel": "Garantido por lei"
+          },
+          {
+            "code": "ATENDIMENTO_PRIORITARIO",
+            "label": "Atendimento prioritário",
+            "value": "SIM",
+            "valueLabel": "Garantido por lei (Lei 10.048/2000)",
+            "lucideIcon": "user-check",
+            "origin": "LEI",
+            "originLabel": "Garantido por lei"
+          }
+        ]
+      }
+    ],
+    "actions": [],
+    "viewerCanEdit": true
   }
 ]

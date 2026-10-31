@@ -10,27 +10,28 @@ import java.util.Set;
  * Facetas operacionais do estabelecimento (taxonomia, seção 8; RF11). O dono declara o valor; ausente = "Sem
  * informação". Algumas são fixas por lei (cão de assistência, atendimento prioritário) e não se editam; outras são
  * derivadas: as refeições vêm do horário e o delivery por aplicativo, dos links de delivery.
- * Toda faceta tem rótulo e ícone; o estado sempre sai em texto, nunca só na cor.
+ * Toda faceta tem rótulo e ícone Lucide (sem repetir os reservados do DESIGN_SYSTEM.md, seção 1); o estado sempre
+ * sai em texto, nunca só na cor.
  */
 public enum Facet {
     // 8.1 atendimento
     SALAO("Consumo no salão", Section.ATENDIMENTO, Values.YES_NO, "utensils"),
-    BALCAO("Pedido ou consumo no balcão", Section.ATENDIMENTO, Values.YES_NO, "store"),
+    BALCAO("Pedido ou consumo no balcão", Section.ATENDIMENTO, Values.YES_NO, "concierge-bell"),
     RETIRADA("Retirada / para viagem", Section.ATENDIMENTO, Values.YES_NO, "shopping-bag"),
     RETIRADA_CARRO("Retirada no carro", Section.ATENDIMENTO, Values.YES_NO, "car"),
     DRIVE_THRU("Drive-thru", Section.ATENDIMENTO, Values.YES_NO, "car-front"),
     DELIVERY_PROPRIO("Entrega própria", Section.ATENDIMENTO, Values.YES_NO, "bike"),
-    DELIVERY_APP("Entrega por aplicativo", Section.ATENDIMENTO, Values.DERIVED, "smartphone"),
+    DELIVERY_APP("Entrega por aplicativo", Section.ATENDIMENTO, Values.DERIVED, "tablet-smartphone"),
     RESERVA("Reservas", Section.ATENDIMENTO, Values.RESERVATION, "calendar-check"),
     ENCOMENDA("Sob encomenda", Section.ATENDIMENTO, Values.YES_NO, "package"),
     // 8.2 refeições (derivadas do horário)
-    CAFE_MANHA("Café da manhã", Section.REFEICOES, Values.DERIVED, "coffee"),
-    ALMOCO("Almoço", Section.REFEICOES, Values.DERIVED, "sun"),
-    JANTAR("Jantar", Section.REFEICOES, Values.DERIVED, "moon"),
+    CAFE_MANHA("Café da manhã", Section.REFEICOES, Values.DERIVED, "croissant"),
+    ALMOCO("Almoço", Section.REFEICOES, Values.DERIVED, "salad"),
+    JANTAR("Jantar", Section.REFEICOES, Values.DERIVED, "sunset"),
     MADRUGADA("Madrugada", Section.REFEICOES, Values.DERIVED, "moon-star"),
     // 8.3 ambiente e ocasião
     FAMILIA_CRIANCAS("Bom para crianças", Section.AMBIENTE, Values.YES_NO, "baby"),
-    GRUPOS("Bom para grupos", Section.AMBIENTE, Values.YES_NO, "users"),
+    GRUPOS("Bom para grupos", Section.AMBIENTE, Values.YES_NO, "users-round"),
     TRABALHO("Bom para trabalhar", Section.AMBIENTE, Values.YES_NO, "laptop"),
     WIFI("Wi-Fi para clientes", Section.AMBIENTE, Values.YES_NO, "wifi"),
     PET_FRIENDLY("Aceita pets", Section.AMBIENTE, Values.PET, "paw-print"),
@@ -43,7 +44,7 @@ public enum Facet {
     MESAS_ACESSIVEIS("Mesas acessíveis", Section.ACESSIBILIDADE, Values.YES_PARTIAL_NO, "armchair"),
     SANITARIO_ACESSIVEL("Sanitário acessível", Section.ACESSIBILIDADE, Values.YES_PARTIAL_NO, "toilet"),
     ESTACIONAMENTO_ACESSIVEL("Vaga reservada", Section.ACESSIBILIDADE, Values.YES_PARTIAL_NO, "square-parking"),
-    CARDAPIO_BRAILLE("Cardápio em braille", Section.ACESSIBILIDADE, Values.YES_PARTIAL_NO, "book-open"),
+    CARDAPIO_BRAILLE("Cardápio em braille", Section.ACESSIBILIDADE, Values.YES_PARTIAL_NO, "book-a"),
     CARDAPIO_ACESSIVEL_DIGITAL("Cardápio digital acessível", Section.ACESSIBILIDADE, Values.YES_PARTIAL_NO, "monitor-smartphone"),
     ATENDIMENTO_LIBRAS("Atendimento em Libras", Section.ACESSIBILIDADE, Values.YES_PARTIAL_NO, "hand"),
     HORA_SILENCIOSA("Horário com menos estímulo sensorial", Section.ACESSIBILIDADE, Values.YES_PARTIAL_NO, "volume-x"),
@@ -52,13 +53,13 @@ public enum Facet {
     // 8.5 pagamento
     PIX("Pix", Section.PAGAMENTO, Values.YES_NO, "qr-code"),
     CARTAO_CREDITO("Cartão de crédito", Section.PAGAMENTO, Values.YES_NO, "credit-card"),
-    CARTAO_DEBITO("Cartão de débito", Section.PAGAMENTO, Values.YES_NO, "credit-card"),
+    CARTAO_DEBITO("Cartão de débito", Section.PAGAMENTO, Values.YES_NO, "wallet-cards"),
     APROXIMACAO("Aproximação (NFC, carteiras)", Section.PAGAMENTO, Values.YES_NO, "nfc"),
     DINHEIRO("Dinheiro", Section.PAGAMENTO, Values.YES_NO, "banknote"),
     VALE_REFEICAO("Vale-refeição", Section.PAGAMENTO, Values.YES_NO, "ticket",
             EnumSet.of(EstablishmentGroup.RESTAURANTE, EstablishmentGroup.RAPIDO, EstablishmentGroup.BAR,
                     EstablishmentGroup.CAFE_DOCE, EstablishmentGroup.PRODUCAO)),
-    VALE_ALIMENTACAO("Vale-alimentação", Section.PAGAMENTO, Values.YES_NO, "shopping-basket",
+    VALE_ALIMENTACAO("Vale-alimentação", Section.PAGAMENTO, Values.YES_NO, "shopping-cart",
             EnumSet.of(EstablishmentGroup.VAREJO, EstablishmentGroup.POLO));
 
     public enum Section {
