@@ -76,6 +76,8 @@ classDiagram
         +head(key) Optional
         +read(key) byte[]
         +write(key, bytes, type) void
+        +writePrivate(key, bytes, type, downloadName) void
+        +presignGet(key, ttl) String
         +delete(key) void
     }
     class S3MediaStorage

@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
 import java.net.URI;
@@ -120,6 +121,22 @@ public class S3MediaStorage implements MediaStorage {
                         // a chave nunca muda: a CDN e o app guardam o arquivo por um ano
                         .cacheControl("public, max-age=31536000, immutable"),
                 RequestBody.fromBytes(bytes));
+    }
+
+    @Override
+    public void writePrivate(String objectKey, byte[] bytes, String contentType, String downloadName) {
+        s3.putObject(r -> r.bucket(bucket).key(objectKey).contentType(contentType)
+                        .cacheControl("private, no-store")
+                        .contentDisposition("attachment; filename=\"" + downloadName + "\""),
+                RequestBody.fromBytes(bytes));
+    }
+
+    @Override
+    public String presignGet(String objectKey, Duration ttl) {
+        PresignedGetObjectRequest signed = presigner.presignGetObject(p -> p
+                .signatureDuration(ttl)
+                .getObjectRequest(r -> r.bucket(bucket).key(objectKey)));
+        return signed.url().toString();
     }
 
     @Override

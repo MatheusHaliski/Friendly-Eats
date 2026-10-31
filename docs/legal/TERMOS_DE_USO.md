@@ -1,6 +1,6 @@
 # Termos de Uso do Friendly Eats
 
-**Versão 2026-10-25.1** · vigente a partir de {{DATA_VIGENCIA}}
+**Versão 2026-10-31.1** · vigente a partir de {{DATA_VIGENCIA}}
 
 > ⚠️ **Rascunho para revisão jurídica.** Os campos entre `{{ }}` são dados da empresa que opera o app e que
 > faltam preencher. Depois de preenchidos e revisados, publicar o texto em `{{URL_DOS_TERMOS}}` e manter a
@@ -15,7 +15,7 @@
 | `{{ENDERECO_SEDE}}` | Endereço completo da sede |
 | `{{EMAIL_CONTATO}}` | E-mail de atendimento |
 | `{{EMAIL_PRIVACIDADE}}` | E-mail para pedidos de titulares (LGPD) |
-| `{{ENCARREGADO_NOME}}` | Nome do encarregado de dados (DPO) |
+| `{{ENCARREGADO_NOME}}` | Nome do encarregado de dados (DPO); o app mostra o valor de `friendly-eats.legal.dpo-name` em `/privacidade` |
 | `{{ENCARREGADO_EMAIL}}` | E-mail do encarregado |
 | `{{URL_POLITICA_PRIVACIDADE}}` | Endereço da Política de Privacidade |
 | `{{URL_DOS_TERMOS}}` | Endereço público destes Termos |
@@ -48,11 +48,18 @@ todos começam desligados.
 ## 3. Quem pode usar
 
 - O Friendly Eats é para pessoas com **13 anos ou mais**.
-- Conteúdo sobre **bebida alcoólica** (bares, adegas, cervejarias, promoções de bebida) só aparece para maiores de 18 anos.
-- **Menores de 16 anos** precisam informar o e-mail de um responsável legal, conforme o ECA Digital (Lei 15.211/2025). A conta deles começa com as proteções mais fortes ligadas, que só o responsável pode alterar:
-  - perfil privado;
-  - comentários só de seguidores;
-  - lembrete de tempo de uso.
+- Conteúdo sobre **bebida alcoólica** (bares, adegas, cervejarias, promoções de bebida) só aparece para quem tem **a idade verificada como maior de 18 anos**. A data de nascimento informada no cadastro não basta (ECA Digital, Lei 15.211/2025, art. 9º; Decreto 12.880/2026, arts. 15 e 19). Sem a verificação, inclusive sem conta, você usa a versão do Friendly Eats sem esse conteúdo.
+  - A verificação é feita por um fornecedor especializado, em **Configurações → Idade e responsável**. Guardamos só o resultado, o método, a data e o código da verificação no fornecedor. **Nunca guardamos a imagem nem a cópia do seu documento.** Esses dados servem só para verificar a idade.
+  - A verificação vale por um ano; depois pedimos de novo.
+  - Se o resultado estiver errado, você pode **contestar**, e uma pessoa da nossa equipe revisa o pedido (Decreto 12.880/2026, art. 27).
+  - A data de nascimento informada continua valendo para as proteções de menores: ela só restringe, nunca libera.
+- **Menores de 16 anos** precisam ter a conta **vinculada à de um responsável legal**, conforme o ECA Digital (arts. 17, 18 e 24).
+  - No cadastro, o menor informa o e-mail do responsável, que recebe um convite. Para aceitar, o responsável entra com a própria conta, com a idade verificada como maior de 18.
+  - Enquanto o vínculo não é aceito, a conta do menor fica com as proteções mais fortes ligadas. Se o convite ficar sem resposta por 7 dias, avisamos o menor.
+  - As proteções são: perfil privado, comentários só de seguidores, conteúdo sensível limitado e lembrete de tempo de uso. Só o responsável vinculado pode desligar cada uma, pelo painel de supervisão, aprovando ou negando os pedidos do menor.
+  - O consentimento para guardar **estilos alimentares** (dado sensível) de quem tem menos de 18 anos é dado pelo responsável vinculado (LGPD, art. 14).
+  - O responsável pode desfazer o vínculo a qualquer momento; a partir dos 16 anos, o próprio adolescente também pode. Sem o vínculo, as proteções voltam ao máximo.
+  - Tudo o que o responsável faz fica registrado e aparece para o menor.
 - Contas de **criador, chef, estabelecimento, varejo, comunidade e órgão oficial** precisam de um responsável maior de 18 anos; nas organizações, com poderes para agir em nome delas. No negócio informal cadastrado com CPF, quem responde pelo negócio é o próprio titular.
 - Você deve informar dados verdadeiros. Contas criadas para enganar outras pessoas podem ser suspensas.
 
@@ -110,23 +117,33 @@ regras do serviço.
 ## 8. Moderação, suspensão e recurso
 
 - Podemos remover conteúdo ou suspender contas que violem estes Termos ou a lei.
-- Sempre que possível, avisamos o motivo e oferecemos um canal de recurso.
+- **Você tem direito a recurso.** Sempre avisamos a decisão, com o motivo e a regra aplicada, e você pode recorrer. O recurso é analisado por uma pessoa, que não é a mesma que tomou a decisão (ECA Digital, arts. 28 a 30).
 - Conta suspensa não consegue entrar até a decisão do recurso.
 
 ## 9. Privacidade e direitos do titular (LGPD)
 
 Você pode, a qualquer momento:
 
-- corrigir seus dados (Configurações → Conta);
-- baixar uma cópia dos seus dados (Seus dados → Exportar);
+- corrigir seus dados (Configurações → Perfil);
+- **baixar uma cópia dos seus dados** (Configurações → Conta → Seus dados → Exportar). Pedimos sua senha de novo (e o código do app autenticador, se a verificação em duas etapas estiver ativa) e avisamos por e-mail. O arquivo fica pronto em até **15 dias**, em geral no mesmo dia, e o link para baixar vale **72 horas**. Dá para pedir uma vez por dia;
 - revogar consentimentos opcionais (Privacidade);
 - excluir a conta.
 
+Os direitos, os prazos e os canais estão na página **Privacidade** (`/privacidade`), que funciona também para quem não tem conta.
+
 Pedidos e dúvidas sobre dados pessoais: {{EMAIL_PRIVACIDADE}}. Encarregado de dados: **{{ENCARREGADO_NOME}}** ({{ENCARREGADO_EMAIL}}).
+
+**Registros de acesso.** Como exige o Marco Civil da Internet (art. 15), guardamos os registros de acesso ao
+Friendly Eats (data e hora de cada entrada, o IP e a porta de origem) por **6 meses**, cifrados e em sigilo. Só
+pessoas autorizadas os consultam, cada consulta fica registrada, e a entrega a terceiros exige ordem judicial. Depois
+de 6 meses eles são apagados, salvo pedido de guarda feito por autoridade.
+
+**Incidentes de segurança.** Se um incidente puder trazer risco ou dano relevante a você, comunicamos a você e à
+Autoridade Nacional de Proteção de Dados (ANPD) em até 3 dias úteis, como manda a LGPD (art. 48).
 
 ## 10. Exclusão da conta
 
-Você pode excluir a conta em Configurações → Seus dados → **Excluir conta**.
+Você pode excluir a conta em Configurações → Conta → **Excluir conta**.
 
 - **Antes de confirmar** pedimos sua senha (e o código do app autenticador, se a verificação em duas etapas estiver ativa) e explicamos as consequências.
 - **Nos 30 dias seguintes:**
@@ -136,14 +153,24 @@ Você pode excluir a conta em Configurações → Seus dados → **Excluir conta
 - **Depois dos 30 dias**, apagamos ou anonimizamos de forma definitiva:
   - perfil, avaliações, publicações, fotos, comentários, curtidas e configurações.
 - **O que continua existindo:**
-  - os registros de acesso (data, hora e IP) ficam guardados por **6 meses**, em sigilo, como exige o Marco Civil da Internet (art. 15);
+  - os registros de acesso (data, hora, IP e porta de origem) ficam guardados por **6 meses**, cifrados e em sigilo, como exige o Marco Civil da Internet (art. 15);
   - mensagens que você enviou a outras pessoas continuam com elas, identificadas como "Conta excluída".
 
 ## 11. Disponibilidade e responsabilidade
 
 Trabalhamos para manter o serviço disponível e seguro, mas ele pode passar por manutenções e
-instabilidades. Não respondemos por conteúdo publicado por usuários, salvo nos casos previstos em lei,
-incluindo o art. 19 do Marco Civil da Internet e o ECA Digital.
+instabilidades.
+
+Pelo conteúdo publicado por usuários, respondemos nos termos da lei, conforme o regime fixado pelo Supremo Tribunal
+Federal nos Temas 987 e 533 (julgamento de 26 e 27/06/2025):
+
+- **Regra geral:** vale o art. 21 do Marco Civil da Internet. Se formos **notificados** sobre conteúdo ilícito e não o
+  removermos, podemos ser responsabilizados, mesmo sem ordem judicial. Por isso mantemos um canal de notificação,
+  aberto também a quem não tem conta.
+- **Crimes contra a honra** (calúnia, difamação e injúria): continua valendo o art. 19, e a responsabilidade depende de
+  ordem judicial. Mesmo assim, podemos remover o conteúdo depois de uma notificação.
+- **Conteúdo envolvendo crianças e adolescentes:** seguimos o ECA Digital, que prevê a retirada sem ordem judicial e o
+  direito de contestação.
 
 ## 12. Mudanças nestes Termos
 

@@ -45,10 +45,12 @@ sequenceDiagram
     AC->>DB: compartilhamentos sem a conta, posts REMOVED sem conteúdo (título Conteúdo removido)
     AC->>DB: DELETE establishment WHERE owner_id = conta (review dos lugares por ON DELETE CASCADE)
     AC->>DB: apaga 2FA, códigos de recuperação e preferências
+    AC->>DB: apaga verificação de idade, contestações e vínculos como menor · encerra os que supervisiona (RF17)
+    AC->>DB: apaga os pedidos de exportação (RF18) · access_log fica 6 meses (Marco Civil)
     AC->>DB: anonymizeForLgpdDeletion · ANONYMOUS_LGPD_DELETED
     AC->>VK: revoga as sessões
     AC->>DB: COMMIT
-    AC->>S3: DELETE avatars/… e posts/… (MediaJanitor, depois do commit)
+    AC->>S3: DELETE avatars/…, posts/… e exports/… (MediaJanitor, depois do commit)
     AC->>VK: ZREM dos posts no ranking em alta (depois do commit)
     Note over AC,S3: ⏳ Cassandra, destruição da DEK
 ```

@@ -51,7 +51,7 @@ paths:
 | | |
 |---|---|
 | **Base legal (LGPD)** | Art. 18, III (correção). Foto sem EXIF/GPS: o local e o aparelho não vão junto (Art. 6º, III, necessidade) |
-| **ECA Digital** | Menor de 16: perfil privado, comentários só de seguidores e lembrete de uso travados (`403`); tema e fundo livres |
+| **ECA Digital** | Menor de 16: perfil privado, comentários só de seguidores, conteúdo sensível limitado e lembrete de uso travados (`403` ao afrouxar; repetir o valor que o responsável liberou pelo painel do [RF17](../RF17/README.md) passa); tema e fundo livres |
 | **Status** | 🟡 Parcial: perfil, gosto (culinárias favoritas e estilos alimentares), preferências e foto com testes; troca de e-mail e auditoria ainda não |
 
 ## Critérios de aceite
@@ -91,7 +91,7 @@ paths:
 |---|---|---|
 | Domínio | `UserAccount` (perfil público, `favoriteCuisines`, `dietaryStyles`), `UserPreference` (`Theme`, `AppBackground`, `HomeTab`, `CommentAudience`, `SensitiveContent`) | ✅ |
 | Aplicação / API | `ProfileService`, `PreferencesService`; `GET/PATCH /api/v1/me/profile`, `GET/PATCH /api/v1/me/preferences`, `PUT/DELETE /api/v1/me/photo` | ✅ |
-| Foto | `MediaUploadController`, `MediaUploads` (`Fit.AVATAR`), `ImageSanitizer`, `MediaJanitor`, `S3MediaStorage` (AWS SDK v2) | ✅ |
+| Foto | `MediaUploadController`, `MediaUploads` (`Fit.AVATAR`), `ImageSanitizer`, `MediaJanitor`, `S3MediaStorage` (AWS SDK v2; `writePrivate` e `presignGet` servem à exportação de dados do [RF18](../RF18/README.md)) | ✅ |
 | Links públicos | `PublicLinks`: `profileShareUrl` (`/@handle`, usado no perfil público do [RF15](../RF15/README.md)), `postShareUrl` (`/p/{id}`, compartilhar do [RF12](../RF12/README.md)) e `mediaUrl`; a mesma limpeza de foto serve ao post (`Fit.POST`, [RF9](../RF9/README.md)) | ✅ |
 | Ambiente | Garage no Compose e nos testes (`infra/garage/`, `support/GarageContainer`); `uploads/` expira em 1 dia e CORS para a origem web | ✅ |
 | Gosto | `ProfilePatch`/`ProfileView` com `favoriteCuisines` e `dietaryStyles`; estilos conferem `ConsentService.granted` com a conta travada (`UserAccountRepository.lockById`); `ConsentApiIT` | ✅ |

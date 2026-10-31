@@ -38,6 +38,7 @@ tracejada).
 | [RF15](RF15/README.md) | Perfil público e feed de perfis | 🟡 parcial |
 | [RF16](RF16/README.md) | Moldura do post (estúdio de moldura) | 🟡 parcial |
 | [RF17](RF17/README.md) | Verificação de idade e conta do responsável | 🟡 parcial |
+| [RF18](RF18/README.md) | Central do titular e conformidade (exportar dados, encarregado, registros de acesso, incidentes) | 🟡 parcial |
 
 Próximos (seguem a [taxonomia](TAXONOMIA_FRIENDLY_EATS.md#13-mapa-para-os-rfs)): RF11 página do estabelecimento,
 com as facetas · RF13 moderação e avaliações falsas. Do RF9 e do RF12 ainda faltam o cardápio com alergênicos por item,
@@ -49,6 +50,7 @@ seguir perfis e a resposta identificada do dono.
   estabelecimento, preço, estrelas e local, com os códigos estáveis usados do RF6 ao RF8
 - [Design System](DESIGN_SYSTEM.md): cores, glifos, chips e contraste das telas (a cor nunca é o único sinal)
 - [Termos de Uso](legal/TERMOS_DE_USO.md) (rascunho com marcadores `{{…}}`, para revisão jurídica)
+- [Runbook de incidentes de segurança](legal/INCIDENTES.md) (LGPD, art. 48; Resolução CD/ANPD 15/2024; RF18)
 - [Pesquisa de requisitos](PESQUISA_REQUISITOS.md): 71 requisitos candidatos em quatro eixos (comunidade,
   estabelecimento, confiança e leis, receitas e IA), as obrigações legais ainda não cumpridas e a proposta do RF17 ao
   RF36, com os arquivos completos em [`pesquisa/requisitos/`](pesquisa/requisitos/)

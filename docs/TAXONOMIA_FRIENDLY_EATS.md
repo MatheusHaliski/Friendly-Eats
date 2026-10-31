@@ -141,11 +141,12 @@ A conta `ESTABELECIMENTO` pode se cadastrar sem CNPJ com `type_details.informalF
 
 | Ator | Código | O que faz | Situação |
 |---|---|---|---|
-| Visitante | — (sem conta) | lê o conteúdo público na versão sem bebida alcoólica (páginas 18+ pedem conta e idade verificada, [RF17](RF17/README.md)); precisa de conta para avaliar, publicar ou interagir | ✅ |
+| Visitante | — (sem conta) | lê o conteúdo público na versão sem bebida alcoólica (páginas 18+ pedem conta e idade verificada, [RF17](RF17/README.md)); precisa de conta para avaliar, publicar ou interagir; vê a página `/privacidade` e escreve ao encarregado ([RF18](RF18/README.md)) | ✅ |
 | Adulto com idade verificada | `VERIFIED_ADULT` (atributo `age_verification.status`) | único que vê posts `AGE_18` e lugares com foco em bebida; vale 365 dias e a data declarada só restringe ([RF17](RF17/README.md)) | ✅ |
 | Menor de 16 | atributo derivado da data declarada (`AgePolicy.protectedMinor`) | conta com as proteções máximas, vinculada a um responsável; pede ao responsável para afrouxar ([RF17](RF17/README.md)) | ✅ |
 | Responsável | `guardian_link.guardian_id` (vínculo `ACTIVE`, não é tipo de conta) | adulto com idade verificada que aceitou o convite; painel de supervisão: aprova ou nega pedidos, afrouxa ou religa proteções, consente o dado sensível do perfil (LGPD, art. 14) e desvincula ([RF17](RF17/README.md)) | ✅ |
 | Revisor de idade | e-mail em `friendly-eats.age-verification.reviewers` (papel interno) | decide as contestações da idade aferida (Decreto 12.880, art. 27) | ✅ lista em configuração; ⏳ papel no código |
+| Encarregado (DPO) | `friendly-eats.legal.dpo-*` (configuração, não é conta) | identidade e contato públicos em `/privacidade`; recebe os pedidos do titular, com ou sem conta ([RF18](RF18/README.md)) | ✅ |
 | Conta com e-mail não confirmado | `PENDING_VERIFICATION` (estado da conta) | lê, mas não interage, não avalia e não cadastra lugar (`403`) | ✅ |
 | Moderador | `MODERADOR` (papel interno, sem perfil público) | confere selos, trata denúncias e revisões de avaliação | ⏳ papel no código; hoje toda sessão é `ROLE_USER` |
 
@@ -995,6 +996,7 @@ Exemplos: pizzaria com `ITALIANA` principal → `EUROPEIA` (a culinária vem ant
 | RF15 | Perfil público e feed de perfis | tipos de conta com cor, glifo e selo (2.1), `FeedType.PROFILE` | 🟡 parcial |
 | RF13 | Moderação e avaliações falsas | ⏳ `MODERADOR`, `UNDER_REVIEW` / `REMOVED`, regras `RULE_*`, R8 e R10 | ⏳ planejado |
 | RF17 | Verificação de idade e conta do responsável | adulto verificado, menor de 16, responsável e revisor de idade (2.3); 18+ (14.3) passa a exigir a verificação | 🟡 parcial |
+| RF18 | Central do titular e conformidade | encarregado (2.3); exportação, registros de acesso e incidentes | 🟡 parcial |
 | RF16 | Moldura do post | cartelas da época com a cozinha de cada estação, padrões de mesa, layout Cardápio; tipo de conta (2) na direção recomendada | 🟡 parcial |
 
 Ao criar ou mudar um desses RFs, atualize esta taxonomia no mesmo commit sempre que surgir um ator, atributo, categoria

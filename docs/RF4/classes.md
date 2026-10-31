@@ -35,6 +35,13 @@ classDiagram
     class Totp {
         <<utility>>
     }
+    class Aead {
+        <<AES-256-GCM, versão + IV + tag>>
+    }
+    class AccessLogCipher {
+        +seal(ip, port, userId) byte[]
+        +open(byte[], userId) String[]
+    }
     class SecretCipher {
         +encrypt(byte[], long userId) byte[]
         +decrypt(byte[], long userId) byte[]
@@ -74,4 +81,7 @@ classDiagram
     UserMfaRepository ..> UserMfa
     RecoveryCodeRepository ..> RecoveryCode
     StepUp --> MfaService
+    SecretCipher ..> Aead
+    AccessLogCipher ..> Aead
+    SessionService ..> AccessLogCipher : LOGIN no registro de acesso (RF18)
 ```
