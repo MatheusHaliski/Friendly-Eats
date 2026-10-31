@@ -31,6 +31,9 @@ public class Review {
     /** Publicada direto; {@code UNDER_REVIEW} e {@code REMOVED} vêm da moderação (RF13). */
     public enum Status { PUBLISHED, UNDER_REVIEW, REMOVED }
 
+    /** O que quem avalia declara sobre a relação com o lugar (RF13). */
+    public enum Disclosure { NONE, COURTESY, INVITATION, RELATIONSHIP }
+
     /** Quanto a avaliação pesa no agregado: verificada por pedido, nota fiscal ou check-in pesa mais. */
     public enum Trust {
         REVIEW_VERIFIED_ORDER(1.0), REVIEW_VERIFIED_RECEIPT(1.0), REVIEW_VERIFIED_CHECKIN(1.0),
@@ -86,6 +89,10 @@ public class Review {
     @Column(name = "edit_count", nullable = false)
     private int editCount;
 
+    /** HMAC do IP de quem escreveu (RF13): só para o sinal de mesma origem, nunca o IP. */
+    @Column(name = "origin_hash", length = 64)
+    private String originHash;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -132,6 +139,47 @@ public class Review {
             createdAt = when;
         }
         this.updatedAt = when;
+    }
+
+    /**
+     * Vínculo declarado por quem avalia (RF13 · RC-SEG-04): cortesia ou convite viram {@code REVIEW_INCENTIVIZED}
+     * (peso menor), relação com o lugar vira {@code REVIEW_CONFLICT} (fora da nota). Avaliação verificada não muda.
+     */
+    public void declare(Disclosure disclosure) {
+        if (trust == Trust.REVIEW_VERIFIED_ORDER || trust == Trust.REVIEW_VERIFIED_RECEIPT
+                || trust == Trust.REVIEW_VERIFIED_CHECKIN || disclosure == null) {
+            return;
+        }
+        trust = switch (disclosure) {
+            case NONE -> Trust.REVIEW_UNVERIFIED;
+            case COURTESY, INVITATION -> Trust.REVIEW_INCENTIVIZED;
+            case RELATIONSHIP -> Trust.REVIEW_CONFLICT;
+        };
+    }
+
+    /** Sinal automático ou retirada preventiva: sai da lista e do agregado até a decisão (RF13). */
+    public void putUnderReview() {
+        if (status == Status.PUBLISHED) {
+            status = Status.UNDER_REVIEW;
+        }
+    }
+
+    /** Decisão de moderação: removida com motivo (o motivo fica na decisão do caso). */
+    public void removeByModeration() {
+        status = Status.REMOVED;
+    }
+
+    /** Decisão "manter" ou recurso procedente: volta para a lista e para o agregado. */
+    public void restoreByModeration() {
+        status = Status.PUBLISHED;
+    }
+
+    public void setOriginHash(String originHash) {
+        this.originHash = originHash;
+    }
+
+    public String getOriginHash() {
+        return originHash;
     }
 
     public Map<ReviewDimension, Integer> getDimensions() {

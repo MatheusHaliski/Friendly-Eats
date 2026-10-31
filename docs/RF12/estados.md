@@ -23,8 +23,13 @@ stateDiagram-v2
     [*] --> Visible : POST comments (201)
     Visible --> Removed : DELETE por quem escreveu ou pelo dono do post
     Visible --> Removed : eliminação da conta de quem escreveu (RF5)
-    Visible --> Removed : moderação ⏳ RF13
+    Visible --> Moderado : denúncia de criança em risco ou decisão (RF13)
+    Moderado --> Visible : decisão manter ou recurso revertido
     Removed --> [*]
+    note left of Moderado
+        moderation_state preenchido: texto guardado,
+        fora da lista e do contador.
+    end note
     note right of Removed
         Texto apagado, id mantido
         para a auditoria. Contador - 1.

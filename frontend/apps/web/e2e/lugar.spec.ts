@@ -88,6 +88,7 @@ test.describe('Página do lugar (RF6, RF7, RF8)', () => {
       dimensions: { COMIDA: 5 },
       spentPerPersonCents: 4590,
       body: 'Pão de queijo perfeito.',
+      disclosure: 'NONE',
     });
     expect(api.find('GET', /\/auth\/csrf$/)).toHaveLength(1);
 

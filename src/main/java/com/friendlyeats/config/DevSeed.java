@@ -29,6 +29,7 @@ import com.friendlyeats.infrastructure.persistence.postgres.PostCommentRepositor
 import com.friendlyeats.infrastructure.persistence.postgres.PostRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.ReviewRepository;
 import com.friendlyeats.infrastructure.persistence.postgres.UserAccountRepository;
+import com.friendlyeats.infrastructure.persistence.postgres.UserRoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -56,7 +57,8 @@ import java.util.function.Consumer;
 /**
  * Dados de exemplo só no perfil {@code dev} (nunca em produção): contas, lugares em São Paulo, Belo Horizonte e
  * Recife, avaliações e um post de cada tipo com curtidas e comentários (RF9, RF12), para o app web ter o que mostrar
- * sem a moderação (RF13) — os selos já nascem conferidos.
+ * sem a moderação (RF13) — os selos já nascem conferidos. Duas contas de moderação (RF13) recebem o papel MODERATOR: uma
+ * decide e a outra revê o recurso.
  * Roda só com o banco vazio. As senhas são públicas de propósito: valem apenas na sua máquina.
  */
 @Component
@@ -75,10 +77,12 @@ public class DevSeed implements ApplicationRunner {
     private final PostRepository posts;
     private final PostCommentRepository comments;
     private final MediaStorage storage;
+    private final UserRoleRepository roles;
 
     public DevSeed(UserAccountRepository users, EstablishmentRepository establishments, ReviewRepository reviews,
                    PasswordEncoder passwords, PostRepository posts, PostCommentRepository comments,
-                   MediaStorage storage) {
+                   MediaStorage storage, UserRoleRepository roles) {
+        this.roles = roles;
         this.users = users;
         this.establishments = establishments;
         this.reviews = reviews;
@@ -176,9 +180,16 @@ public class DevSeed implements ApplicationRunner {
                 "alertas@friendlyeats.dev", UserCategoryEnum.OFICIAL, CategoryVerification.VERIFIED,
                 Map.of("agency", "Vigilância sanitária municipal (exemplo)", "city", "São Paulo", "state", "SP"), hash);
         seedPosts(now, ana, chef, owner, vigilancia, people, byName);
+        for (String n : List.of("", "2")) {
+            UserAccount mod = account("Moderação " + (n.isEmpty() ? "1" : n), "moderacao" + n,
+                    "moderacao" + n + "@friendlyeats.dev", UserCategoryEnum.COMENSAL, CategoryVerification.NOT_REQUIRED,
+                    Map.of(), hash);
+            roles.grant(mod.getId(), UserRoleRepository.MODERATOR, "seed");
+        }
         log.info("Seed de desenvolvimento: {} lugares e {} contas. Entre com ana@friendlyeats.dev, "
-                + "dono@friendlyeats.dev, lu@friendlyeats.dev, chef@friendlyeats.dev ou alertas@friendlyeats.dev "
-                + "(senha em DevSeed.PASSWORD).", places.size() + 1, users.count());
+                + "dono@friendlyeats.dev, lu@friendlyeats.dev, chef@friendlyeats.dev, alertas@friendlyeats.dev ou, "
+                + "na moderação, moderacao@friendlyeats.dev e moderacao2@friendlyeats.dev (senha em DevSeed.PASSWORD).",
+                places.size() + 1, users.count());
     }
 
     /** Um post de cada tipo (RF9), com curtidas e comentários (RF12). */

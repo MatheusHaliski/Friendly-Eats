@@ -27,7 +27,8 @@ que exige revisão humana na importação.
 12. [Chip de culinária](#12-chip-de-culinária)
 13. [Mapa para os RFs](#13-mapa-para-os-rfs)
 14. [Conteúdo: posts, feeds e interações](#14-conteúdo-posts-feeds-e-interações)
-15. [Fontes](#15-fontes)
+15. [Moderação e segurança entre usuários](#15-moderação-e-segurança-entre-usuários)
+16. [Fontes](#16-fontes)
 
 ---
 
@@ -143,7 +144,9 @@ A conta `ESTABELECIMENTO` pode se cadastrar sem CNPJ com `type_details.informalF
 |---|---|---|---|
 | Visitante | — (sem conta) | lê o conteúdo público, exceto as páginas 18+ (precisa entrar); precisa de conta para avaliar, publicar ou interagir | ✅ |
 | Conta com e-mail não confirmado | `PENDING_VERIFICATION` (estado da conta) | lê, mas não interage, não avalia e não cadastra lugar (`403`) | ✅ |
-| Moderador | `MODERADOR` (papel interno, sem perfil público) | confere selos, trata denúncias e revisões de avaliação | ⏳ papel no código; hoje toda sessão é `ROLE_USER` |
+| Moderador | `MODERADOR` (papel interno `user_role.role = 'MODERATOR'`, sessão com `ROLE_MODERATOR`; a conta continua com o seu tipo) | trata a fila de denúncias, decide com motivo, revê recursos de outra pessoa, registra a comunicação às autoridades e publica alertas ao consumidor ([RF13](RF13/README.md)); ⏳ conferir selos | ✅ RF13: concedido por configuração (`bootstrap-moderators`) ou pelo DevSeed |
+| Pessoa sem conta que denuncia | — (formulário público, nome e e-mail obrigatórios) | denuncia post, perfil ou página de lugar pelo canal de não usuários (STF, Temas 987 e 533, item 9) e recebe protocolo | ✅ RF13 |
+| Filtro antifraude | — (sistema) | põe avaliação suspeita em análise e congela novas avaliações num pico; a decisão final é humana | ✅ RF13 |
 
 ### 2.4 Regras de quem é dono e de quem avalia
 
@@ -883,10 +886,12 @@ calculamos as notas" explica pesos e recência.
 | Estado | Significado | Situação |
 |---|---|---|
 | `PUBLISHED` | visível e contada no agregado; a avaliação já nasce publicada, sem censura prévia (Marco Civil art. 19) | ✅ v1 |
-| `UNDER_REVIEW` | denúncia ou anomalia; sai do agregado até a decisão | ⏳ RF13 |
-| `REMOVED` | removida por política publicada, com motivo e direito de recurso; fica fora do agregado | ⏳ RF13 |
+| `UNDER_REVIEW` | sinal automático de fraude (rajada de contas novas, mesma origem) ou retirada preventiva por criança em risco; sai da lista e do agregado até a decisão; o autor vê "Em análise" | ✅ RF13 |
+| `REMOVED` | removida por política publicada, com motivo e direito de recurso; fica fora do agregado; o autor não reescreve nem apaga para recomeçar | ✅ RF13 |
 
-Transições previstas: `PUBLISHED` → `UNDER_REVIEW` → `PUBLISHED` | `REMOVED`. A edição gera uma nova versão e não é
+Transições: `PUBLISHED` → `UNDER_REVIEW` → `PUBLISHED` | `REMOVED`, e `PUBLISHED` → `REMOVED` pela decisão; o
+recurso procedente volta para `PUBLISHED`. A contestação do dono e a denúncia comum **não** tiram a avaliação do ar
+até a decisão. A edição gera uma nova versão e não é
 um estado. A pesquisa 03 também cita `PENDING`, `REJECTED` e `EDITED`, que não foram adotados.
 
 ### 10.6 Exibição
@@ -900,11 +905,11 @@ um estado. A pesquisa 03 também cita `PENDING`, `REJECTED` e `EDITED`, que não
 |---|---|---|
 | `RULE_NO_INSIDER` | o dono não avalia o próprio estabelecimento, e contas `ESTABELECIMENTO`, `VAREJO` e `OFICIAL` não avaliam. ⏳ Sócio, funcionário, parente e concorrente direto viram `REVIEW_CONFLICT` | ✅ dono e tipos de conta; ⏳ o resto |
 | `RULE_NO_SENTIMENT_INCENTIVE` | proibido oferecer benefício **condicionado** a nota positiva ou à remoção de nota negativa | ⏳ |
-| `RULE_INCENTIVE_DISCLOSED` | benefício não condicionado (cupom por qualquer avaliação) exige o selo "Recebeu benefício do estabelecimento" | ⏳ |
-| `RULE_NO_SUPPRESSION` | o estabelecimento não oculta avaliação negativa; remoção só por política publicada, com motivo e recurso | ⏳ |
+| `RULE_INCENTIVE_DISCLOSED` | quem avalia declara o vínculo (`Review.Disclosure`): `COURTESY` e `INVITATION` viram `REVIEW_INCENTIVIZED` (peso 0,6 e selo escrito "Declarou cortesia ou convite"); `RELATIONSHIP` vira `REVIEW_CONFLICT` (fora da nota) | ✅ RF13 (declaração); ⏳ benefício declarado pelo dono |
+| `RULE_NO_SUPPRESSION` | o estabelecimento não oculta avaliação negativa: contesta só pelos motivos da política (`ownerContest`), a avaliação fica no ar até a decisão, o bloqueio não esconde avaliações e a remoção sai com motivo e recurso | ✅ RF13 |
 | `RULE_OWNER_REPLY` | direito de resposta pública do estabelecimento, uma por avaliação | ⏳ |
-| `RULE_NO_AI_FAKE` | proibido texto em nome de pessoa que não existe ou não teve a experiência; detecção por velocidade, rede de contas, similaridade, IP/dispositivo e distância | ⏳ |
-| `RULE_REVIEW_BOMBING` | pico anômalo depois de notícia ou viral: congela o agregado e manda para moderação | ⏳ |
+| `RULE_NO_AI_FAKE` | proibido texto em nome de pessoa que não existe ou não teve a experiência; detecção por velocidade, rede de contas, similaridade, IP/dispositivo e distância | 🟡 RF13: rajada de contas novas (`BURST_NEW_ACCOUNTS`) e mesma origem por HMAC do IP (`SAME_ORIGIN`); ⏳ similaridade de texto, aparelho, distância e IA |
+| `RULE_REVIEW_BOMBING` | pico anômalo depois de notícia ou viral: congela **novas** avaliações e manda para moderação, com alerta ao consumidor e data de fim | ✅ RF13 (automático a partir de `freeze-threshold` e manual pela moderação) |
 | `RULE_INFLUENCER` | avaliação de perfil com relação comercial é publicidade e exige identificação (CONAR) | ⏳ |
 
 Base: CDC (arts. 6º, 36 e 37), Guia de Influenciadores do CONAR (edição 2026), Marco Civil art. 19 e STJ REsp
@@ -1032,7 +1037,8 @@ Exemplos: pizzaria com `ITALIANA` principal → `EUROPEIA` (a culinária vem ant
 | RF12 | Interações | curtir, salvar, comentar e compartilhar (`ReactionKind`, `ShareChannel`, 14.4); ⏳ resposta do dono (`RULE_OWNER_REPLY`), seguir | 🟡 parcial |
 | RF14 | Feed e página do post | `FeedType` (14.2), 18+ (14.3), "em alta" | 🟡 parcial |
 | RF15 | Perfil público e feed de perfis | tipos de conta com cor, glifo e selo (2.1), `FeedType.PROFILE` | 🟡 parcial |
-| RF13 | Moderação e avaliações falsas | ⏳ `MODERADOR`, `UNDER_REVIEW` / `REMOVED`, regras `RULE_*`, R8 e R10 | ⏳ planejado |
+| RF13 | Moderação, denúncia, recurso e integridade das avaliações | `MODERADOR` (2.3), motivos, prioridades, ações e estados do caso (15.1 a 15.4), `UNDER_REVIEW` / `REMOVED` (10.5), regras `RULE_*` (10.7), alertas ao consumidor (15.5); ⏳ R8 e R10 (verificação do lugar) | 🟡 parcial |
+| RF19 | Segurança entre usuários | bloquear, silenciar e palavras filtradas (15.6) | 🟡 parcial |
 | RF16 | Moldura do post | cartelas da época com a cozinha de cada estação, padrões de mesa, layout Cardápio; tipo de conta (2) na direção recomendada | 🟡 parcial |
 
 Ao criar ou mudar um desses RFs, atualize esta taxonomia no mesmo commit sempre que surgir um ator, atributo, categoria
@@ -1088,7 +1094,7 @@ O chip **Publicidade** (`advertising`) é independente da classificação e pode
 |---|---|---|
 | `ReactionKind` | `LIKE` (público, contado) · `SAVE` (privado, sem contador) | idempotente, uma por conta |
 | `ShareChannel` | `COPY_LINK` · `NATIVE` · `WHATSAPP` · `TELEGRAM` · `X` · `EMAIL` | conta pares (conta, canal) distintos; o link `/p/{id}` não diz quem compartilhou |
-| `CommentStatus` | `VISIBLE` · `REMOVED` | quem comenta segue o `who_can_comment` do autor (`EVERYONE`, `FOLLOWERS`, `NOBODY`) |
+| `CommentStatus` | `VISIBLE` · `REMOVED` | quem comenta segue o `who_can_comment` do autor (`EVERYONE`, `FOLLOWERS`, `NOBODY`); a moderação usa `moderation_state` (15.4), sem apagar o texto |
 
 ### 14.5 Alergênicos no post (`Allergen`)
 
@@ -1096,7 +1102,83 @@ O enum usa exatamente os códigos da seção 6.2: 21 alergênicos `VIGENTE`, 5 `
 post) e as advertências `LACTOSE` e `GLUTEN` (`Kind.ADVERTENCIA`, campo `warnings`). Cada alergênico tem o nível
 `CONTEM` ou `PODE_CONTER`, e a tela mostra sempre o aviso de informação autodeclarada.
 
-## 15. Fontes
+## 15. Moderação e segurança entre usuários
+
+Vocabulários do [RF13](RF13/README.md) e do [RF19](RF19/README.md). Os códigos são estáveis; os rótulos aparecem na
+tela e na decisão enviada ao autor.
+
+### 15.1 Motivos de denúncia (`ReportReason`)
+
+| Código | Rótulo | Prioridade | Vale para | Contestação do dono |
+|---|---|---|---|---|
+| `CRIANCA_EM_RISCO` | Criança ou adolescente em risco | `CRITICA` (retirada preventiva de post, comentário e avaliação) | todos | — |
+| `DESINFORMACAO_SANITARIA` | Desinformação sanitária | `URGENTE` | post, comentário, avaliação | — |
+| `ASSEDIO` | Assédio ou cyberbullying | `ALTA` | todos | — |
+| `ODIO` | Discurso de ódio ou discriminação | `ALTA` | todos | — |
+| `CONTEUDO_SEXUAL` | Nudez ou conteúdo sexual | `ALTA` | todos | — |
+| `DADO_PESSOAL` | Dado pessoal exposto | `ALTA` | todos | ✅ |
+| `GOLPE_FRAUDE` | Golpe ou fraude | `ALTA` | todos | — |
+| `AVALIACAO_FALSA` | Avaliação falsa ou com incentivo | `NORMAL` | avaliação, página de lugar, post | ✅ ("não é experiência própria") |
+| `CONFLITO_INTERESSE` | Conflito de interesse | `NORMAL` | avaliação, post | ✅ |
+| `OFENSA_OU_CRIME` | Ofensa ou acusação de crime | `NORMAL` | avaliação, post, comentário | ✅ |
+| `DIREITO_AUTORAL` | Direito autoral | `NORMAL` | post, perfil, página de lugar | — |
+| `SPAM` | Spam | `BAIXA` | todos | — |
+| `FORA_DO_TEMA` | Fora do tema ou lugar errado | `BAIXA` | avaliação, post, comentário | ✅ |
+| `OUTRO` | Outro motivo (texto obrigatório) | `NORMAL` | todos | — |
+
+"Discordo da nota" não é motivo de contestação (RC-SEG-08). Os mesmos códigos são as **regras da política** citadas
+na decisão.
+
+### 15.2 Prioridade da fila (`ModerationPriority`)
+
+| Código | Rótulo | Prazo de revisão humana ⚖️ |
+|---|---|---|
+| `CRITICA` | Crítica | 24 h (o conteúdo já saiu do ar) |
+| `URGENTE` | Urgente | 24 h |
+| `ALTA` | Alta | 72 h |
+| `NORMAL` | Normal | 7 dias |
+| `BAIXA` | Baixa | 14 dias |
+
+Denunciante com muitas improcedentes (3 ou mais em 90 dias e 70 % ou mais do total) desce um nível, sem sanção; a
+`CRITICA` nunca desce, mas deixa de retirar o conteúdo na hora.
+
+### 15.3 Alvos, origens e ações
+
+| Vocabulário | Códigos |
+|---|---|
+| Alvo (`TargetType`) | `POST` · `COMMENT` · `REVIEW` · `PROFILE` · `ESTABLISHMENT` |
+| Origem (`ReportSource`) | `USER` (com conta) · `PUBLIC_FORM` (sem conta) · `OWNER_CONTEST` (dono contesta avaliação) · `SYSTEM` (sinal antifraude) |
+| Ação (`ModerationAction`) | `KEEP` (manter) · `HIDE` (ocultar; só post e comentário) · `REMOVE` (remover; perfil = conta suspensa, lugar = página fora do ar) · `WARN` (avisar o autor) |
+| Etapa da decisão | `PREVENTIVE` (automática) · `FIRST` (moderação) · `APPEAL` (recurso, por outra pessoa) |
+| Comunicação às autoridades | `NONE` · `PENDING` (indício de abuso sexual infantil) · `SENT` (registrada pela moderação; nada é automático) |
+
+### 15.4 Estados
+
+| Vocabulário | Códigos |
+|---|---|
+| Caso (`CaseStatus`) | `OPEN` (na fila) → `DECIDED` (corre o prazo de recurso) → `IN_APPEAL` → `FINAL` |
+| Denúncia | `OPEN` → `UPHELD` (procedente) ou `DISMISSED` (improcedente) |
+| Recurso | `OPEN` → `MAINTAINED` ou `REVERSED` |
+| Post e comentário (`moderation_state`, `ContentModeration`) | `NULL` (normal) · `PREVENTIVE` · `HIDDEN` · `REMOVED`; o texto fica guardado para o recurso e a preservação |
+
+### 15.5 Integridade das avaliações
+
+| Vocabulário | Códigos |
+|---|---|
+| Sinais (`ReviewSignal`) | `BURST_NEW_ACCOUNTS` · `SAME_ORIGIN` (em análise) · `INCENTIVE_DECLARED` · `CONFLICT_DECLARED` (só registro) |
+| Alerta ao consumidor (`AlertKind`) | `AVALIACAO_PAGA` · `ATIVIDADE_SUSPEITA` · `ATENCAO_PUBLICA`, com ícone `octagon-alert` e título escrito |
+| Vínculo declarado (`Review.Disclosure`) | `NONE` · `COURTESY` · `INVITATION` · `RELATIONSHIP` |
+
+### 15.6 Segurança entre usuários (RF19)
+
+| Ação | Efeito | Quem fica sabendo |
+|---|---|---|
+| Bloquear | nos dois sentidos: perfil, posts, comentários, feed, "em alta" e busca de perfis somem (`404`); não comenta nem interage. **Avaliações continuam públicas** | ninguém |
+| Silenciar | só para quem silenciou: feed e comentários | ninguém |
+| Palavras filtradas | comentários nos posts de quem filtrou somem para todos, menos para quem escreveu; até 100 palavras ou expressões, sem acento, com trocas como `1d10t4` | ninguém |
+| Filtro de ofensas | lista padrão (`WordFilter.DEFAULT_WORDS`) ligada e travada para menor de 16; opcional para os demais | — |
+
+## 16. Fontes
 
 **Plataformas e vocabulários**
 

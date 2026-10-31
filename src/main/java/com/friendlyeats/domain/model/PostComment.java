@@ -45,6 +45,10 @@ public class PostComment {
     @Column(name = "removed_at")
     private Instant removedAt;
 
+    /** Moderação (RF13): {@code null} = normal; gravado só pela moderação (SQL), nunca pela entidade. */
+    @Column(name = "moderation_state", insertable = false, updatable = false)
+    private String moderationState;
+
     protected PostComment() {
         // JPA
     }
@@ -77,8 +81,13 @@ public class PostComment {
         removedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
     }
 
+    /** Visível: não apagado e fora de qualquer medida de moderação (RF13). */
     public boolean isVisible() {
-        return status == CommentStatus.VISIBLE;
+        return status == CommentStatus.VISIBLE && moderationState == null;
+    }
+
+    public String getModerationState() {
+        return moderationState;
     }
 
     /** Pode remover: quem escreveu ou o dono do post (moderação da própria caixa). */

@@ -5,8 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { useRoles } from '@/lib/moderation';
 import { useSession } from '@/lib/queries';
-import { IconAccount, IconFeed, IconLogin, IconPublish, IconSearch, IconSettings } from './icons';
+import { IconAccount, IconFeed, IconLogin, IconModeration, IconPublish, IconSearch, IconSettings } from './icons';
 import { ThemeToggle } from './ThemeToggle';
 
 function HeaderSearch() {
@@ -37,6 +38,7 @@ function HeaderSearch() {
 
 function SessionLink() {
   const { data: user, isPending } = useSession();
+  const roles = useRoles();
   const pathname = usePathname();
   if (isPending) return <span className="inline-block h-11 w-24" aria-hidden="true" />;
   if (!user) {
@@ -53,6 +55,12 @@ function SessionLink() {
         <IconPublish size={18} />
         <span className="sr-only sm:not-sr-only">Publicar</span>
       </Link>
+      {roles.data?.moderator && (
+        <Link href="/moderacao" className="fe-btn fe-btn-sm" data-testid="link-moderacao" aria-current={pathname === '/moderacao' ? 'page' : undefined}>
+          <IconModeration size={18} />
+          <span className="sr-only md:not-sr-only">Moderação</span>
+        </Link>
+      )}
       <Link
         href="/configuracoes"
         className="fe-btn fe-btn-sm"

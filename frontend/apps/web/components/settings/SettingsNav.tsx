@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { IconAccount, IconDisplay, IconPrivacy, IconProfileEdit, IconSecurity } from '@/components/icons';
+import { IconAccount, IconDisplay, IconMyReports, IconPrivacy, IconProfileEdit, IconSecurity } from '@/components/icons';
 import { SETTINGS_SECTIONS, type SettingsSectionSlug } from '@/lib/settings-sections';
 
 const ICONS: Record<SettingsSectionSlug, (p: { size?: number; className?: string }) => ReactNode> = {
@@ -10,6 +10,7 @@ const ICONS: Record<SettingsSectionSlug, (p: { size?: number; className?: string
   exibicao: IconDisplay,
   privacidade: IconPrivacy,
   seguranca: IconSecurity,
+  denuncias: IconMyReports,
   conta: IconAccount,
 };
 

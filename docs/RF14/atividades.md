@@ -8,7 +8,9 @@ flowchart TD
     X -- não --> N404[404]
     X -- sim --> A{Quem pede é o autor?}
     A -- sim --> OK
-    A -- não --> AC{Autor ACTIVE?}
+    A -- não --> MO{Retirado pela moderação<br/>ou bloqueio entre os dois? RF13 · RF19}
+    MO -- sim --> N404
+    MO -- não --> AC{Autor ACTIVE?}
     AC -- não --> N404
     AC -- sim --> PR{Perfil do autor privado?<br/>sem preferências: menor de 16}
     PR -- sim --> N404
@@ -32,7 +34,7 @@ flowchart TD
     V -- PROFILE ou outro --> E400[400]
     V -- ok --> C{cursor válido?}
     C -- não --> E400
-    C -- sim --> Q[SQL VISIBLE · PUBLISHED · não encerrado<br/>autor ativo e perfil público ou o próprio]
+    C -- sim --> Q[SQL VISIBLE · PUBLISHED · não encerrado<br/>autor ativo e perfil público ou o próprio<br/>sem moderação, sem bloqueio nos dois sentidos, sem silenciado]
     Q --> AG{Quem vê tem 18+?}
     AG -- não --> LV[só LIVRE]
     AG -- sim --> ALL[LIVRE e AGE_18]

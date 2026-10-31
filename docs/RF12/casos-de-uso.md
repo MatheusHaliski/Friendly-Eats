@@ -21,7 +21,8 @@ flowchart LR
     UC11(["Responder como estabelecimento ⏳"]):::planned
 
     TR["Valkey · em alta"]:::actor
-    MOD["Moderação ⏳"]:::actor
+    MOD["Moderação · RF13"]:::actor
+    SEG["Bloqueio, silêncio e palavras · RF19"]:::actor
 
     PES --- UC1 & UC2 & UC3 & UC5 & UC7
     DONO --- UC6 & UC8 & UC11
@@ -32,6 +33,7 @@ flowchart LR
     UC10 -. «extend» libera FOLLOWERS .-> UC3
     UC1 & UC3 & UC7 --- TR
     UC6 -.- MOD
+    UC4 -.- SEG
 
     classDef actor fill:#FFF1E8,stroke:#E88F12,stroke-width:2px,color:#17120D,font-weight:bold
     classDef planned stroke-dasharray:5 4

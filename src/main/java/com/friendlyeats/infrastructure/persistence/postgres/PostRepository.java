@@ -23,7 +23,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
     @Query(value = """
             SELECT * FROM post
-            WHERE author_id = :authorId AND status IN ('PUBLISHED','ARCHIVED')
+            WHERE author_id = :authorId AND status IN ('PUBLISHED','ARCHIVED') AND moderation_state IS NULL
               AND (:adult OR age_rating = 'LIVRE')
             ORDER BY created_at DESC, id DESC
             LIMIT :limit
@@ -33,7 +33,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     /** Página seguinte por cursor (created_at, id): estável mesmo com posts novos chegando. */
     @Query(value = """
             SELECT * FROM post
-            WHERE author_id = :authorId AND status IN ('PUBLISHED','ARCHIVED')
+            WHERE author_id = :authorId AND status IN ('PUBLISHED','ARCHIVED') AND moderation_state IS NULL
               AND (:adult OR age_rating = 'LIVRE')
               AND (created_at, id) < (:beforeCreatedAt, :beforeId)
             ORDER BY created_at DESC, id DESC
@@ -41,7 +41,8 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
             """, nativeQuery = true)
     List<Post> findProfileFeedBefore(Long authorId, boolean adult, Instant beforeCreatedAt, UUID beforeId, int limit);
 
-    long countByAuthorIdAndStatusIn(Long authorId, Collection<PostStatus> statuses);
+    /** Posts do perfil (RF15), sem os retirados pela moderação (RF13). */
+    long countByAuthorIdAndStatusInAndModerationStateIsNull(Long authorId, Collection<PostStatus> statuses);
 
     // ------------------------------------------------------------ reações (LIKE / SAVE)
 

@@ -19,7 +19,8 @@ import java.util.UUID;
  * <p>A regra de quem vê está toda em {@link #VISIBLE}, a mesma da página do post: publicado, fora do prazo de
  * expiração, autor com a conta ativa e perfil público (o próprio autor sempre se vê) e, para visitante sem login ou
  * menor de 18, só posts {@code LIVRE}. Sem linha em {@code user_preference}, o perfil é privado para menor de 16 (o
- * padrão do cadastro, ECA Digital).
+ * padrão do cadastro, ECA Digital). Post retirado pela moderação não entra (RF13), nem post de quem bloqueou quem vê,
+ * foi bloqueado por ele ou foi silenciado por ele (RF19).
  */
 @Repository
 public class PostFeedQueries {
@@ -30,6 +31,11 @@ public class PostFeedQueries {
               AND u.account_status = 'ACTIVE'
               AND (p.author_id = :viewer
                    OR NOT COALESCE(pp.profile_private, u.user_date_of_birth > :minorBirthAfter, FALSE))
+              AND p.moderation_state IS NULL
+              AND NOT EXISTS (SELECT 1 FROM user_block b
+                              WHERE (b.blocker_id = :viewer AND b.blocked_id = p.author_id)
+                                 OR (b.blocker_id = p.author_id AND b.blocked_id = :viewer))
+              AND NOT EXISTS (SELECT 1 FROM user_mute m WHERE m.muter_id = :viewer AND m.muted_id = p.author_id)
             """;
 
     private static final String FROM = """

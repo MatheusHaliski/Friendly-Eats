@@ -5,6 +5,7 @@ import {
   type Coded,
   type DimensionItem,
   type ReviewDimensionCode,
+  type ReviewDisclosure,
   type ReviewDraft,
   type ReviewView,
   type VisitModeCode,
@@ -13,6 +14,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useId, useState, type FormEvent } from 'react';
 import { describedBy, ErrorSummary, FieldErrors, Notice, useDeferredFocus } from '@/components/Form';
+import { RadioPills } from '@/components/settings/PreferenceControls';
 import { StarRatingInput } from '@/components/StarRatingInput';
 import { api } from '@/lib/api';
 import { mapReviewErrors, type MappedErrors } from '@/lib/field-errors';
@@ -40,6 +42,9 @@ export function ReviewForm({ placeId, initial, dimensions, visitModes, onSaved, 
   const [dims, setDims] = useState<Partial<Record<ReviewDimensionCode, number>>>(initial?.dimensions ?? {});
   const [spent, setSpent] = useState(centsToInput(initial?.spentPerPersonCents));
   const [body, setBody] = useState(initial?.body ?? '');
+  const [disclosure, setDisclosure] = useState<ReviewDisclosure>(
+    initial?.trust === 'REVIEW_INCENTIVIZED' ? 'COURTESY' : initial?.trust === 'REVIEW_CONFLICT' ? 'RELATIONSHIP' : 'NONE',
+  );
   const [errors, setErrors] = useState<MappedErrors>(EMPTY);
   const [serverMessage, setServerMessage] = useState<string | null>(null);
   const [summaryRef, focusSummary] = useDeferredFocus<HTMLDivElement>();
@@ -95,6 +100,7 @@ export function ReviewForm({ placeId, initial, dimensions, visitModes, onSaved, 
       dimensions: keepDimensions(dims, mode, dimensions),
       spentPerPersonCents: cents,
       body: body.trim() ? body.trim() : null,
+      disclosure,
     });
   }
 
@@ -255,6 +261,20 @@ export function ReviewForm({ placeId, initial, dimensions, visitModes, onSaved, 
         </p>
         <FieldErrors id={`${fieldIds.body}-erro`} errors={err('body')} />
       </div>
+
+      <RadioPills<ReviewDisclosure>
+        name={`${uid}-vinculo`}
+        legend="Você tem vínculo com o lugar?"
+        hint="Declarar é obrigatório pela política de avaliações. Cortesia ou convite aparecem na avaliação e pesam menos na nota; quem trabalha, é da família ou concorrente fica fora da nota."
+        value={disclosure}
+        onChange={setDisclosure}
+        options={[
+          { value: 'NONE', label: 'Não tenho' },
+          { value: 'COURTESY', label: 'Recebi cortesia' },
+          { value: 'INVITATION', label: 'Fui convidado' },
+          { value: 'RELATIONSHIP', label: 'Trabalho, é da família ou concorrente' },
+        ]}
+      />
 
       <div className="flex flex-wrap gap-2">
         <button type="submit" className="fe-btn fe-btn-primary" disabled={save.isPending}>

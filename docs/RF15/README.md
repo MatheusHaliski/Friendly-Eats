@@ -46,6 +46,11 @@ paths:
    - `city`: cidade de atuação, sem diferenciar maiúscula nem acento; nunca alcança o comensal;
    - `q`: parte do nome ou do @ (até 80 caracteres; `%` e `_` são literais).
 
+- **Segurança e moderação** ([RF19](../RF19/README.md), [RF13](../RF13/README.md)): bloqueio em qualquer sentido entre
+  quem vê e o titular dá `404` no perfil e nos posts e tira a conta do feed de perfis (`GET /users` recebe quem vê), sem
+  revelar o bloqueio. Posts retirados pela moderação não entram na lista nem no número de posts. O perfil público tem o
+  menu "…" com Denunciar, Silenciar e Bloquear (com confirmação) e o desfazer.
+
 ## Contrato (`ProfileViews`)
 
 - `PublicProfileView {id, name, handle, category: AccountBadge, verified, privateProfile, avatarUrl, bio, pronouns,
@@ -66,6 +71,7 @@ paths:
 |---|---|---|
 | Regras | `PublicProfileService` (conta ativa, perfil privado, cidade de atuação, 18+ nos posts, cursor do feed de perfis), `AccountBadge` (cor, glifo e ícone dos 7 tipos), `ProfileViews` | ✅ |
 | Persistência | `ProfileDirectoryQueries` (conta ativa, perfil público pelos padrões do cadastro, organizações com selo, `f_unaccent` na cidade e no nome); `PostRepository.findProfileFeed` ([RF9](../RF9/README.md)) | ✅ |
+| Segurança e moderação | `PublicProfileService` com `SafetyGuard.blockedEitherWay` e `ProfileDirectoryQueries.page(…, viewerId, …)` com `NOT EXISTS user_block` ([RF19](../RF19/README.md)); `PostRepository.countByAuthorIdAndStatusInAndModerationStateIsNull` e o perfil sem os moderados ([RF13](../RF13/README.md)); `ProfileSafetyActions` no `ProfileView`; `SafetyApiIT.blockWorksBothWaysOnFeedPostCommentsAndProfiles` | ✅ |
 | API | `UserProfileController`: `GET /api/v1/users`, `/api/v1/users/{id}/profile`, `/api/v1/users/{id}/posts`; GET públicos no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Testes | `UserProfileApiIT.profileShowsOnlyPublicDataAndTheAuthorsPostsPageByCursor`, `UserProfileApiIT.privateProfileShowsTheMinimumAndClosesThePostsExceptForTheHolder`, `UserProfileApiIT.profileFeedListsActivePublicAccountsWithBadgeAndSealAndFilters` | ✅ |
 | Pendências | seguir e deixar de seguir, com contadores; perfil privado liberado para seguidores; feed de perfis por relevância e perto de mim; perfil do estabelecimento com os lugares dele; denúncia de perfil (RF13) | ⏳ |

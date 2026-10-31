@@ -9,6 +9,9 @@ import com.friendlyeats.application.establishment.EstablishmentViews.Establishme
 import com.friendlyeats.application.establishment.EstablishmentViews.ReviewPage;
 import com.friendlyeats.application.establishment.EstablishmentViews.ReviewView;
 import com.friendlyeats.application.establishment.ReviewService;
+import com.friendlyeats.security.AppSecrets;
+import com.friendlyeats.security.ClientInfo;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,13 +40,15 @@ public class EstablishmentController {
     private final EstablishmentService establishments;
     private final ReviewService reviews;
     private final EstablishmentSearch search;
+    private final AppSecrets secrets;
 
     public EstablishmentController(ViewerResolver viewer, EstablishmentService establishments, ReviewService reviews,
-                                   EstablishmentSearch search) {
+                                   EstablishmentSearch search, AppSecrets secrets) {
         this.viewer = viewer;
         this.establishments = establishments;
         this.reviews = reviews;
         this.search = search;
+        this.secrets = secrets;
     }
 
     /** Busca e filtros (RF10). Parâmetros repetíveis aceitam também lista separada por vírgula. */
@@ -107,10 +112,15 @@ public class EstablishmentController {
         return ResponseEntity.of(reviews.mine(viewer.requireViewer(), id));
     }
 
-    /** Cria (201) ou substitui (200) a sua avaliação; a versão anterior fica no histórico. */
+    /**
+     * Cria (201) ou substitui (200) a sua avaliação; a versão anterior fica no histórico. A origem (HMAC do IP) entra
+     * nos sinais de fraude do RF13.
+     */
     @PutMapping("/establishments/{id}/reviews/me")
-    public ResponseEntity<ReviewView> review(@PathVariable long id, @RequestBody ReviewDraft body) {
-        ReviewService.Saved saved = reviews.upsertMine(viewer.requireViewer(), id, body);
+    public ResponseEntity<ReviewView> review(@PathVariable long id, @RequestBody ReviewDraft body,
+                                             HttpServletRequest request) {
+        ReviewService.Saved saved = reviews.upsertMine(viewer.requireViewer(), id, body,
+                ClientInfo.from(request, secrets).ipHash());
         return ResponseEntity.status(saved.created() ? HttpStatus.CREATED : HttpStatus.OK).body(saved.review());
     }
 

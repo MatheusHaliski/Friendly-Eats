@@ -1,5 +1,5 @@
-// Seções de /configuracoes (RF2 · RF3 · RF4 · RF5), na ordem do menu.
-export type SettingsSectionSlug = 'perfil' | 'exibicao' | 'privacidade' | 'seguranca' | 'conta';
+// Seções de /configuracoes (RF2 · RF3 · RF4 · RF5 · RF13), na ordem do menu.
+export type SettingsSectionSlug = 'perfil' | 'exibicao' | 'privacidade' | 'seguranca' | 'denuncias' | 'conta';
 
 export interface SettingsSection {
   slug: SettingsSectionSlug;
@@ -8,7 +8,7 @@ export interface SettingsSection {
   description: string;
   /** Base legal mostrada na lista, quando houver. */
   law?: string;
-  rf: 'RF2' | 'RF3' | 'RF4' | 'RF5';
+  rf: 'RF2' | 'RF3' | 'RF4' | 'RF5' | 'RF13';
 }
 
 export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
@@ -31,7 +31,7 @@ export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
     slug: 'privacidade',
     href: '/configuracoes/privacidade',
     title: 'Privacidade',
-    description: 'Quem vê e comenta, conteúdo sensível e os usos opcionais dos seus dados',
+    description: 'Quem vê e comenta, conteúdo sensível, bloqueados, silenciados, palavras filtradas e os usos opcionais dos seus dados',
     law: 'Art. 7º, I e Art. 11 — consentimento',
     rf: 'RF3',
   },
@@ -41,6 +41,14 @@ export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
     title: 'Senha e segurança',
     description: 'Senha, aparelhos conectados e verificação em duas etapas',
     rf: 'RF4',
+  },
+  {
+    slug: 'denuncias',
+    href: '/configuracoes/denuncias',
+    title: 'Denúncias e decisões',
+    description: 'Minhas denúncias, decisões da moderação sobre o meu conteúdo e recursos',
+    law: 'ECA Digital · Art. 30 — contestação',
+    rf: 'RF13',
   },
   {
     slug: 'conta',

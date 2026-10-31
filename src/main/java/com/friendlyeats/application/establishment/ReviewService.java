@@ -8,6 +8,7 @@ import com.friendlyeats.application.establishment.EstablishmentViews.Coded;
 import com.friendlyeats.application.establishment.EstablishmentViews.ReviewAuthorView;
 import com.friendlyeats.application.establishment.EstablishmentViews.ReviewPage;
 import com.friendlyeats.application.establishment.EstablishmentViews.ReviewView;
+import com.friendlyeats.application.moderation.ReviewIntegrityService;
 import com.friendlyeats.domain.model.AccountStatus;
 import com.friendlyeats.domain.model.Establishment;
 import com.friendlyeats.domain.model.Review;
@@ -39,7 +40,10 @@ import java.util.Set;
  *   <li>só pessoas avaliam — contas de Estabelecimento, Varejo & Marca e Oficial não ({@code RULE_NO_INSIDER});</li>
  *   <li>o dono nunca avalia o próprio lugar;</li>
  *   <li>a conta precisa estar ativa (e-mail confirmado);</li>
- *   <li>a avaliação sai publicada, sem censura prévia (Marco Civil art. 19); a moderação vem depois (RF13).</li>
+ *   <li>a avaliação sai publicada, sem censura prévia (Marco Civil art. 19); a moderação vem depois (RF13): sinais de
+ *       fraude na criação ({@link ReviewIntegrityService}) podem pô-la em análise, fora da lista e da nota;</li>
+ *   <li>lugar com novas avaliações congeladas (pico suspeito, RF13) recusa avaliação nova com {@code 409};</li>
+ *   <li>quem avalia pode declarar cortesia, convite ou vínculo com o lugar ({@code disclosure}), que muda o peso.</li>
  * </ul>
  */
 @Service
@@ -57,19 +61,22 @@ public class ReviewService {
     private final ReviewRevisionRepository revisions;
     private final UserAccountRepository users;
     private final EstablishmentService establishments;
+    private final ReviewIntegrityService integrity;
     private final Clock clock;
 
     public ReviewService(ReviewRepository reviews, ReviewRevisionRepository revisions, UserAccountRepository users,
-                         EstablishmentService establishments, Clock clock) {
+                         EstablishmentService establishments, ReviewIntegrityService integrity, Clock clock) {
         this.reviews = reviews;
         this.revisions = revisions;
         this.users = users;
         this.establishments = establishments;
+        this.integrity = integrity;
         this.clock = clock;
     }
 
+    /** {@code originHash}: HMAC do IP de quem escreve (ClientInfo), guardado só na criação para o sinal de mesma origem. */
     @Transactional
-    public Saved upsertMine(long viewerId, long establishmentId, ReviewDraft draft) {
+    public Saved upsertMine(long viewerId, long establishmentId, ReviewDraft draft, String originHash) {
         UserAccount author = users.findById(viewerId).orElseThrow(CommonExceptions.Unauthenticated::new);
         Establishment place = establishments.requireVisible(establishmentId, Optional.of(author));
         if (Objects.equals(place.getOwnerId(), viewerId)) {
@@ -83,6 +90,7 @@ public class ReviewService {
         }
         List<String> errors = new ArrayList<>();
         ReviewContent c = EstablishmentRules.review(draft, errors);
+        Review.Disclosure disclosure = disclosure(draft == null ? null : draft.disclosure(), errors);
         if (!errors.isEmpty()) {
             throw new CommonExceptions.Invalid(errors);
         }
@@ -93,9 +101,30 @@ public class ReviewService {
                 throw new CommonExceptions.Conflict("Sua avaliação deste lugar foi removida pela moderação.");
             }
             revisions.save(ReviewRevision.of(r, clock.instant()));
+        } else {
+            integrity.requireNotFrozen(establishmentId);
+            r.setOriginHash(originHash);
         }
         r.write(c.rating(), c.visitMode(), c.dimensions(), c.spentPerPersonCents(), c.body(), clock.instant());
-        return new Saved(view(reviews.saveAndFlush(r), author), existing.isEmpty());
+        r.declare(disclosure);
+        Review saved = reviews.saveAndFlush(r);
+        if (existing.isEmpty()) {
+            integrity.afterNewReview(saved, disclosure);
+        }
+        return new Saved(view(saved, author), existing.isEmpty());
+    }
+
+    /** Vínculo declarado (RF13); ausente = mantém. */
+    static Review.Disclosure disclosure(String code, List<String> errors) {
+        if (code == null || code.isBlank()) {
+            return null;
+        }
+        try {
+            return Review.Disclosure.valueOf(code.strip());
+        } catch (IllegalArgumentException e) {
+            errors.add("Vínculo com o lugar: use NONE, COURTESY, INVITATION ou RELATIONSHIP.");
+            return null;
+        }
     }
 
     @Transactional
@@ -134,6 +163,6 @@ public class ReviewService {
                 new Coded(r.getVisitMode().name(), r.getVisitMode().getLabel(), null), dims,
                 r.getSpentPerPersonCents(), r.getBody(), r.getTrust().name(), r.getEditCount() > 0,
                 new ReviewAuthorView(author.getName(), author.getHandle(), CategoryView.of(author.getUserType())),
-                r.getCreatedAt(), r.getUpdatedAt());
+                r.getCreatedAt(), r.getUpdatedAt(), r.getStatus().name());
     }
 }

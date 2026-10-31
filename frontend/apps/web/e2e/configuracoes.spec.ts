@@ -3,7 +3,7 @@ import { CODIGO_2FA, fixture, problem, SENHA_CERTA } from './support/mock-api';
 import { expect, expectAccessibleInBothThemes, test } from './support/test';
 
 const AVATAR = fileURLToPath(new URL('./fixtures/avatar.png', import.meta.url));
-const SECOES = ['perfil', 'exibicao', 'privacidade', 'seguranca', 'conta'] as const;
+const SECOES = ['perfil', 'exibicao', 'privacidade', 'seguranca', 'denuncias', 'conta'] as const;
 
 test.describe('Configurações: casca', () => {
   test('sem sessão, cada seção vai para o login com voltar', async ({ page }) => {
@@ -20,7 +20,7 @@ test.describe('Configurações: casca', () => {
     await expect(page).toHaveURL(/\/configuracoes$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Configurações' })).toBeFocused();
     const lista = page.getByRole('main').getByRole('navigation', { name: 'Seções das configurações' });
-    await expect(lista.getByRole('link')).toHaveText([/^Perfil/, /^Exibição/, /^Privacidade/, /^Senha e segurança/, /^Conta/]);
+    await expect(lista.getByRole('link')).toHaveText([/^Perfil/, /^Exibição/, /^Privacidade/, /^Senha e segurança/, /^Denúncias e decisões/, /^Conta/]);
     await expectAccessibleInBothThemes(page, 'Configurações (lista)');
 
     await lista.getByRole('link', { name: /^Privacidade/ }).click();
@@ -54,7 +54,7 @@ test.describe('Configurações: casca', () => {
     api.login();
     await page.goto('/conta');
     const atalhos = page.getByRole('region', { name: 'Configurações' });
-    await expect(atalhos.getByRole('link')).toHaveCount(5);
+    await expect(atalhos.getByRole('link')).toHaveCount(6);
     await atalhos.getByRole('link', { name: /^Conta/ }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Conta' })).toBeVisible();
   });

@@ -8,13 +8,17 @@ import { Notice } from '@/components/Form';
 import { IconCopy, IconExternal, IconPlace, IconPrivate } from '@/components/icons';
 import { Avatar } from '@/components/post/PostBits';
 import { PostList } from '@/components/post/PostList';
+import { ProfileSafetyActions } from '@/components/safety/ProfileSafetyActions';
 import { plural } from '@/lib/format';
 import { formatMonthYear } from '@/lib/post-format';
 import { useProfilePosts, usePublicProfile } from '@/lib/post-queries';
 import { useSession } from '@/lib/queries';
 import { copyText } from '@/lib/share';
 
-/** Perfil público (RF15): cabeçalho, links, posts do autor e compartilhar; perfil privado mostra só o mínimo. */
+/**
+ * Perfil público (RF15): cabeçalho, links, posts do autor e compartilhar; perfil privado mostra só o mínimo. O menu
+ * "…" traz Denunciar (RF13), Bloquear e Silenciar (RF19); bloqueado nos dois sentidos, o perfil responde 404.
+ */
 export function ProfileView({ id }: { id: string }) {
   const profile = usePublicProfile(id);
   const name = profile.data?.name;
@@ -77,6 +81,9 @@ function ProfileContent({ profile }: { profile: PublicProfileView }) {
               <AccountBadge code={profile.category.code} label={profile.category.label} />
             </p>
             {profile.pronouns && profile.pronouns.length > 0 && <p className="text-sm text-muted">{profile.pronouns.join(', ')}</p>}
+          </div>
+          <div className="ml-auto flex flex-wrap items-start justify-end gap-2">
+            <ProfileSafetyActions profile={profile} />
           </div>
         </div>
         {closed ? (

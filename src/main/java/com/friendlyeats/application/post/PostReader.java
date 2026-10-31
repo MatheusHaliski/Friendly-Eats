@@ -17,6 +17,7 @@ import com.friendlyeats.application.post.PostViews.PostDetailView;
 import com.friendlyeats.application.post.PostViews.PriceView;
 import com.friendlyeats.application.post.PostViews.RecipeView;
 import com.friendlyeats.application.post.PostViews.ViewerStateView;
+import com.friendlyeats.application.safety.SafetyGuard;
 import com.friendlyeats.domain.model.AccountStatus;
 import com.friendlyeats.domain.model.AgeRating;
 import com.friendlyeats.domain.model.CategoryVerification;
@@ -53,7 +54,9 @@ import java.util.stream.Collectors;
  * Quem vê qual post e como ele aparece (RF14). A regra da página do post é a mesma do feed
  * ({@link PostFeedQueries}): publicado ou arquivado, autor com a conta ativa e o perfil público (o autor sempre se vê)
  * e, se o post é 18+, só com login ({@code 401}) e para maior de 18 ({@code 404} para menor). Nada revela qual regra
- * barrou: inexistente, removido, de perfil privado ou de conta suspensa respondem o mesmo {@code 404}.
+ * barrou: inexistente, removido, de perfil privado ou de conta suspensa respondem o mesmo {@code 404}. Também dão
+ * {@code 404} o post retirado pela moderação (RF13; o autor ainda abre o seu) e o de quem bloqueou quem vê ou foi
+ * bloqueado por ele (RF19).
  */
 @Component
 public class PostReader {
@@ -77,15 +80,17 @@ public class PostReader {
     private final AuthorDirectory authors;
     private final PublicLinks links;
     private final BackgroundService backgrounds;
+    private final SafetyGuard safety;
     private final Clock clock;
 
     public PostReader(PostRepository posts, EstablishmentRepository establishments, AuthorDirectory authors,
-                      PublicLinks links, BackgroundService backgrounds, Clock clock) {
+                      PublicLinks links, BackgroundService backgrounds, SafetyGuard safety, Clock clock) {
         this.posts = posts;
         this.establishments = establishments;
         this.authors = authors;
         this.links = links;
         this.backgrounds = backgrounds;
+        this.safety = safety;
         this.clock = clock;
     }
 
@@ -103,6 +108,9 @@ public class PostReader {
         Post post = posts.findById(postId).filter(p -> p.isVisibleTo(v.id())).orElseThrow(PostReader::notFound);
         if (post.isAuthoredBy(v.id())) {
             return post;
+        }
+        if (post.isModerated() || safety.blockedEitherWay(v.id(), post.getAuthorId())) {
+            throw notFound();
         }
         UserAccount author = authors.find(post.getAuthorId()).filter(AuthorDirectory::isActive)
                 .orElseThrow(PostReader::notFound);

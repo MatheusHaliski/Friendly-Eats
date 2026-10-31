@@ -9,6 +9,7 @@ import com.friendlyeats.application.post.PostViews.FeedPageView;
 import com.friendlyeats.application.profile.ProfileViews.ProfileCardView;
 import com.friendlyeats.application.profile.ProfileViews.ProfilePageView;
 import com.friendlyeats.application.profile.ProfileViews.PublicProfileView;
+import com.friendlyeats.application.safety.SafetyGuard;
 import com.friendlyeats.domain.model.CategoryVerification;
 import com.friendlyeats.domain.model.Post;
 import com.friendlyeats.domain.model.PostStatus;
@@ -30,7 +31,8 @@ import java.util.Optional;
 /**
  * Perfil público, posts do autor e feed de perfis (RF15). O perfil abre só para conta ativa (senão {@code 404}, sem
  * dizer o motivo); perfil privado mostra o mínimo e fecha os posts para quem não é o titular. Menor de 16 tem o perfil
- * privado travado (ECA Digital), então nunca entra no feed de perfis.
+ * privado travado (ECA Digital), então nunca entra no feed de perfis. Bloqueio (RF19) vale nos dois sentidos: o perfil
+ * e os posts respondem {@code 404} e a conta some da busca de perfis, sem revelar o bloqueio.
  */
 @Service
 @Transactional(readOnly = true)
@@ -44,14 +46,16 @@ public class PublicProfileService {
     private final PostRepository posts;
     private final ProfileDirectoryQueries directory;
     private final PublicLinks links;
+    private final SafetyGuard safety;
 
     public PublicProfileService(AuthorDirectory authors, PostReader reader, PostRepository posts,
-                                ProfileDirectoryQueries directory, PublicLinks links) {
+                                ProfileDirectoryQueries directory, PublicLinks links, SafetyGuard safety) {
         this.authors = authors;
         this.reader = reader;
         this.posts = posts;
         this.directory = directory;
         this.links = links;
+        this.safety = safety;
     }
 
     public PublicProfileView profile(long userId, Optional<Long> viewerId) {
@@ -65,7 +69,7 @@ public class PublicProfileService {
         }
         return new PublicProfileView(u.getId(), u.getName(), u.getHandle(), badge, verified, authors.isPrivate(u),
                 links.mediaUrl(u.getPhotoObjectKey()), u.getBio(), u.getPronouns(), u.getLinks(), city(u), uf(u),
-                u.getCreatedAt(), posts.countByAuthorIdAndStatusIn(u.getId(), PostStatus.PUBLIC),
+                u.getCreatedAt(), posts.countByAuthorIdAndStatusInAndModerationStateIsNull(u.getId(), PostStatus.PUBLIC),
                 "/api/v1/users/" + u.getId() + "/posts", links.profileShareUrl(u.getId()));
     }
 
@@ -88,7 +92,8 @@ public class PublicProfileService {
     }
 
     /** {@code GET /api/v1/users?type=&city=&q=&cursor=&size=}: o feed de perfis ({@code FeedType.PROFILE}). */
-    public ProfilePageView profiles(String typeCode, String city, String q, String cursor, Integer size) {
+    public ProfilePageView profiles(String typeCode, String city, String q, String cursor, Integer size,
+                                    Optional<Long> viewerId) {
         UserCategoryEnum type = typeCode == null || typeCode.isBlank() ? null
                 : Arrays.stream(UserCategoryEnum.values()).filter(c -> c.name().equals(typeCode.strip())).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de conta desconhecido: " + typeCode + "."));
@@ -99,7 +104,7 @@ public class PublicProfileService {
         }
         int limit = size(size);
         List<Long> ids = directory.page(new ProfileDirectoryQueries.Filter(type, c, text, decode(cursor)),
-                authors.minorBirthAfter(), limit + 1);
+                authors.minorBirthAfter(), viewerId.orElse(null), limit + 1);
         boolean hasMore = ids.size() > limit;
         List<Long> page = hasMore ? ids.subList(0, limit) : ids;
         Map<Long, UserAccount> byId = authors.findAll(page);
@@ -115,6 +120,7 @@ public class PublicProfileService {
     private UserAccount visibleAccount(long userId, Optional<Long> viewerId) {
         boolean self = viewerId.filter(id -> id == userId).isPresent();
         return authors.find(userId).filter(u -> self || AuthorDirectory.isActive(u))
+                .filter(u -> self || !safety.blockedEitherWay(viewerId.orElse(null), userId))
                 .orElseThrow(() -> new CommonExceptions.NotFound("Perfil não encontrado."));
     }
 

@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { BrowserContext, Page, Route } from '@playwright/test';
+import { ModerationState } from './mock-moderation';
 import { PostsState } from './mock-posts';
 import type {
   ConsentList,
@@ -96,6 +97,8 @@ export class MockApi {
   private ownedPlaces: Map<string, EstablishmentView> | null = null;
   /** Posts, comentários, perfis e moldura (RF9 · RF12 · RF14 · RF15 · RF16). */
   readonly posts: PostsState = this.makePosts();
+  /** Moderação e segurança entre usuários (RF13 · RF19). */
+  readonly moderation: ModerationState = this.makeModeration();
   private overrides: Array<{ method: string; pattern: RegExp; handler: Handler }> = [];
 
   constructor(
@@ -111,6 +114,16 @@ export class MockApi {
         return host.session;
       },
       uploads: () => (host.session ? host.account.uploads : null),
+    });
+  }
+
+  private makeModeration(): ModerationState {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- o estado da moderação lê a sessão atual
+    const host = this;
+    return new ModerationState(fixture, {
+      get session() {
+        return host.session;
+      },
     });
   }
 
@@ -304,6 +317,9 @@ export class MockApi {
     const ownedMatch = /^\/api\/v1\/establishments\/(\d+)$/.exec(p);
     if (ownedMatch && m === 'PATCH') return this.savePlace(ownedMatch[1]!, rec.body as EstablishmentDraft);
     if (ownedMatch && m === 'GET' && this.owned().has(ownedMatch[1]!)) return { status: 200, body: this.owned().get(ownedMatch[1]!) };
+
+    const moderationReply = this.moderation.handle(rec);
+    if (moderationReply) return moderationReply;
 
     const postsReply = this.posts.handle(rec);
     if (postsReply) return postsReply;
@@ -748,7 +764,8 @@ export class MockApi {
         dimensions: draft.dimensions ?? {},
         spentPerPersonCents: draft.spentPerPersonCents,
         body: draft.body,
-        trust: 'REVIEW_UNVERIFIED',
+        trust: draft.disclosure === 'COURTESY' || draft.disclosure === 'INVITATION' ? 'REVIEW_INCENTIVIZED' : draft.disclosure === 'RELATIONSHIP' ? 'REVIEW_CONFLICT' : 'REVIEW_UNVERIFIED',
+        status: 'PUBLISHED',
         edited: !!current,
         author: { name: this.session.name, handle: this.session.handle, category: this.session.category },
         createdAt: current?.createdAt ?? now,

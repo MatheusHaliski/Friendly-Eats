@@ -35,12 +35,14 @@ tracejada).
 | [RF10](RF10/README.md) | Buscar e filtrar estabelecimentos (taxonomia, preço, estrelas e raio) | 🟡 parcial |
 | [RF11](RF11/README.md) | Página do estabelecimento: horários, cobranças, facetas e botões de ação | 🟡 parcial |
 | [RF12](RF12/README.md) | Interações: curtir, salvar, comentar e compartilhar | 🟡 parcial |
+| [RF13](RF13/README.md) | Moderação: denúncia, decisão motivada, recurso e integridade das avaliações | 🟡 parcial |
 | [RF14](RF14/README.md) | Feed e página do post, com o ranking em alta | 🟡 parcial |
 | [RF15](RF15/README.md) | Perfil público e feed de perfis | 🟡 parcial |
 | [RF16](RF16/README.md) | Moldura do post (estúdio de moldura) | 🟡 parcial |
+| [RF19](RF19/README.md) | Segurança entre usuários: bloquear, silenciar e palavras filtradas | 🟡 parcial |
 
-Próximos (seguem a [taxonomia](TAXONOMIA_FRIENDLY_EATS.md#13-mapa-para-os-rfs)): RF13 moderação e avaliações falsas ·
-RF20 gestão da página (a equipe entra pelo `PlaceEditors` do RF11). Do RF9 e do RF12 ainda faltam o cardápio com alergênicos por item,
+Próximos (seguem a [proposta](PESQUISA_REQUISITOS.md#3-proposta-de-rfs)): RF20 gestão da página (a equipe entra pelo
+`PlaceEditors` do RF11) e os demais da proposta. Do RF9 e do RF12 ainda faltam o cardápio com alergênicos por item,
 seguir perfis e a resposta identificada do dono.
 
 ## Outros documentos

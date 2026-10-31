@@ -49,6 +49,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return problem(HttpStatus.CONFLICT, "Ação não disponível agora", e.getMessage());
     }
 
+    @ExceptionHandler(CommonExceptions.TooManyRequests.class)
+    ResponseEntity<ProblemDetail> commonTooMany(CommonExceptions.TooManyRequests e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, Long.toString(Math.max(1, e.retryAfter().toSeconds())))
+                .body(problem(HttpStatus.TOO_MANY_REQUESTS, "Muitos pedidos", e.getMessage()));
+    }
+
     // ------------------------------------------------------------ envio de foto (RF2, RF9)
 
     @ExceptionHandler(MediaExceptions.Forbidden.class)
