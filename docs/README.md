@@ -37,6 +37,7 @@ tracejada).
 | [RF14](RF14/README.md) | Feed e página do post, com o ranking em alta | 🟡 parcial |
 | [RF15](RF15/README.md) | Perfil público e feed de perfis | 🟡 parcial |
 | [RF16](RF16/README.md) | Moldura do post (estúdio de moldura) | 🟡 parcial |
+| [RF17](RF17/README.md) | Verificação de idade e conta do responsável | 🟡 parcial |
 
 Próximos (seguem a [taxonomia](TAXONOMIA_FRIENDLY_EATS.md#13-mapa-para-os-rfs)): RF11 página do estabelecimento,
 com as facetas · RF13 moderação e avaliações falsas. Do RF9 e do RF12 ainda faltam o cardápio com alergênicos por item,

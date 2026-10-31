@@ -40,6 +40,7 @@ stateDiagram-v2
     end note
     note left of NoAr
         200. Tipo principal 18+: 401 sem sessão,
+        403 sem a idade verificada (RF17),
         404 para menor de 18.
     end note
 ```

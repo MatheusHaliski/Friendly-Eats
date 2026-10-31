@@ -1,6 +1,7 @@
 package com.friendlyeats.api;
 
 import com.friendlyeats.application.account.AccountExceptions;
+import com.friendlyeats.application.age.AgeExceptions;
 import com.friendlyeats.application.media.MediaExceptions;
 import com.friendlyeats.application.common.CommonExceptions;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -47,6 +48,21 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(CommonExceptions.Conflict.class)
     ProblemDetail commonConflict(CommonExceptions.Conflict e) {
         return problem(HttpStatus.CONFLICT, "Ação não disponível agora", e.getMessage());
+    }
+
+    // ------------------------------------------------------------ idade verificada (RF17)
+
+    /** 403 que a tela reconhece por {@code ageVerificationRequired} para mostrar o botão "Verificar idade". */
+    @ExceptionHandler(AgeExceptions.VerificationRequired.class)
+    ProblemDetail ageVerificationRequired(AgeExceptions.VerificationRequired e) {
+        ProblemDetail p = problem(HttpStatus.FORBIDDEN, "Verifique a idade", e.getMessage());
+        p.setProperty("ageVerificationRequired", true);
+        return p;
+    }
+
+    @ExceptionHandler(AgeExceptions.ProviderUnavailable.class)
+    ProblemDetail ageProviderUnavailable(AgeExceptions.ProviderUnavailable e) {
+        return problem(HttpStatus.SERVICE_UNAVAILABLE, "Indisponível", e.getMessage());
     }
 
     // ------------------------------------------------------------ envio de foto (RF2, RF9)

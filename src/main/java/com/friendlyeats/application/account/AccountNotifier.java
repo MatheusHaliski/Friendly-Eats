@@ -21,4 +21,29 @@ public interface AccountNotifier {
     void deletionScheduled(UserAccount user, Instant deletionAt);
 
     void accountReactivated(UserAccount user);
+
+    // ------------------------------------------------------------ RF17 · idade e responsável
+
+    /** Convite ao responsável (ECA Digital, art. 24): o link leva o token de uso único. */
+    void guardianInvite(String guardianEmail, UserAccount minor, String token, Instant expiresAt);
+
+    /** Ao menor: a supervisão do responsável está ativa (art. 17, III). */
+    void guardianLinked(UserAccount minor, UserAccount guardian);
+
+    /** Ao menor: o convite ao responsável segue sem resposta há {@code days} dias. */
+    void guardianLinkPending(UserAccount minor, long days);
+
+    /** Ao responsável: o menor pediu para afrouxar uma proteção. */
+    void guardianRequest(UserAccount guardian, UserAccount minor, String protectionLabel);
+
+    /** Contestação da idade aferida decidida por uma pessoa (Decreto 12.880, art. 27). */
+    void ageAppealDecided(UserAccount user, boolean accepted);
+
+    // ------------------------------------------------------------ RF18 · central do titular
+
+    /** Pedido de exportação registrado: aviso de segurança, para o caso de sessão sequestrada. */
+    void dataExportRequested(UserAccount user, Instant dueAt);
+
+    /** Exportação pronta para baixar até {@code expiresAt}. */
+    void dataExportReady(UserAccount user, Instant expiresAt);
 }

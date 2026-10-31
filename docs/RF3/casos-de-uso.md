@@ -11,12 +11,16 @@ flowchart LR
     UC4(["Aceitar nova versão da política ⏳"]):::planned
     UC5(["Nascer com tudo desligado ✅<br/>no cadastro"])
     UC6(["Ter finalidades travadas ✅<br/>até 16: localização · feed · marketing<br/>até 18: dado sensível"])
+    UC8(["Responsável consente o dado sensível ✅<br/>painel do RF17"])
+    RS["Responsável vinculado"]:::actor
     UC7(["Guardar estilos alimentares ✅<br/>só com o consentimento sensível"])
 
     SYS["Perfil (RF2)<br/>estilos · localização"]:::actor
 
     T --- UC1 & UC2 & UC3 & UC4 & UC7
     M --- UC6
+    RS --- UC8
+    UC8 -. «extend» destrava .-> UC6
     UC5 -. «include» .-> UC1
     UC6 -. «extend» .-> UC2
     UC3 --- SYS

@@ -25,7 +25,7 @@ paths:
 |---|---|
 | **Taxonomia** | Os mesmos códigos de [`TAXONOMIA_FRIENDLY_EATS.md`](../TAXONOMIA_FRIENDLY_EATS.md): culinária (seção 3), formato (4), tipo e grupo (7), estilo (6), preço (9), estrelas (10) e local (11) |
 | **LGPD** | A coordenada de quem busca é usada só na requisição (Art. 7º, V; Art. 6º, III): não é gravada nem vai para log. Lugar com endereço aproximado é medido até o ponto público arredondado, e a distância sai de 0,5 em 0,5 km |
-| **ECA Digital / Termos** | Lugar com foco em bebida alcoólica não aparece para visitante sem login nem para menor de 18 |
+| **ECA Digital / Termos** | Lugar com foco em bebida alcoólica não aparece para visitante sem login, para menor de 18 nem para adulto sem a idade verificada ([RF17](../RF17/README.md); Decreto 12.880, art. 19) |
 | **Status** | 🟡 Parcial: filtros, raio, ordenações e cards prontos e testados; sugestões, cache no Valkey, C por categoria e município e mapa ainda não |
 
 ## Critérios de aceite
@@ -51,7 +51,7 @@ paths:
    `DISTANCE` sem localização dão `422` com todos os erros juntos. **Nenhum texto do pedido entra no SQL**: os códigos são conferidos contra a taxonomia, os valores vão
    como parâmetros nomeados (`:c0`, `:chipC0`…, com índice, nunca com o texto recebido) e o SQL só junta constantes.
 2. **Só páginas públicas**: lugar `ACTIVE` (fechado sai), conta dona `ACTIVE` e selo **`VERIFIED`**. Lugar com foco em
-   bebida alcoólica só para adulto logado.
+   bebida alcoólica só para adulto logado com a idade verificada (`AgeGate`, [RF17](../RF17/README.md)).
 3. **Raio**: o pré-filtro usa o índice GiST (`ST_DWithin` com folga de 600 m) e a distância final é medida até o
    **ponto público** — exato em `ADDR_PUBLIC_FULL`, centro da célula de 0,005° em `ADDR_PUBLIC_BAIRRO` ou quando a conta
    dona é cozinha caseira. Lugar `ADDR_HIDDEN` não entra na busca por raio. `distanceKm` tem uma casa; no endereço
@@ -77,7 +77,7 @@ paths:
 
 | Camada | Artefato | Situação |
 |---|---|---|
-| Aplicação | `EstablishmentSearch` (filtros, SQL com PostGIS e as fórmulas de nota e preço, cards); `EstablishmentService.price`, `rating`, `location` e `classification` reaproveitados ([RF6](../RF6/README.md)); `ReviewRepository.findCountingIn` ([RF8](../RF8/README.md)) | ✅ |
+| Aplicação | `EstablishmentSearch` (filtros, 18+ pelo `AgeGate`, SQL com PostGIS e as fórmulas de nota e preço, cards); `EstablishmentService.price`, `rating`, `location` e `classification` reaproveitados ([RF6](../RF6/README.md)); `ReviewRepository.findCountingIn` ([RF8](../RF8/README.md)) | ✅ |
 | Persistência | índices da V2: GiST em `establishment.point`, GIN `jsonb_path_ops` em `cuisines_all` e `formats_all`, trigram no nome | ✅ |
 | API | `GET /api/v1/establishments` em `EstablishmentController`; GET público no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Tela | app web: Explorar em `/` (busca por nome, chips, culinária específica, tipo de comida, preço com o rótulo em reais, nota mínima, estilos, "perto de mim" com raio e aviso de que a localização não é guardada, ordem e paginação). Os filtros ficam na URL; a coordenada só na memória da página, arredondada a ~110 m; mudar um filtro ou ligar/desligar "perto de mim" volta para a primeira página; e2e `explorar.spec.ts` com axe | ✅ |

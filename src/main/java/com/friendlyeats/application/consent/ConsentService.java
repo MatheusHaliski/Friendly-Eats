@@ -4,6 +4,7 @@ import com.friendlyeats.application.account.AccountExceptions;
 import com.friendlyeats.application.account.AgePolicy;
 import com.friendlyeats.application.account.LegalDocuments;
 import com.friendlyeats.application.common.CommonExceptions;
+import com.friendlyeats.application.guardian.GuardianConsents;
 import com.friendlyeats.domain.model.ConsentPurpose;
 import com.friendlyeats.domain.model.UserAccount;
 import com.friendlyeats.infrastructure.persistence.postgres.UserAccountRepository;
@@ -23,7 +24,8 @@ import java.util.Map;
  * RF3 · consentimentos (LGPD Art. 7º, I · Art. 8º, §5º · Art. 11). Ligar e desligar é igualmente fácil; cada mudança
  * gera uma linha nova em {@code consent_event} (append-only) e o estado atual vem de {@code user_consent_current}.
  * Desligar tem efeito imediato na mesma transação: SENSITIVE_PROFILE_DATA apaga os estilos alimentares e
- * LOCATION_TRACKING apaga a última localização salva.
+ * LOCATION_TRACKING apaga a última localização salva. Para o menor de 18, SENSITIVE_PROFILE_DATA destrava com o
+ * consentimento do responsável vinculado ({@link GuardianConsents}, RF17).
  */
 @Service
 public class ConsentService {
@@ -32,12 +34,15 @@ public class ConsentService {
     private final JdbcTemplate jdbc;
     private final LegalDocuments legal;
     private final AgePolicy age;
+    private final GuardianConsents guardians;
 
-    public ConsentService(UserAccountRepository users, JdbcTemplate jdbc, LegalDocuments legal, AgePolicy age) {
+    public ConsentService(UserAccountRepository users, JdbcTemplate jdbc, LegalDocuments legal, AgePolicy age,
+                          GuardianConsents guardians) {
         this.users = users;
         this.jdbc = jdbc;
         this.legal = legal;
         this.age = age;
+        this.guardians = guardians;
     }
 
     public record ConsentView(ConsentPurpose purpose, String label, String description, String legalBasis,
@@ -141,7 +146,8 @@ public class ConsentService {
         return switch (p.getMinorRule()) {
             case NONE -> false;
             case UNDER_16 -> age.protectedMinor(u.getUserDateOfBirth());
-            case UNDER_18 -> !age.adult(u.getUserDateOfBirth());
+            // com o consentimento do responsável vinculado (RF17), o menor de 18 pode ligar (LGPD Art. 14, §1º)
+            case UNDER_18 -> !age.adult(u.getUserDateOfBirth()) && !guardians.sensitiveDataConsented(u.getId());
         };
     }
 

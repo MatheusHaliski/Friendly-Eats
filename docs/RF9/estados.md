@@ -54,5 +54,6 @@ stateDiagram-v2
     note right of Adulto
         Alerta sanitário nunca fica 18+.
         Menor de 18 não publica 18+.
+        Ver exige a idade verificada (RF17).
     end note
 ```

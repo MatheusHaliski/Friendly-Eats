@@ -1,5 +1,6 @@
 package com.friendlyeats.application.post;
 
+import com.friendlyeats.application.age.AgeGate;
 import com.friendlyeats.application.background.BackgroundService;
 import com.friendlyeats.application.common.CommonExceptions;
 import com.friendlyeats.application.common.PublicLinks;
@@ -52,16 +53,15 @@ import java.util.stream.Collectors;
 /**
  * Quem vê qual post e como ele aparece (RF14). A regra da página do post é a mesma do feed
  * ({@link PostFeedQueries}): publicado ou arquivado, autor com a conta ativa e o perfil público (o autor sempre se vê)
- * e, se o post é 18+, só com login ({@code 401}) e para maior de 18 ({@code 404} para menor). Nada revela qual regra
+ * e, se o post é 18+, só com login ({@code 401}), com a idade verificada ({@code 403} com
+ * {@code ageVerificationRequired}, RF17) e para maior de 18 ({@code 404} para menor). Nada revela qual regra
  * barrou: inexistente, removido, de perfil privado ou de conta suspensa respondem o mesmo {@code 404}.
  */
 @Component
 public class PostReader {
 
     static final int EXCERPT = 160;
-    static final String ADULTS_ONLY = "Entre na sua conta para ver: conteúdo de bebida alcoólica é só para maiores de 18.";
-
-    /** Quem está vendo: {@code account} nulo = visitante. */
+    /** Quem está vendo: {@code account} nulo = visitante; {@code adult} = vê bebida (18+ verificado, RF17). */
     public record Viewer(UserAccount account, boolean adult) {
         public Long id() {
             return account == null ? null : account.getId();
@@ -77,15 +77,17 @@ public class PostReader {
     private final AuthorDirectory authors;
     private final PublicLinks links;
     private final BackgroundService backgrounds;
+    private final AgeGate ageGate;
     private final Clock clock;
 
     public PostReader(PostRepository posts, EstablishmentRepository establishments, AuthorDirectory authors,
-                      PublicLinks links, BackgroundService backgrounds, Clock clock) {
+                      PublicLinks links, BackgroundService backgrounds, AgeGate ageGate, Clock clock) {
         this.posts = posts;
         this.establishments = establishments;
         this.authors = authors;
         this.links = links;
         this.backgrounds = backgrounds;
+        this.ageGate = ageGate;
         this.clock = clock;
     }
 
@@ -110,12 +112,8 @@ public class PostReader {
             throw notFound();
         }
         if (post.getAgeRating() == AgeRating.AGE_18) {
-            if (v.anonymous()) {
-                throw new CommonExceptions.Unauthenticated(ADULTS_ONLY);
-            }
-            if (!v.adult()) {
-                throw notFound();
-            }
+            // visitante 401; maior sem verificação 403 (ageVerificationRequired); menor 404
+            ageGate.requireAlcoholAccess(v.account(), PostReader::notFound);
         }
         return post;
     }

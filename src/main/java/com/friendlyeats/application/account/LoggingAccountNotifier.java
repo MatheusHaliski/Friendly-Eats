@@ -53,6 +53,43 @@ public class LoggingAccountNotifier implements AccountNotifier {
         log.info("Aviso de conta reativada para {}", mask(user.getEmail()));
     }
 
+    @Override
+    public void guardianInvite(String guardianEmail, UserAccount minor, String token, Instant expiresAt) {
+        log.info("Convite de responsável enviado para {} (menor {}, vale até {}){}", mask(guardianEmail), minor.getId(),
+                expiresAt, logCodes ? " (dev: /configuracoes/idade?convite=" + token + ")" : "");
+    }
+
+    @Override
+    public void guardianLinked(UserAccount minor, UserAccount guardian) {
+        log.info("Aviso de supervisão ativa para {}", mask(minor.getEmail()));
+    }
+
+    @Override
+    public void guardianLinkPending(UserAccount minor, long days) {
+        log.info("Aviso de vínculo com o responsável pendente há {} dias para {}", days, mask(minor.getEmail()));
+    }
+
+    @Override
+    public void guardianRequest(UserAccount guardian, UserAccount minor, String protectionLabel) {
+        log.info("Pedido do menor {} ({}) avisado ao responsável {}", minor.getId(), protectionLabel,
+                mask(guardian.getEmail()));
+    }
+
+    @Override
+    public void ageAppealDecided(UserAccount user, boolean accepted) {
+        log.info("Contestação de idade {} avisada a {}", accepted ? "aceita" : "recusada", mask(user.getEmail()));
+    }
+
+    @Override
+    public void dataExportRequested(UserAccount user, Instant dueAt) {
+        log.info("Aviso de pedido de exportação (prazo {}) para {}", dueAt, mask(user.getEmail()));
+    }
+
+    @Override
+    public void dataExportReady(UserAccount user, Instant expiresAt) {
+        log.info("Aviso de exportação pronta (até {}) para {}", expiresAt, mask(user.getEmail()));
+    }
+
     static String mask(String email) {
         if (email == null || !email.contains("@")) {
             return "***";

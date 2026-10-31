@@ -13,7 +13,7 @@ flowchart TD
     K -- sim --> D{PostKind.denialFor<br/>tipo de conta e selo}
     D -- recusa --> E403[403 · quem publica este tipo]
     D -- pode --> L{establishmentId?}
-    L -- sim --> V{Lugar visível para o autor?<br/>regras do RF6 e 18+}
+    L -- sim --> V{Lugar visível para o autor?<br/>regras do RF6 e 18+ verificado · RF17}
     V -- não --> ERR
     V -- sim --> O
     L -- não --> O{Prato do dia ou<br/>promoção do dono?}

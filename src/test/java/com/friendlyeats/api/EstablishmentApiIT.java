@@ -89,6 +89,7 @@ class EstablishmentApiIT {
                 Map.of("informalFormat", "COZINHA_CASEIRA", "cpf", "52998224725", "tradeName", "Marmitas da Lu",
                         "city", "Recife", "state", "PE")));
         ana = save(person("Ana Ribeiro", "ana@example.com", LocalDate.of(1994, 5, 2)));
+        com.friendlyeats.support.AgeFixtures.verifiedAdult(jdbc, ana.getId());   // RF17: vê o bar
         teen = save(person("Duda", "duda@example.com", LocalDate.now().minusYears(15)));
     }
 
@@ -315,6 +316,10 @@ class EstablishmentApiIT {
         ResponseEntity<Map> anonymous = new ApiClient(port).get("/api/v1/establishments/" + bar);
         assertThat(anonymous.getStatusCode().value()).isEqualTo(401);
         assertThat((String) anonymous.getBody().get("detail")).contains("maiores de 18");
+        // RF17: adulto pela data declarada, sem verificação: 403 com o pedido de verificar a idade
+        ResponseEntity<Map> notVerified = send(HttpMethod.GET, "/api/v1/establishments/" + bar, market, null);
+        assertThat(notVerified.getStatusCode().value()).isEqualTo(403);
+        assertThat(notVerified.getBody()).containsEntry("ageVerificationRequired", true);
         assertThat(send(HttpMethod.GET, "/api/v1/establishments/" + bar, teen, null).getStatusCode().value()).isEqualTo(404);
         assertThat(send(HttpMethod.PUT, "/api/v1/establishments/" + bar + "/reviews/me", teen, five)
                 .getStatusCode().value()).isEqualTo(404);

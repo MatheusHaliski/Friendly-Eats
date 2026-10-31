@@ -25,6 +25,8 @@ public class CapturingNotifier {
     public static class Captured implements AccountNotifier {
         public final Map<String, String> codes = new ConcurrentHashMap<>();
         public final List<String> events = new CopyOnWriteArrayList<>();
+        /** Último token de convite por e-mail do responsável (RF17). */
+        public final Map<String, String> guardianTokens = new ConcurrentHashMap<>();
 
         @Override
         public void verificationCode(UserAccount user, String code) {
@@ -54,6 +56,42 @@ public class CapturingNotifier {
         @Override
         public void accountReactivated(UserAccount user) {
             events.add("reactivated:" + user.getEmail());
+        }
+
+        @Override
+        public void guardianInvite(String guardianEmail, UserAccount minor, String token, Instant expiresAt) {
+            guardianTokens.put(guardianEmail, token);
+            events.add("guardian-invite:" + guardianEmail);
+        }
+
+        @Override
+        public void guardianLinked(UserAccount minor, UserAccount guardian) {
+            events.add("guardian-linked:" + minor.getEmail());
+        }
+
+        @Override
+        public void guardianLinkPending(UserAccount minor, long days) {
+            events.add("guardian-pending:" + minor.getEmail());
+        }
+
+        @Override
+        public void guardianRequest(UserAccount guardian, UserAccount minor, String protectionLabel) {
+            events.add("guardian-request:" + guardian.getEmail());
+        }
+
+        @Override
+        public void ageAppealDecided(UserAccount user, boolean accepted) {
+            events.add("age-appeal-" + accepted + ":" + user.getEmail());
+        }
+
+        @Override
+        public void dataExportRequested(UserAccount user, Instant dueAt) {
+            events.add("export-requested:" + user.getEmail());
+        }
+
+        @Override
+        public void dataExportReady(UserAccount user, Instant expiresAt) {
+            events.add("export-ready:" + user.getEmail());
         }
     }
 }

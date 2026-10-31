@@ -43,7 +43,7 @@ paths:
 |---|---|
 | **Origem** | RF24 e RF25 da Orange Social (página do post, cursor `(created_at, id)`, 404 sem dizer o motivo) e o Trending Score no Valkey (ADR-03 de lá) |
 | **Base legal (LGPD)** | Art. 7º, V. O autor aparece com nome, @, bolinha e selo; conta eliminada vira "Conta excluída", sem link. Perfil privado não entra no feed |
-| **ECA Digital / Termos** | Post 18+ (bebida alcoólica) não aparece para o visitante nem para o menor de 18, a mesma regra da página do lugar ([RF6](../RF6/README.md)) |
+| **ECA Digital / Termos** | Post 18+ (bebida alcoólica) não aparece para o visitante, para o menor de 18 nem para o adulto sem a idade verificada ([RF17](../RF17/README.md)), a mesma regra da página do lugar ([RF6](../RF6/README.md)) |
 | **Status** | 🟡 Parcial: página do post, feed com cursor e filtros, posts do lugar, "em alta" com recálculo, telas do feed (abas e segmentos) e da página do post e testes prontos; timeline no Cassandra, feed de quem eu sigo, descoberta local por distância e visualizações únicas ainda não |
 
 ## Critérios de aceite
@@ -51,7 +51,9 @@ paths:
 1. **Página do post** (`GET /api/v1/posts/{id}`, pública). Abre com status `PUBLISHED` ou `ARCHIVED`, autor com a
    conta `ACTIVE` e o perfil público; o autor sempre vê o próprio post. Fora disso (inexistente, removido, rascunho
    de outro, autor suspenso ou em exclusão, perfil privado), `404` sem dizer qual. Post `AGE_18`: o visitante recebe
-   `401` ("Entre na sua conta para ver: conteúdo de bebida alcoólica é só para maiores de 18.") e o menor, `404`.
+   `401` ("Entre na sua conta e verifique a idade para ver: conteúdo de bebida alcoólica é só para maiores de 18."),
+   o adulto sem a idade verificada, `403` com `ageVerificationRequired: true` ([RF17](../RF17/README.md)), e o
+   menor, `404`.
 2. **O que a página mostra** (`PostDetailView`): tipo com ícone e forma da borda, foto com `altText`, lugar citado
    (só se a página dele estiver no ar para quem vê), culinária, formato, estilos, alergênicos com nível, advertências e
    o aviso `allergenNotice`, classificação com rótulo, chip Publicidade, vigência, preço com o texto pronto ("De R$
@@ -60,7 +62,7 @@ paths:
    [RF16](../RF16/README.md)).
 3. **Feed** (`GET /api/v1/posts?feed=POST|ALERT&kind=&establishmentId=&cursor=&size=`, público): só `PUBLISHED`, sem
    os encerrados (`expires_at` no passado), de autores ativos com perfil público (o próprio autor se vê), e para o
-   visitante e o menor de 18 só `LIVRE`. Mais novos primeiro, paginação por cursor opaco `(created_at, id)`:
+   visitante, o menor de 18 e o adulto sem a idade verificada só `LIVRE`. Mais novos primeiro, paginação por cursor opaco `(created_at, id)`:
    `nextCursor` nulo é o fim; cursor inválido dá `400`. `feed` padrão `POST`; `PROFILE` dá `400` (fica no
    [RF15](../RF15/README.md)); `size` de 1 a 50 (padrão 20). O card (`PostCardView`) não traz o texto corrido (só
    `excerpt`, até 160 caracteres) nem a receita.
@@ -106,7 +108,7 @@ paths:
 | Camada | Artefato | Situação |
 |---|---|---|
 | Domínio | `FeedType` (`PROFILE`, `POST`, `ALERT`) | ✅ |
-| Regras | `PostReader` (quem vê, 401/404 do 18+, lugar no ar, montagem da página e dos cards sem N+1), `AuthorDirectory` (conta ativa, perfil privado com os padrões do cadastro, `AuthorView`), `FeedCursor`, `PostQueryService` (feed, lugar, em alta) | ✅ |
+| Regras | `PostReader` (quem vê, 401/403/404 do 18+ pelo `AgeGate` do RF17, lugar no ar, montagem da página e dos cards sem N+1), `AuthorDirectory` (conta ativa, `adult` = 18+ verificado, perfil privado com os padrões do cadastro, `AuthorView`), `FeedCursor`, `PostQueryService` (feed, lugar, em alta) | ✅ |
 | Persistência | `PostFeedQueries` (SQL com a regra de visibilidade em `VISIBLE` e índices `idx_post_feed` e `idx_post_establishment` da V3) | ✅ |
 | Cache | `TrendingScoreCalculator` (fórmula da Orange), `TrendingScoreRepository` (ZSET por feed e por tipo de conta, TTL 72 h), `TrendingService` (depois do commit, melhor esforço), `TrendingJob` (10 min, desligável com `friendly-eats.jobs.enabled`) | ✅ |
 | API | `PostFeedController`: `GET /api/v1/posts`, `/api/v1/posts/{id}`, `/api/v1/posts/trending`, `/api/v1/establishments/{id}/posts`; GET públicos no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |

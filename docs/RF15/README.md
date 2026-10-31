@@ -38,7 +38,7 @@ paths:
    menor de 16).
 3. **Posts do autor** (`GET /api/v1/users/{id}/posts?cursor=&size=`): publicados e arquivados (os encerrados com
    `expired: true`), dos mais novos aos mais antigos, com o cursor do [RF14](../RF14/README.md). Os 18+ só para quem tem
-   18 anos ou mais (ou o próprio autor). Perfil privado: `403` para quem não é o titular. Cursor inválido: `400`.
+   18 anos ou mais com a idade verificada ([RF17](../RF17/README.md)) ou para o próprio autor. Perfil privado: `403` para quem não é o titular. Cursor inválido: `400`.
 4. **Feed de perfis** (`GET /api/v1/users?type=&city=&q=&cursor=&size=`, `FeedType.PROFILE`, público): só contas
    ativas com o perfil público; organizações (`ESTABELECIMENTO`, `VAREJO`, `OFICIAL`) só com o selo `VERIFIED`, para
    uma conta "Anvisa" sem selo não aparecer na vitrine. Dos mais novos aos mais antigos (cursor opaco pelo id).
@@ -64,7 +64,7 @@ paths:
 
 | Camada | Artefato | Situação |
 |---|---|---|
-| Regras | `PublicProfileService` (conta ativa, perfil privado, cidade de atuação, 18+ nos posts, cursor do feed de perfis), `AccountBadge` (cor, glifo e ícone dos 7 tipos), `ProfileViews` | ✅ |
+| Regras | `PublicProfileService` (conta ativa, perfil privado, cidade de atuação, 18+ verificado nos posts (via `AuthorDirectory.adult`, RF17), cursor do feed de perfis), `AccountBadge` (cor, glifo e ícone dos 7 tipos), `ProfileViews` | ✅ |
 | Persistência | `ProfileDirectoryQueries` (conta ativa, perfil público pelos padrões do cadastro, organizações com selo, `f_unaccent` na cidade e no nome); `PostRepository.findProfileFeed` ([RF9](../RF9/README.md)) | ✅ |
 | API | `UserProfileController`: `GET /api/v1/users`, `/api/v1/users/{id}/profile`, `/api/v1/users/{id}/posts`; GET públicos no `SecurityConfig` ([RF4](../RF4/README.md)) | ✅ |
 | Testes | `UserProfileApiIT.profileShowsOnlyPublicDataAndTheAuthorsPostsPageByCursor`, `UserProfileApiIT.privateProfileShowsTheMinimumAndClosesThePostsExceptForTheHolder`, `UserProfileApiIT.profileFeedListsActivePublicAccountsWithBadgeAndSealAndFilters` | ✅ |

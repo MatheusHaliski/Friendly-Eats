@@ -35,7 +35,7 @@ paths:
 |---|---|
 | **Base legal (LGPD)** | Os dados do estabelecimento não são dado pessoal (Art. 5º, I). A exceção é a cozinha caseira com CPF, em que o endereço é a casa do titular: o público vê só o bairro e um ponto arredondado (Art. 6º, III, necessidade) |
 | **Consumidor (CDC)** | A faixa de preço é informação ao consumidor (art. 6º, III). Com 5 relatos ou mais, a faixa vem das avaliações e não do dono, o que dificulta a faixa enganosa (art. 37, §1º) |
-| **Termos de Uso / ECA Digital** | Página de tipo com foco em bebida alcoólica é só para maiores de 18: o visitante precisa entrar e, para menor, ela não existe (`404`) |
+| **Termos de Uso / ECA Digital** | Página de tipo com foco em bebida alcoólica é só para maiores de 18 com a idade **verificada** ([RF17](../RF17/README.md)): o visitante precisa entrar, o adulto sem verificação recebe `403` com `ageVerificationRequired` e, para menor, ela não existe (`404`) |
 | **Taxonomia** | [`TAXONOMIA_FRIENDLY_EATS.md`](../TAXONOMIA_FRIENDLY_EATS.md): conta dona (2.4), tipo e grupo (7), preço (9) e local (11) |
 | **Status** | 🟡 Parcial: API, regras, página pública com selo, 18+, endereço protegido e preço derivado prontos; verificação automática de CNPJ e CNAE, moderação, busca e telas ainda não |
 
@@ -84,8 +84,10 @@ paths:
    removido). Para os demais, os dois campos vêm nulos.
 9. **18+.** Os 8 tipos com foco em bebida alcoólica (`BAR`, `BOTECO`, `GASTROBAR`, `BAR_COQUETELARIA`, `BAR_VINHOS`,
    `CERVEJARIA`, `VINICOLA_DESTILARIA` e `ADEGA`), quando são o **tipo principal**, marcam a página `adultsOnly`. O
-   visitante anônimo recebe `401` com a mensagem "Entre na sua conta para ver: conteúdo de bebida alcoólica é só para
-   maiores de 18." e quem tem menos de 18 recebe `404`. A mesma regra vale para a lista de avaliações (RF8).
+   visitante anônimo recebe `401` com a mensagem "Entre na sua conta e verifique a idade para ver: conteúdo de bebida
+   alcoólica é só para maiores de 18.", quem declarou 18+ mas não tem a idade verificada recebe `403` com
+   `ageVerificationRequired: true` ([RF17](../RF17/README.md), `AgeGate`) e quem tem menos de 18 (declarado ou
+   verificado) recebe `404`. A mesma regra vale para a lista de avaliações (RF8).
 10. **Editar.** `PATCH /api/v1/establishments/{id}` é só do dono (para os outros, `404`):
     - campo nulo não muda nada; tipos, local e preço são trocados por inteiro;
     - trocar o tipo revalida a classificação atual ([RF7](../RF7/README.md)) e o preço declarado no grupo novo (um polo
@@ -108,7 +110,7 @@ paths:
 | Camada | Artefato | Situação |
 |---|---|---|
 | Domínio | `Establishment` (`setTypes` com o grupo derivado, `setLocation`, `setDeclaredPrice`, `isAlcoholFocused`, `Status`), `EstablishmentType` (48 tipos, grupo, 18+, CNAE típico), `EstablishmentGroup`, `Uf` (código IBGE), `GeoPrecision`, `AddressVisibility`, `PriceLevel` (`Source`) | ✅ |
-| Regras | `EstablishmentRules.types/location/price/publicCoordinate`, `PriceScale` (limites, `levelOf`, `rangeLabel`), `EstablishmentService` (dono, CPF com um ponto, `requireVisible`, `publishBlockers`, preço derivado, endereço por visibilidade) | ✅ |
+| Regras | `EstablishmentRules.types/location/price/publicCoordinate`, `PriceScale` (limites, `levelOf`, `rangeLabel`), `EstablishmentService` (dono, CPF com um ponto, `requireVisible` com o 18+ verificado pelo `AgeGate` do [RF17](../RF17/README.md), `publishBlockers`, preço derivado, endereço por visibilidade) | ✅ |
 | Persistência | `V2__estabelecimento_e_avaliacao.sql`: tabela `establishment` com CHECKs, `point` gerado (`geography(Point,4326)`) e índices GiST, GIN e trigrama; `EstablishmentRepository` (`countByOwnerId`, `deleteAllOwnedBy`) | ✅ |
 | API | `POST /api/v1/establishments`, `GET` e `PATCH /api/v1/establishments/{id}`, `GET /api/v1/me/establishments`; GET público no `SecurityConfig` ([RF4](../RF4/README.md)). O `GET /api/v1/establishments` (busca) é do [RF10](../RF10/README.md), que monta os cards com `price`, `rating`, `location` e `classification` deste serviço: o card mostra o mesmo que a página | ✅ |
 | Configuração | `friendly-eats.price.reference-brl` (58), `multipliers` (0.7,1.4,2.8), `round-brl` (5), `min-reports` (5) | ✅ |

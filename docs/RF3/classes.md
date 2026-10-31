@@ -68,9 +68,13 @@ classDiagram
     class AgePolicy {
         +protectedMinor(LocalDate) boolean
     }
+    class GuardianConsents {
+        +sensitiveDataConsented(long) boolean
+    }
     RegistrationService ..> ConsentService : recordDefaults (5 desligadas)
     ProfileService ..> ConsentService : granted(SENSITIVE_PROFILE_DATA)
     ConsentService ..> AgePolicy : lockedForMinor
+    ConsentService ..> GuardianConsents : UNDER_18 destrava com o responsável (RF17)
     ConsentService ..> ConsentEvent : nova linha a cada mudança
     ConsentService ..> UserConsentCurrent : estado atual
     ConsentService --> ConsentView

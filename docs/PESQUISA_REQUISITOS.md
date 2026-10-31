@@ -15,7 +15,7 @@ esforço. Os arquivos completos estão em [`pesquisa/requisitos/`](pesquisa/requ
 > com um advogado. O que as pesquisas não conseguiram confirmar na fonte original está marcado como *não verificado*.
 
 > **Numeração provisória.** Os RFs abaixo (RF17 em diante) são propostas: só ganham pasta `docs/RFn/` quando forem
-> aceitos e entrarem num PR, como manda o `CLAUDE.md`.
+> aceitos e entrarem num PR, como manda o `CLAUDE.md`. Já criado: [RF17](RF17/README.md) (pendências na pasta).
 
 ## 1. O mais urgente: obrigações legais que o produto ainda não cumpre
 
@@ -88,7 +88,7 @@ contestação pelo dono (EST-14) com (SEG-08); e revisão humana (SEG-02) com go
 
 | RF | Título | RCs | Prioridade | Obrigação legal? | Esforço |
 |---|---|---|---|---|---|
-| **RF17** | Verificação de idade e conta do responsável | SEG-13, SEG-14 | **Must** | Sim (ECA Digital) | G |
+| **[RF17](RF17/README.md)** ✅ criado | Verificação de idade e conta do responsável | SEG-13, SEG-14 | **Must** | Sim (ECA Digital) | G |
 | **RF13** | Moderação: denúncia, decisão motivada, recurso e integridade das avaliações | SEG-01 a 05, SEG-07, SEG-08, EST-14 | **Must** | Sim (STF, ECA Digital, CDC) | G |
 | **RF18** | Central do titular e conformidade (exportar dados, encarregado, registros de acesso, incidentes, transparência) | SEG-12, SEG-15, SEG-16, SEG-17 | **Must** | Sim (LGPD, Marco Civil) | G |
 | **RF19** | Segurança entre usuários: bloquear, silenciar, palavras filtradas, desfoque de rosto e placa, direito autoral | SEG-09, SEG-10, SEG-11 | **Must** (menores) / Should | Em parte | M |
