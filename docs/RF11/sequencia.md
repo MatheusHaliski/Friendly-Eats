@@ -51,9 +51,17 @@ sequenceDiagram
 
     V->>P: /lugares/{id}
     P->>API: GET /api/v1/establishments/{id}
-    API->>S: get(viewer, id) (regras de visibilidade e 18+ do RF6)
-    S->>PV: openStatus(agora no fuso do lugar), hours, charges, facets, actions
-    API-->>P: 200 {openStatus, hours, charges, facets, actions, viewerCanEdit, …}
+    API->>S: get(viewer, id) (visibilidade do RF6 e AgeGate do RF17)
+    alt lugar com foco em bebida e visitante
+        API-->>P: 401 · "Entrar e verificar a idade"
+    else adulto sem a idade verificada
+        API-->>P: 403 ageVerificationRequired · convite para verificar
+    else menor de 18
+        API-->>P: 404
+    else pode ver
+        S->>PV: openStatus(agora no fuso do lugar), hours, charges, facets, actions
+        API-->>P: 200 {openStatus, hours, charges, facets, actions, viewerCanEdit, …}
+    end
     P->>M: ponto público (pino) ou área aproximada
     M->>T: GET /{z}/{x}/{y}.png (Referer só com a origem)
     V->>X: clica "Pedir pelo iFood" (outra aba, sem referência)

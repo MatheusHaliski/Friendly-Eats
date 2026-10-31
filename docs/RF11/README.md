@@ -92,7 +92,10 @@ paths:
    avaliações, RF6), nota com histograma 1–5 só a partir de 5 avaliações (RF8), facetas, horários, cobranças, botões,
    mapa (pino ou área aproximada, com a atribuição do OpenStreetMap), "Como chegar" só com o endereço completo, "Ver no
    OpenStreetMap", posts do lugar (RF14) e avaliações. O card da busca (RF10) e o modal do Explorar trazem o mesmo
-   `openStatus`; o modal resume as cobranças.
+   `openStatus`; o modal resume as cobranças. Lugar com foco em bebida passa pelo `AgeGate` do
+   [RF17](../RF17/README.md), na página completa e em `GET /establishments/{id}/integrity`: visitante recebe `401` e o
+   app oferece "Entrar e verificar a idade"; adulto sem a idade verificada recebe `403` com
+   `ageVerificationRequired` e o app mostra o convite para verificar; menor recebe `404`.
 9. **Quem edita**: `POST` e `PATCH /api/v1/establishments[/id]` aceitam os blocos `hours`, `temporaryClosure`,
    `charges`, `facets` e `actions`; no `PATCH`, bloco ausente não muda e bloco presente troca por inteiro. Só quem o
    `PlaceEditors` aceita edita (hoje, o dono; os outros recebem `404`) — o ponto de extensão da equipe do
@@ -120,7 +123,7 @@ paths:
 | Páginas | `PlaceDetailsViews.openStatus/hours/charges/facets/actions` (textos fixos, ordem dos deliveries), `EstablishmentView.viewerCanEdit`, `PlaceEditors.canEdit` (ponto de extensão do RF20); card da busca com `openStatus` ([RF10](../RF10/README.md)) | ✅ |
 | Persistência | `V6__pagina_do_lugar.sql` (colunas JSONB com CHECK de formato, `reopens_on` só com a pausa) | ✅ |
 | API | `POST`, `GET` e `PATCH /api/v1/establishments[/id]` com os blocos novos; `GET /api/v1/taxonomy` com `facets`, `actionProviders` e `couvertKinds` ([RF7](../RF7/README.md)) | ✅ |
-| Tela | `/lugares/[id]` (`PlaceView` com `OpenStatusBadge`, `ActionButtons`, `HoursSection`, `ChargesSection`, `FacetsSection`, `PlaceLocation` e `PlaceMap`), `/lugares/novo` e `/lugares/[id]/editar` (`PlaceForm`, `lib/place-form`), "Meus lugares" com cadastrar e editar ([RF4](../RF4/README.md)); `PlaceDialog` e `EstablishmentCard` com o aberto agora | ✅ |
+| Tela | `/lugares/[id]` (`PlaceView` com o `401`/`403 ageVerificationRequired` do RF17 tratados, com `OpenStatusBadge`, `ActionButtons`, `HoursSection`, `ChargesSection`, `FacetsSection`, `PlaceLocation` e `PlaceMap`), `/lugares/novo` e `/lugares/[id]/editar` (`PlaceForm`, `lib/place-form`), "Meus lugares" com cadastrar e editar ([RF4](../RF4/README.md)); `PlaceDialog` e `EstablishmentCard` com o aberto agora | ✅ |
 | Dados de exemplo | `DevSeed`: horário de almoço e jantar e facetas de pagamento em todos os lugares; taxa de serviço, desconto no Pix, iFood e WhatsApp no Sabor Mineiro | ✅ |
 | Testes | `PlacePageRulesTest` (aberto agora com virada da meia-noite e fuso de Manaus, datas especiais, mais de 7 dias, pausa e "pode estar fechado", 24 horas, erros de horário, cobranças, facetas, links e WhatsApp); `EstablishmentApiIT.placePageHasHoursChargesFacetsAndActionButtonsEditableOnlyByTheOwner` (gravação JSON de ida e volta, card da busca, 404 para outra conta, 422 com tudo junto, revalidação das cobranças, pausa); vitest `place-form.test.ts` e `place-info.test.ts`; e2e `lugar-pagina.spec.ts` e `lugar-dono.spec.ts` (CSRF, corpo do POST e do PATCH, erros por campo, axe nos dois temas) | ✅ |
 | Pendências | confirmações da comunidade nas facetas e "estava fechado" com limiar (RC-EST-04, 5); lembrete de feriado 14 dias antes (RC-EST-04, 3); filtro "aberto agora" na busca (precisa do cálculo no SQL ou de um índice de faixas por fuso); municípios do oeste do Amazonas em UTC−5; verificação periódica de link quebrado, "link errado" pelos comensais e contagem de cliques (RC-EST-08, 9); botões Ligar, Site e Rota; `SINAL_RESERVA`, `BENEFICIO_BANDEIRA` e horários adicionais (cozinha, happy hour); "cobrança diferente da página" na avaliação (RF8); equipe da página (RF20) | ⏳ |
